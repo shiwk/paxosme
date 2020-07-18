@@ -1,0 +1,7 @@
+3rd_party/*
+
+# built srtuff
+cmake-build-debug/*
+
+# idea
+.idea/*
