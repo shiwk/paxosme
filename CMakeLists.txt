@@ -3,4 +3,8 @@ project(paxosme)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(paxosme main.cpp)
+add_subdirectory(src/core)
+
+add_executable(paxosme
+        main.cpp
+        )
