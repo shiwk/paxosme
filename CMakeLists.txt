@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
+
 project(paxosme)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_subdirectory(src/core)
+include_directories(include)
 
-add_executable(paxosme
-        main.cpp
-        )
+add_subdirectory(src)
