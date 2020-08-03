@@ -5,8 +5,8 @@
 #ifndef PAXOSME_PAX_DECIDER_HPP
 #define PAXOSME_PAX_DECIDER_HPP
 
-#include <node.hpp>
-#include "player.hpp"
+#include <paxos_node.hpp>
+#include "pax_player.hpp"
 #include "pax_config.hpp"
 
 namespace paxosme {

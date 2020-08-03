@@ -5,7 +5,7 @@
 #ifndef PAXOSME_PAX_ACCEPTOR_HPP
 #define PAXOSME_PAX_ACCEPTOR_HPP
 
-#include "player.hpp"
+#include "pax_player.hpp"
 #include "pax_config.hpp"
 
 namespace paxosme {

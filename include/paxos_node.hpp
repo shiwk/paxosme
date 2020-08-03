@@ -1,0 +1,39 @@
+//
+// Created by shiwk on 2020/7/25.
+//
+
+#ifndef PAXOSME_NODE_HPP
+#define PAXOSME_NODE_HPP
+
+#include <log_value.hpp>
+#include <string>
+#include <vector>
+#include "common.hpp"
+
+namespace paxosme {
+    class NodeInfo {
+        NodeId node_id_;
+        std::string ip_;
+        int port_;
+    };
+
+    class NodeList {
+        std::vector<NodeInfo *> node_list_;
+    };
+
+    class Node {
+    public:
+        void Start();
+
+        void Propose(const LogValue &log_value, InstanceId &instance_id);
+
+        NodeId GetNodeId();
+
+    private:
+        NodeInfo node_info_;
+        NodeList my_learners_;
+        NodeList all_nodes_;
+    };
+}
+
+#endif //PAXOSME_PAXOS_NODE_HPP

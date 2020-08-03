@@ -7,7 +7,7 @@
 
 
 #include <log_value.hpp>
-#include "player.hpp"
+#include "pax_player.hpp"
 #include "pax_config.hpp"
 
 namespace paxosme {
