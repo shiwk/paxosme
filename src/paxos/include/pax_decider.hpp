@@ -11,12 +11,16 @@
 
 namespace paxosme {
     class PaxDecider{
-        bool IsToBeReceived();
+    public:
+        bool IsToBeAccepted();
+        void AddApproval(proposal_id_t proposal_id, node_id_t node_id);
+        void Reset();
 
     private:
         int GetMajorityCount();
         PaxConfig pax_config_;
-        NodeConfig node_config_;
+        int approval_count_;
+
     };
 }
 

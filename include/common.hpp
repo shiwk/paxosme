@@ -10,7 +10,7 @@
 #include <cstdint>
 
 
-using NodeId = uint32_t;
-using ProposalId = uint64_t;
-using RoundId = uint64_t;
-using InstanceId = uint64_t;
+using node_id_t = uint64_t;
+using proposal_id_t = uint64_t;
+using round_id_t = uint64_t;
+using instance_id_t = uint64_t;

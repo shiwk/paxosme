@@ -10,12 +10,12 @@
 
 namespace paxosme {
     class PaxInstance {
-        InstanceId GetInstanceId();
+        instance_id_t GetInstanceId();
         LogValue GetInstanceValue();
         bool IsAlreadyChosen();
 
     private:
-        InstanceId instance_id_;
+        instance_id_t instance_id_;
         LogValue log_value_;
     };
 }

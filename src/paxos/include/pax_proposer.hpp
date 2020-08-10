@@ -9,6 +9,7 @@
 #include <log_value.hpp>
 #include "pax_player.hpp"
 #include "pax_config.hpp"
+#include "pax_decider.hpp"
 
 namespace paxosme {
 
@@ -20,31 +21,29 @@ namespace paxosme {
 
     class PaxProposer : public PaxPlayer {
 
-        void ProposeNew(LogValue log_value);
+    public:
+        void Propose(const LogValue& log_value);
 
-        void HandlePreReply(PaxMessage message);
+        void HandlePreReply(PaxPreReplyMessage& pre_reply_message);
 
-        void HandleAcceptReply(PaxMessage message);
+        void HandleAcceptReply(PaxMessage& message);
 
         void ProposeNoop();
+        PaxProposer(const PaxConfig &pax_config);
+
+    protected:
+        void BroadCast(const PaxMessage &message);
 
     private:
-        void PrePropose(PaxMessage message);
+        void PrePropose(const LogValue &log_value);
 
-        void Propose(PaxMessage message);
-
-        void OnChosenValue(ProposalId proposal_id);
+        void OnChosenValue(LogValue &log_value);
 
         void SetProposerStatus(paxosme::PaxProposerStatus proposer_status);
 
-        PaxConfig pax_config_;
-
-    public:
-        PaxProposer(const PaxConfig &pax_config);
-
-    private:
-
         PaxProposerStatus proposer_status_;
+//        PaxMessage* proposed_message_;
+        PaxDecider* pax_decider_;
     };
 }
 #endif //PAXOSME_PAX_PROPOSER_HPP

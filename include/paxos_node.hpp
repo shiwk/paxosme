@@ -12,7 +12,7 @@
 
 namespace paxosme {
     class NodeInfo {
-        NodeId node_id_;
+        node_id_t node_id_;
         std::string ip_;
         int port_;
     };
@@ -25,9 +25,9 @@ namespace paxosme {
     public:
         void Start();
 
-        void Propose(const LogValue &log_value, InstanceId &instance_id);
+        void Propose(const LogValue &log_value, instance_id_t &instance_id);
 
-        NodeId GetNodeId();
+        node_id_t GetNodeId();
 
     private:
         NodeInfo node_info_;

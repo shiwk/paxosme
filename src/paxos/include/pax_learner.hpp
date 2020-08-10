@@ -18,11 +18,11 @@ namespace paxosme {
         void ReceiveChosenValue(PaxMessage message);
 
         bool GetLearnedValue(LogValue & log_value);
-        InstanceId GetLastInstanceId();
+        instance_id_t GetLastInstanceId();
 
     private:
         void RequestNewValue(); // LearnNewValue
-        void ReplyLearnedValue(NodeId node_id, LogValue log_value); // HandleLearnRequest
+        void ReplyLearnedValue(node_id_t node_id, LogValue log_value); // HandleLearnRequest
         void BroadCastLearnedValue(LogValue log_value); // if chosen my local proposer
 
         PaxConfig pax_config_;
