@@ -7,31 +7,49 @@
 
 
 #include <log_value.hpp>
+#include <utility>
+#include <string>
 #include "common.hpp"
 
 namespace paxosme {
+    class PaxPreMessage{
+
+    };
+
     class PaxMessage {
     public:
-        PaxMessage(instance_id_t instance_id, proposal_id_t proposal_id, node_id_t node_id, const LogValue &log_value) : instance_id_(
-                instance_id), proposal_id_(proposal_id), node_id_(node_id), log_value_(log_value) {}
-
+        PaxMessage(instance_id_t instance_id, proposal_id_t proposal_id, node_id_t node_id)
+                : instance_id_(instance_id), proposal_id_(proposal_id), node_id_(node_id){}
     private:
         instance_id_t instance_id_;
         proposal_id_t proposal_id_;
         node_id_t node_id_;
-        const LogValue &log_value_;
+        LogValue log_value_;
 
     public:
+        void SetLogValue(const LogValue &log_value) {
+            log_value_ = log_value;
+        }
+
+        const LogValue &GetLogValue() const {
+            return log_value_;
+        }
+
         proposal_id_t GetProposalId() const {
             return proposal_id_;
+        }
+        void SetProposalId(proposal_id_t proposal_id) {
+            proposal_id_ = proposal_id;
         }
     };
 
 
-    class PaxPreReplyMessage{
+    class PaxReplyMessage {
     public:
-        PaxPreReplyMessage(node_id_t proposer_id, node_id_t replier_id, proposal_id_t accepted_id, proposal_id_t promised_id, bool is_accepted) : accepted_id_(
-                accepted_id), promised_id_(promised_id), is_accepted_(is_accepted) , proposer_id_(proposer_id), replier_id_(replier_id){}
+        PaxReplyMessage(node_id_t proposer_id, node_id_t replier_id, proposal_id_t accepted_id,
+                        proposal_id_t promised_id, bool is_accepted) : accepted_id_(
+                accepted_id), promised_id_(promised_id), is_accepted_(is_accepted), proposer_id_(proposer_id),
+                                                                          replier_id_(replier_id) {}
 
     private:
         node_id_t proposer_id_;

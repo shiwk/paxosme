@@ -15,35 +15,41 @@ namespace paxosme {
 
     enum class PaxProposerStatus {
         kNone = 0,
-        kPrepare = 1,
-        kAccept = 2
+        kPrePropose = 1,
+        kPropose = 2
     };
 
     class PaxProposer : public PaxPlayer {
 
     public:
-        void Propose(const LogValue& log_value);
+        void ProposeNew(const LogValue& log_value);
 
-        void HandlePreReply(PaxPreReplyMessage& pre_reply_message);
+        void HandlePreReply(const PaxReplyMessage& pax_reply_message);
 
-        void HandleAcceptReply(PaxMessage& message);
+        void HandleProposeReply(const PaxReplyMessage& pax_reply_message);
 
         void ProposeNoop();
-        PaxProposer(const PaxConfig &pax_config);
 
-    protected:
-        void BroadCast(const PaxMessage &message);
+        PaxProposer(const PaxConfig &pax_config);
 
     private:
         void PrePropose(const LogValue &log_value);
+        void Propose();
 
-        void OnChosenValue(LogValue &log_value);
-
-        void SetProposerStatus(paxosme::PaxProposerStatus proposer_status);
-
+        void OnChosenValue();
         PaxProposerStatus proposer_status_;
-//        PaxMessage* proposed_message_;
+        PaxMessage proposed_message_;
         PaxDecider* pax_decider_;
+
+        void LaunchPrePropose();
+        void LaunchPropose();
+        void SetPaxMessage(const PaxMessage &message);
+
+        void SetLogValue(const LogValue &value);
+
+        void OnReceivedReply(const PaxReplyMessage &pax_reply_message);
+
+        void UpdatePaxMessage();
     };
 }
 #endif //PAXOSME_PAX_PROPOSER_HPP

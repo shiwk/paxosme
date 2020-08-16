@@ -13,7 +13,9 @@ namespace paxosme {
     class PaxDecider{
     public:
         bool IsToBeAccepted();
+        bool IsStillPending();
         void AddApproval(proposal_id_t proposal_id, node_id_t node_id);
+        void AddRejection(proposal_id_t proposal_id, node_id_t node_id);
         void Reset();
 
     private:

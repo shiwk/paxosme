@@ -5,15 +5,8 @@
 #include <pax_player.hpp>
 #include <controller.hpp>
 
-void paxosme::PaxPlayer::BroadCast(const PaxMessage &message) {
-    PaxRequest pax_request = message;
-    communicator_->BroadCast(pax_request);
-}
-
-paxosme::PaxMessage paxosme::PaxPlayer::GenerateMessage(const paxosme::LogValue &log_value) const {
-    PaxMessage pax_message = PaxMessage(pax_state_->GetInstanceId(), pax_state_->GetApplicableProposalId(),
-                                        node_id_, log_value);
-    return pax_message;
+paxosme::PaxMessage paxosme::PaxPlayer::GeneratePreMessage() const {
+    return {pax_state_->GetInstanceId(), pax_state_->GetApplicableProposalId(), node_id_};
 }
 
 instance_id_t paxosme::PaxPlayer::GetInstanceId() {
@@ -24,6 +17,8 @@ void paxosme::PaxPlayer::ProcessMessageAcceptedByMajority(paxosme::PaxMessage &p
     controller_->AddMessage(pax_message);
 }
 
-paxosme::PaxRequest::PaxRequest(const paxosme::PaxMessage &message) : PaxMessage(message.GetProposalId()){
-
+void paxosme::PaxPlayer::BroadCastToAcceptors(const PaxRequest &pax_request) {
+    communicator_->BroadCast(pax_request);
 }
+
+

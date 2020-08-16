@@ -19,15 +19,18 @@ namespace paxosme {
     };
 
     class PaxRequest{
-        PaxMessage* pax_message_;
+        PaxMessage pax_message_;
         RequestType request_type_;
 
     public:
-        PaxRequest(PaxMessage &message) : pax_message_(&message){}
+        const PaxMessage &GetPaxMessage() const {
+            return pax_message_;
+        }
+
+    public:
+        PaxRequest(const PaxMessage &message, RequestType request_type) : pax_message_(message), request_type_(request_type){}
     };
 
-    class PaxResponse : PaxMessage {
-    };
 
     class Communicator {
     public:
@@ -64,18 +67,19 @@ namespace paxosme {
     public:
         virtual void Send(PaxRequest pax_request, node_id_t node_id) {}
 
-        virtual void Send(PaxResponse pax_response, node_id_t node_id) {}
-
-
         instance_id_t GetInstanceId();
 
-
+        node_id_t GetNodeId() const {
+            return node_id_;
+        }
         void Reset(); // reset status for new instance
 
     protected:
-        PaxMessage GenerateMessage(const LogValue &log_value) const;
-        virtual void ProcessMessageAcceptedByMajority(PaxMessage &pax_message);
-        virtual void BroadCast(const PaxMessage &message) ;
+        PaxMessage GeneratePreMessage() const;
+        void ProcessMessageAcceptedByMajority(PaxMessage &pax_message);
+
+        void BroadCastToAcceptors(const PaxRequest &pax_request);
+        void BroadCastToLearners(const PaxMessage &message);
 
         Communicator *communicator_;
         PaxState *pax_state_;
@@ -83,11 +87,6 @@ namespace paxosme {
     private:
         node_id_t node_id_;
         PaxController *controller_;
-
-    public:
-        node_id_t GetNodeId() const {
-            return node_id_;
-        }
     };
 }
 #endif //PAXOSME_PAX_PLAYER_HPP
