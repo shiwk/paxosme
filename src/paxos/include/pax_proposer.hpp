@@ -10,10 +10,11 @@
 #include "pax_player.hpp"
 #include "pax_config.hpp"
 #include "pax_decider.hpp"
+#include "proposer_state.hpp"
 
 namespace paxosme {
 
-    enum class PaxProposerStatus {
+    enum class ProposerStatus {
         kNone = 0,
         kPrePropose = 1,
         kPropose = 2
@@ -22,11 +23,11 @@ namespace paxosme {
     class PaxProposer : public PaxPlayer {
 
     public:
-        void ProposeNew(const LogValue& log_value);
+        void ProposeNew(const LogValue &log_value);
 
-        void HandlePreReply(const PaxReplyMessage& pax_reply_message);
+        void HandlePreProposeResponse(const PaxReplyMessage &pax_reply_message);
 
-        void HandleProposeReply(const PaxReplyMessage& pax_reply_message);
+        void HandleProposeResponse(const PaxReplyMessage &pax_reply_message);
 
         void ProposeNoop();
 
@@ -34,22 +35,28 @@ namespace paxosme {
 
     private:
         void PrePropose(const LogValue &log_value);
+
         void Propose();
 
         void OnChosenValue();
-        PaxProposerStatus proposer_status_;
-        PaxMessage proposed_message_;
-        PaxDecider* pax_decider_;
+
+        ProposerStatus proposer_status_;
+        PaxDecider *pax_decider_;
+        ProposerState *proposer_state_;
 
         void LaunchPrePropose();
+
         void LaunchPropose();
+
         void SetPaxMessage(const PaxMessage &message);
 
-        void SetLogValue(const LogValue &value);
+        void UpdateLogValue(const LogValue &value);
 
         void OnReceivedReply(const PaxReplyMessage &pax_reply_message);
 
-        void UpdatePaxMessage();
+        void TryUpdatePaxMessageWithPreProposeReply(proposal_id_t proposal_id, const LogValue value);
+
+        void TryUpdatePaxMessageWithPreProposeReply(const PaxReplyMessage message);
     };
 }
 #endif //PAXOSME_PAX_PROPOSER_HPP

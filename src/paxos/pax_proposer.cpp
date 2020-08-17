@@ -21,27 +21,27 @@ namespace paxosme {
      * @param log_value
      */
     void PaxProposer::PrePropose(const LogValue &log_value) {
-        proposer_status_ = PaxProposerStatus::kPrePropose;
+        proposer_status_ = ProposerStatus::kPrePropose;
         auto pax_message = GeneratePreMessage();
         SetPaxMessage(pax_message);
         LaunchPrePropose();
-        SetLogValue(log_value);
+        UpdateLogValue(log_value);
     }
 
     /**
      * Process pre-propose reply from other acceptors
      * @param pax_reply_message
      */
-    void PaxProposer::HandlePreReply(const PaxReplyMessage &pax_reply_message) {
+    void PaxProposer::HandlePreProposeResponse(const PaxReplyMessage &pax_reply_message) {
 
-        if (proposer_status_ != PaxProposerStatus::kPrePropose)
+        if (proposer_status_ != ProposerStatus::kPrePropose)
             return; // incompatible proposer status
 
         OnReceivedReply(pax_reply_message);
 
         if (pax_decider_->IsToBeAccepted()) {
             Propose();
-            proposer_status_ = PaxProposerStatus::kPropose;
+            proposer_status_ = ProposerStatus::kPropose;
         } else if (pax_decider_->IsStillPending()) {
             // todo: handle unaccepted case
         }
@@ -52,7 +52,7 @@ namespace paxosme {
      */
     void PaxProposer::Propose() {
         pax_decider_->Reset();
-        proposer_status_ = PaxProposerStatus::kPropose;
+        proposer_status_ = ProposerStatus::kPropose;
         // todo : check whether need update proposal_id
         //UpdatePaxMessage();
         LaunchPropose();
@@ -62,9 +62,9 @@ namespace paxosme {
      *
      * @param pax_reply_message
      */
-    void PaxProposer::HandleProposeReply(const PaxReplyMessage &pax_reply_message) {
+    void PaxProposer::HandleProposeResponse(const PaxReplyMessage &pax_reply_message) {
 
-        if (proposer_status_ != PaxProposerStatus::kPropose)
+        if (proposer_status_ != ProposerStatus::kPropose)
             return; // incompatible proposer status
 
         OnReceivedReply(pax_reply_message);
@@ -72,7 +72,7 @@ namespace paxosme {
         if (pax_decider_->IsToBeAccepted()) {
             // value chosen
             OnChosenValue();
-            proposer_status_ = PaxProposerStatus::kPropose;
+            proposer_status_ = ProposerStatus::kPropose;
         } else if (pax_decider_->IsStillPending()) {
             // todo: handle unaccepted case
         }
@@ -82,42 +82,56 @@ namespace paxosme {
      * Handle message already accepted by majority
      */
     void PaxProposer::OnChosenValue() {
-        ProcessMessageAcceptedByMajority(proposed_message_);
-        proposer_status_ = PaxProposerStatus::kNone;
+        PaxMessage pax_message = proposer_state_->GetPendingMessage();
+        ProcessMessageAcceptedByMajority(pax_message);
+        proposer_status_ = ProposerStatus::kNone;
     }
 
     void PaxProposer::LaunchPrePropose() {
-        PaxRequest pax_request(proposed_message_, RequestType::PreProposeBroadCast);
+        PaxMessage pax_message = proposer_state_->GetPendingMessage();
+        PaxRequest pax_request(pax_message, RequestType::PreProposeBroadCast);
         BroadCastToAcceptors(pax_request);
     }
 
     void PaxProposer::LaunchPropose() {
-        PaxRequest pax_request(proposed_message_, RequestType::ProposeBroadCast);
+        PaxMessage pax_message = proposer_state_->GetPendingMessage();
+        PaxRequest pax_request(pax_message, RequestType::ProposeBroadCast);
         BroadCastToAcceptors(pax_request);
     }
 
     void PaxProposer::SetPaxMessage(const PaxMessage &message) {
-        proposed_message_ = message;
+        proposer_state_->SetPendingMessage(message);
     }
 
-    void PaxProposer::SetLogValue(const LogValue &value) {
-        proposed_message_.SetLogValue(value);
+    void PaxProposer::UpdateLogValue(const LogValue &value) {
+        proposer_state_->SetLogValue(value);
     }
 
     void PaxProposer::OnReceivedReply(const PaxReplyMessage &pax_reply_message) {
         if (pax_reply_message.GetProposerId() != GetNodeId())
             // reply not for the local node
             return;
-        if (pax_reply_message.GetProposerId() != proposed_message_.GetProposalId())
+        if (pax_reply_message.GetProposerId() != proposer_state_->GetPendingProposalId())
             return; // something goes wrong!
 
-        if (pax_reply_message.IsAccepted()) {
+        if (!pax_reply_message.IsRejected()) {
             // count for approval
-            pax_decider_->AddApproval(proposed_message_.GetProposalId(), GetNodeId());
+            pax_decider_->AddApproval(proposer_state_->GetPendingProposalId(), GetNodeId());
+
+            // update log_value
+            if (proposer_status_ == ProposerStatus::kPrePropose)
+                TryUpdatePaxMessageWithPreProposeReply(pax_reply_message);
+
         } else {
             // reject and record proposal id promised by the replier
-            pax_state_->UpdateMaximalProposalId(pax_reply_message.GetPromisedId());
-            pax_decider_->AddRejection(proposed_message_.GetProposalId(), GetNodeId())
+            proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
+                                                        pax_reply_message.GetReplierId());
+            pax_decider_->AddRejection(proposer_state_->GetPendingProposalId(), GetNodeId());
         }
+    }
+
+    void PaxProposer::TryUpdatePaxMessageWithPreProposeReply(PaxReplyMessage message) {
+        proposer_state_->TryUpdateLogValue(message.GetProposerId(), message.GetProposerId(),
+                                           message.GetAcceptedValue());
     }
 }

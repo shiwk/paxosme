@@ -12,19 +12,16 @@
 #include "common.hpp"
 
 namespace paxosme {
-    class PaxPreMessage{
-
-    };
 
     class PaxMessage {
-    public:
-        PaxMessage(instance_id_t instance_id, proposal_id_t proposal_id, node_id_t node_id)
-                : instance_id_(instance_id), proposal_id_(proposal_id), node_id_(node_id){}
-    private:
         instance_id_t instance_id_;
         proposal_id_t proposal_id_;
-        node_id_t node_id_;
+        node_id_t proposer_id_;
         LogValue log_value_;
+
+    public:
+        PaxMessage(instance_id_t instance_id, proposal_id_t proposal_id, node_id_t node_id)
+                : instance_id_(instance_id), proposal_id_(proposal_id), proposer_id_(node_id) {}
 
     public:
         void SetLogValue(const LogValue &log_value) {
@@ -38,22 +35,34 @@ namespace paxosme {
         proposal_id_t GetProposalId() const {
             return proposal_id_;
         }
+
         void SetProposalId(proposal_id_t proposal_id) {
             proposal_id_ = proposal_id;
+        }
+
+        node_id_t GetProposerId() const {
+            return proposer_id_;
         }
     };
 
 
     class PaxReplyMessage {
-    public:
-        PaxReplyMessage(node_id_t proposer_id, node_id_t replier_id, proposal_id_t accepted_id,
-                        proposal_id_t promised_id, bool is_accepted) : accepted_id_(
-                accepted_id), promised_id_(promised_id), is_accepted_(is_accepted), proposer_id_(proposer_id),
-                                                                          replier_id_(replier_id) {}
+        node_id_t replier_id_;
+        proposal_id_t accepted_id_;
+        LogValue accepted_value_;
+        proposal_id_t promised_id_;
+        node_id_t promised_node_id_;
 
     private:
+
+        bool is_rejected;
         node_id_t proposer_id_;
+
     public:
+        void SetIsRejected(bool is_rejected) {
+            PaxReplyMessage::is_rejected = is_rejected;
+        }
+
         node_id_t GetProposerId() const {
             return proposer_id_;
         }
@@ -70,15 +79,35 @@ namespace paxosme {
             return promised_id_;
         }
 
-        bool IsAccepted() const {
-            return is_accepted_;
+        bool IsRejected() const {
+            return is_rejected;
         }
 
-    private:
-        node_id_t replier_id_;
-        proposal_id_t accepted_id_;
-        proposal_id_t promised_id_;
-        bool is_accepted_;
+        const LogValue &GetAcceptedValue() const {
+            return accepted_value_;
+        }
+
+        void SetProposerId(node_id_t proposer_id) {
+            proposer_id_ = proposer_id;
+        }
+
+        void SetReplierId(node_id_t replier_id) {
+            replier_id_ = replier_id;
+        }
+        void SetAcceptedId(proposal_id_t accepted_id) {
+            accepted_id_ = accepted_id;
+        }
+
+        void SetAcceptedValue(const LogValue &accepted_value) {
+            accepted_value_ = accepted_value;
+        }
+
+        void SetPromisedId(proposal_id_t promised_id) {
+            promised_id_ = promised_id;
+        }
+        void SetPromisedNodeId(node_id_t promised_node_id) {
+            promised_node_id_ = promised_node_id;
+        }
     };
 
     struct Hoop {
