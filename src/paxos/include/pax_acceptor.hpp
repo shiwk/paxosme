@@ -12,7 +12,13 @@ namespace paxosme {
     class AcceptorState{
         proposal_id_t promised_id_;
         node_id_t promised_node_id_;
-        proposal_id_t accepted_id_;
+
+        proposal_id_t accepted_proposal_id_;
+        node_id_t accepted_node_id_;
+
+    private:
+
+
         LogValue accepted_value_;
 
     public:
@@ -24,12 +30,26 @@ namespace paxosme {
             return promised_node_id_;
         }
 
-        void SetPromisedProposal(proposal_id_t proposal_id, node_id_t node_id){
+        void SetPromisedProposal(proposal_id_t proposal_id, node_id_t proposer_id){
             promised_id_ = proposal_id;
-            promised_node_id_ = node_id;
+            promised_node_id_ = proposer_id;
         }
-        proposal_id_t GetAcceptedId() const {
-            return accepted_id_;
+
+        void SetAcceptedProposal(proposal_id_t proposal_id, node_id_t proposer_id){
+            accepted_proposal_id_ = proposer_id;
+            accepted_node_id_ = proposer_id;
+        }
+
+        proposal_id_t GetAcceptedProposalId() const {
+            return accepted_proposal_id_;
+        }
+
+        node_id_t GetAcceptedNodeId() const {
+            return accepted_node_id_;
+        }
+
+        void SetAcceptedValue(const LogValue &accepted_value) {
+            accepted_value_ = accepted_value;
         }
 
         const LogValue &GetAcceptedValue() const {
@@ -44,6 +64,8 @@ namespace paxosme {
         void HandlePreProposeRequest(PaxMessage message);
 
         void HandleProposeRequest(PaxMessage message);
+
+        void ReplyProposer(PaxAcceptorReplyMessage pax_acceptor_reply_message, node_id_t proposer_id);
     };
 }
 

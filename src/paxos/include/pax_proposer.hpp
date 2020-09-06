@@ -14,31 +14,39 @@
 
 namespace paxosme {
 
-    enum class ProposerStatus {
+    enum class ProposerStatus : unsigned char {
         kNone = 0,
         kPrePropose = 1,
-        kPropose = 2
+        kPropose = 1u << 1u,
+        kMajorityAccepted = 1u << 2u,
+        kMajorityRejected = 1u << 3u
     };
+
+    inline constexpr int operator&(ProposerStatus a, unsigned char b) {
+        return (static_cast<unsigned char>(a) & b);
+    }
 
     class PaxProposer : public PaxPlayer {
 
     public:
         void ProposeNew(const LogValue &log_value);
 
-        void HandlePreProposeResponse(const PaxReplyMessage &pax_reply_message);
+        void HandlePreProposeResponse(const PaxAcceptorReplyMessage &pax_reply_message);
 
-        void HandleProposeResponse(const PaxReplyMessage &pax_reply_message);
-
-        void ProposeNoop();
+        void HandleProposeResponse(const PaxAcceptorReplyMessage &pax_reply_message);
 
         PaxProposer(const PaxConfig &pax_config);
 
     private:
+        PaxMessage GeneratePreMessage() const;
+
         void PrePropose(const LogValue &log_value);
 
         void Propose();
 
         void OnChosenValue();
+
+        void OnAbandonValue();
 
         ProposerStatus proposer_status_;
         PaxDecider *pax_decider_;
@@ -52,11 +60,9 @@ namespace paxosme {
 
         void UpdateLogValue(const LogValue &value);
 
-        void OnReceivedReply(const PaxReplyMessage &pax_reply_message);
+        void OnReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message);
 
-        void TryUpdatePaxMessageWithPreProposeReply(proposal_id_t proposal_id, const LogValue value);
-
-        void TryUpdatePaxMessageWithPreProposeReply(const PaxReplyMessage message);
+        bool TryUpdateProposerStateWithRejectionReply(const PaxAcceptorReplyMessage &message);
     };
 }
 #endif //PAXOSME_PAX_PROPOSER_HPP

@@ -22,7 +22,7 @@ namespace paxosme {
     public:
         bool TryUpdateHighestProposalId(proposal_id_t proposal_id, node_id_t node_id);
 
-        void
+        bool
         TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id, const LogValue &log_value);
 
         proposal_id_t GetApplicableProposalId() {

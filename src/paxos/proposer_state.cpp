@@ -31,10 +31,14 @@ bool paxosme::ProposerState::TryUpdateHighestProposalId(proposal_id_t proposal_i
     return false;
 }
 
-void paxosme::ProposerState::TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id,
+bool paxosme::ProposerState::TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id,
                                                const paxosme::LogValue &log_value) {
-    if (TryUpdateHighestProposalId(proposal_id, node_id))
+    if (TryUpdateHighestProposalId(proposal_id, node_id)) {
         pending_message_.SetLogValue(log_value);
+        return true;
+    }
+
+    return false;
 }
 
 

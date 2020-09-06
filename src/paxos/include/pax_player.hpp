@@ -18,60 +18,26 @@ namespace paxosme {
         ProposeBroadCast
     };
 
-    class PaxRequest {
-        PaxMessage pax_message_;
-        RequestType request_type_;
-
-    public:
-        const PaxMessage &GetPaxMessage() const {
-            return pax_message_;
-        }
-
-    public:
-        PaxRequest(const PaxMessage &message, RequestType request_type) : pax_message_(message),
-                                                                          request_type_(request_type) {}
-    };
-
-
     class Communicator {
     public:
-        void BroadCast(const PaxRequest &pax_request);
-
-        void Send(PaxMessage pax_message, node_id_t node_id);
+        void BroadCast(const std::string &data);
+        void BroadCast(const std::vector<byte> &data);
     };
 
-    class PaxState {
-    public:
-
-
-    private:
-
-    };
 
     class PaxController;
 
     class PaxPlayer {
     public:
-        virtual void Send(PaxRequest pax_request, node_id_t node_id) {}
-
-        instance_id_t GetInstanceId();
-
-        node_id_t GetNodeId() const {
-            return node_id_;
-        }
-
-        void Reset(); // reset status for new instance
+        virtual void Reset()  = 0; // reset status for new instance
 
     protected:
-        PaxMessage GeneratePreMessage() const;
+        instance_id_t GetInstanceId() const;
 
+        node_id_t GetNodeId() const ;
         void ProcessMessageAcceptedByMajority(PaxMessage &pax_message);
 
-        void BroadCastToAcceptors(const PaxRequest &pax_request);
-
-        void BroadCastToLearners(const PaxMessage &message);
-
-        Communicator *communicator_;
+        void BroadCast(const PaxMessage &message, RequestType request_type);
 
     private:
         node_id_t node_id_;

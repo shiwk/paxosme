@@ -21,9 +21,13 @@ namespace paxosme {
 
         void Init(); // start loop
 
+        instance_id_t GetInstanceId() const;
+        void FinishInstance();
+
     private:
         MsgQueue msg_queue_;
         PaxProposer pax_proposer_;
+        instance_id_t instance_id_;
     };
 }
 

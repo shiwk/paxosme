@@ -46,7 +46,7 @@ namespace paxosme {
     };
 
 
-    class PaxReplyMessage {
+    class PaxAcceptorReplyMessage {
         node_id_t replier_id_;
         proposal_id_t accepted_id_;
         LogValue accepted_value_;
@@ -54,13 +54,12 @@ namespace paxosme {
         node_id_t promised_node_id_;
 
     private:
-
-        bool is_rejected;
+        bool is_rejected_;
         node_id_t proposer_id_;
 
     public:
         void SetIsRejected(bool is_rejected) {
-            PaxReplyMessage::is_rejected = is_rejected;
+            is_rejected_ = is_rejected;
         }
 
         node_id_t GetProposerId() const {
@@ -80,7 +79,7 @@ namespace paxosme {
         }
 
         bool IsRejected() const {
-            return is_rejected;
+            return is_rejected_;
         }
 
         const LogValue &GetAcceptedValue() const {
@@ -108,9 +107,6 @@ namespace paxosme {
         void SetPromisedNodeId(node_id_t promised_node_id) {
             promised_node_id_ = promised_node_id;
         }
-    };
-
-    struct Hoop {
     };
 }
 
