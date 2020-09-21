@@ -20,6 +20,8 @@ namespace paxosme {
         PaxConfig *pax_config_;
 
     public:
+        ProposerState(const PaxMessage &pending_message);
+
         bool TryUpdateHighestProposalId(proposal_id_t proposal_id, node_id_t node_id);
 
         bool

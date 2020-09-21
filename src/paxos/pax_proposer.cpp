@@ -41,8 +41,11 @@ namespace paxosme {
 
         if (pax_decider_->IsMajorityAccepted()) {
             Propose();
-        } else if (pax_decider_->IsStillPending()) {
-            // todo: handle unaccepted case
+        } else if (!pax_decider_->IsStillPending()) {
+            if (pax_decider_->IsMajorityRejected()) {
+                OnAbandonValue();
+            }
+            // todo: another proposing to be prepared since the proposal is not pending anymore.
         }
     }
 
@@ -68,8 +71,11 @@ namespace paxosme {
 
         if (pax_decider_->IsMajorityAccepted()) {
             OnChosenValue(); // value chosen
-        } else if (pax_decider_->IsMajorityRejected()) {
-            OnAbandonValue();
+        } else {
+            if (pax_decider_->IsMajorityRejected()) {
+                OnAbandonValue();
+            }
+            // todo: another proposing to be prepared since the proposal is not pending anymore.
         }
     }
 
@@ -79,7 +85,7 @@ namespace paxosme {
     void PaxProposer::OnChosenValue() {
         proposer_status_ = ProposerStatus::kMajorityAccepted;
         PaxMessage pax_message = proposer_state_->GetPendingMessage();
-        ProcessMessageAcceptedByMajority(pax_message);
+        ProcessAcceptedMessage(pax_message);
     }
 
     void PaxProposer::OnAbandonValue() {
@@ -118,7 +124,7 @@ namespace paxosme {
             pax_decider_->AddApproval(proposer_state_->GetPendingProposalId(), GetNodeId());
 
             // try to update log_value if
-            if (proposer_status_  & 0x03)
+            if (proposer_status_ & 0x03)
                 TryUpdateProposerStateWithRejectionReply(pax_reply_message);
 
         } else {

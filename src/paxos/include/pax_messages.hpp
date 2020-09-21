@@ -13,8 +13,16 @@
 
 namespace paxosme {
 
-    class PaxMessage {
+    class Serializable{
+    public:
+         virtual std::string& Serialize() const= 0;
+    };
+
+    class PaxMessage : public Serializable{
         instance_id_t instance_id_;
+
+
+    private:
         proposal_id_t proposal_id_;
         node_id_t proposer_id_;
         LogValue log_value_;
@@ -24,6 +32,10 @@ namespace paxosme {
                 : instance_id_(instance_id), proposal_id_(proposal_id), proposer_id_(node_id) {}
 
     public:
+        instance_id_t GetInstanceId() const {
+            return instance_id_;
+        }
+
         void SetLogValue(const LogValue &log_value) {
             log_value_ = log_value;
         }
@@ -43,10 +55,13 @@ namespace paxosme {
         node_id_t GetProposerId() const {
             return proposer_id_;
         }
+
+        std::string &Serialize() const override{
+
+        }
     };
 
-
-    class PaxAcceptorReplyMessage {
+    class PaxAcceptorReplyMessage : public Serializable{
         node_id_t replier_id_;
         proposal_id_t accepted_id_;
         LogValue accepted_value_;
@@ -106,6 +121,9 @@ namespace paxosme {
         }
         void SetPromisedNodeId(node_id_t promised_node_id) {
             promised_node_id_ = promised_node_id;
+        }
+
+        std::string &Serialize() const override {
         }
     };
 }

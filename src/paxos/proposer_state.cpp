@@ -41,4 +41,3 @@ bool paxosme::ProposerState::TryUpdateLogValue(proposal_id_t proposal_id, node_i
     return false;
 }
 
-

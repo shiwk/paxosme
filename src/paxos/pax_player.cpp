@@ -14,9 +14,14 @@ node_id_t paxosme::PaxPlayer::GetNodeId() const {
     return node_id_;
 }
 
-void paxosme::PaxPlayer::ProcessMessageAcceptedByMajority(paxosme::PaxMessage &pax_message) {
-    controller_->AddMessage(pax_message);
+void paxosme::PaxPlayer::ProcessAcceptedMessage(paxosme::PaxMessage &pax_message) {
+    controller_->Pick(pax_message);
 }
+
+bool paxosme::PaxPlayer::IsAccepted(const instance_id_t instance_id) {
+    return controller_->IsAccepted(instance_id);
+}
+
 
 
 

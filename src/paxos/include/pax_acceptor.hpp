@@ -17,8 +17,6 @@ namespace paxosme {
         node_id_t accepted_node_id_;
 
     private:
-
-
         LogValue accepted_value_;
 
     public:
@@ -61,11 +59,13 @@ namespace paxosme {
     class PaxAcceptor : public PaxPlayer{
         AcceptorState *acceptor_state_;
     public:
-        void HandlePreProposeRequest(PaxMessage message);
+        void HandlePreProposeRequest(const PaxMessage& message);
 
-        void HandleProposeRequest(PaxMessage message);
+        void HandleProposeRequest(const PaxMessage& message);
 
-        void ReplyProposer(PaxAcceptorReplyMessage pax_acceptor_reply_message, node_id_t proposer_id);
+        void ReplyProposer(const PaxAcceptorReplyMessage& pax_acceptor_reply_message, node_id_t proposer_id, RequestType request_type);
+
+        bool IsAccepted();
     };
 }
 

@@ -8,7 +8,7 @@
  * Acceptor processing when received prepare request
  * @param message
  */
-void paxosme::PaxAcceptor::HandlePreProposeRequest(paxosme::PaxMessage message) {
+void paxosme::PaxAcceptor::HandlePreProposeRequest(const paxosme::PaxMessage& message) {
 
     /**
      * "An acceptor can accept a proposal numbered n iff
@@ -22,9 +22,12 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(paxosme::PaxMessage message) 
     proposal_id_t proposal_id = message.GetProposalId();
     proposal_id_t proposer_id = message.GetProposerId();
 
-    if (proposal_id > acceptor_state_->GetPromisedId() ||
-        proposal_id == acceptor_state_->GetPromisedId() &&
-        proposer_id > acceptor_state_->GetPromisedNodeId()) {
+    proposal_id_t promised_proposal_id = acceptor_state_->GetPromisedId();
+    node_id_t promised_proposer = acceptor_state_->GetPromisedNodeId();
+
+    if (proposal_id > promised_proposal_id ||
+        proposal_id == promised_proposal_id &&
+        proposer_id > promised_proposer) {
 
         /**
          * "If an acceptor receives a prepare request with number n greater than that of any prepare request to
@@ -34,15 +37,16 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(paxosme::PaxMessage message) 
 
         // higher than promised, then accept
         pax_reply_message.SetIsRejected(false);
-        proposal_id_t accepted_id = acceptor_state_->GetAcceptedProposalId();
+        proposal_id_t accepted_proposal_id = acceptor_state_->GetAcceptedProposalId();
 
-        if (accepted_id != 0) {
-            pax_reply_message.SetAcceptedId(accepted_id);
+        if (accepted_proposal_id != 0) {
+            pax_reply_message.SetAcceptedId(accepted_proposal_id);
             pax_reply_message.SetAcceptedValue(acceptor_state_->GetAcceptedValue());
         }
         acceptor_state_->SetPromisedProposal(proposal_id, proposer_id);
 
-        // todo: handle/persist the received log value
+        // an acceptor must remember this information even if it fails and then restarts.
+        Persist(message.GetInstanceId(), acceptor_state_->GetAcceptedValue());
 
     } else {
 
@@ -56,10 +60,10 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(paxosme::PaxMessage message) 
     }
 
     // reply
-    ReplyProposer(pax_reply_message, proposer_id);
+    ReplyProposer(pax_reply_message, proposer_id, RequestType::PreProposeReply);
 }
 
-void paxosme::PaxAcceptor::HandleProposeRequest(paxosme::PaxMessage message) {
+void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& message) {
     PaxAcceptorReplyMessage pax_reply_message;
     pax_reply_message.SetProposerId(message.GetProposerId());
     pax_reply_message.SetReplierId(GetNodeId());
@@ -67,8 +71,11 @@ void paxosme::PaxAcceptor::HandleProposeRequest(paxosme::PaxMessage message) {
     proposal_id_t proposal_id = message.GetProposalId();
     proposal_id_t proposer_id = message.GetProposerId();
 
-    proposal_id_t promised_id = acceptor_state_->GetPromisedId();
-    if (proposal_id > promised_id || proposal_id == promised_id && proposer_id > acceptor_state_->GetPromisedNodeId()) {
+    proposal_id_t promised_proposal_id = acceptor_state_->GetPromisedId();
+    node_id_t promised_proposer = acceptor_state_->GetPromisedNodeId();
+    if (proposal_id > promised_proposal_id || proposal_id == promised_proposal_id && proposer_id > promised_proposer) {
+        proposal_id_t accepted_proposal_id = acceptor_state_->GetAcceptedProposalId();
+
         {
             /**
              * "For any v and n, if a proposal with value v and number n is issued,
@@ -76,8 +83,8 @@ void paxosme::PaxAcceptor::HandleProposeRequest(paxosme::PaxMessage message) {
              * has accepted any proposal numbered less than n, or (b) v is the value of the highest-numbered proposal
              * among all proposals numbered less than n accepted by the acceptors in S."
              */
-            if (acceptor_state_->GetAcceptedProposalId() != 0) {
-                // acceptor_state_->GetAcceptedValue() should be message.GetLogValue()
+            if (accepted_proposal_id != 0) {
+                // this should not happen with Non-Byzantium
             }
         }
 
@@ -86,18 +93,23 @@ void paxosme::PaxAcceptor::HandleProposeRequest(paxosme::PaxMessage message) {
         acceptor_state_->SetAcceptedProposal(proposal_id, proposer_id);
         acceptor_state_->SetAcceptedValue(message.GetLogValue());
 
-        // todo: handle/persist the received log value
-    }
-    else {
+        // an acceptor must remember this information even if it fails and then restarts.
+        Persist(message.GetInstanceId(), acceptor_state_->GetAcceptedValue());
+
+    } else {
         pax_reply_message.SetIsRejected(true);
-        pax_reply_message.SetPromisedId(promised_id);
+        pax_reply_message.SetPromisedId(promised_proposal_id);
     }
 
     // reply
-    ReplyProposer(pax_reply_message, proposer_id);
+    ReplyProposer(pax_reply_message, proposer_id, RequestType::ProposeReply);
 }
 
-void paxosme::PaxAcceptor::ReplyProposer(paxosme::PaxAcceptorReplyMessage pax_acceptor_reply_message,
-                                         node_id_t proposer_id) {
+void paxosme::PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &pax_acceptor_reply_message,
+                                         node_id_t proposer_id, RequestType request_type) {
+    Send(pax_acceptor_reply_message, proposer_id, request_type);
+}
 
+bool paxosme::PaxAcceptor::IsAccepted() {
+    return acceptor_state_->GetAcceptedNodeId() > 0;
 }

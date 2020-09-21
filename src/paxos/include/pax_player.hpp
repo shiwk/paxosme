@@ -15,12 +15,15 @@ namespace paxosme {
     enum RequestType {
         None,
         PreProposeBroadCast,
-        ProposeBroadCast
+        ProposeBroadCast,
+        PreProposeReply,
+        ProposeReply
     };
 
     class Communicator {
     public:
         void BroadCast(const std::string &data);
+
         void BroadCast(const std::vector<byte> &data);
     };
 
@@ -29,15 +32,22 @@ namespace paxosme {
 
     class PaxPlayer {
     public:
-        virtual void Reset()  = 0; // reset status for new instance
+        virtual void Reset() = 0; // reset status for new instance
 
     protected:
         instance_id_t GetInstanceId() const;
 
-        node_id_t GetNodeId() const ;
-        void ProcessMessageAcceptedByMajority(PaxMessage &pax_message);
+        node_id_t GetNodeId() const;
 
-        void BroadCast(const PaxMessage &message, RequestType request_type);
+        void ProcessAcceptedMessage(PaxMessage &pax_message);
+
+        bool IsAccepted(instance_id_t instance_id);
+
+        void BroadCast(const Serializable &message, RequestType request_type);
+
+        void Send(const Serializable &message, const node_id_t node_id, RequestType request_type);
+
+        void Persist(const instance_id_t instance_id, const LogValue &log_value);
 
     private:
         node_id_t node_id_;
