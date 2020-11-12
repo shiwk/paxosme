@@ -12,12 +12,15 @@
 
 namespace paxosme {
 
-    enum RequestType {
+    enum MessageType {
         None,
         PreProposeBroadCast,
         ProposeBroadCast,
         PreProposeReply,
-        ProposeReply
+        ProposeReply,
+        LearnerNewRequest,
+        LearnerNewReply,
+        InstanceIdTell
     };
 
     class Communicator {
@@ -38,14 +41,19 @@ namespace paxosme {
         instance_id_t GetInstanceId() const;
 
         node_id_t GetNodeId() const;
+        node_id_t GetFollowingNodeId() const;
 
         void ProcessAcceptedMessage(PaxMessage &pax_message);
 
         bool IsAccepted(instance_id_t instance_id);
 
-        void BroadCast(const Serializable &message, RequestType request_type);
+        void BroadCast(const Serializable &message, MessageType request_type);
 
-        void Send(const Serializable &message, const node_id_t node_id, RequestType request_type);
+        void Send(const Serializable &message, const node_id_t node_id, MessageType request_type);
+
+        // send instance id to others
+        void Send(uint64_t id, const node_id_t node_id, MessageType request_type);
+        void SendToFollowers(const Serializable &message);
 
         void Persist(const instance_id_t instance_id, const LogValue &log_value);
 

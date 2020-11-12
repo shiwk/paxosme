@@ -44,9 +44,9 @@ namespace paxosme {
 
         void Propose();
 
-        void OnChosenValue();
+        void HandleChosenValue();
 
-        void OnAbandonValue();
+        void HandleAbandonValue();
 
         ProposerStatus proposer_status_;
         PaxDecider *pax_decider_;
@@ -60,9 +60,9 @@ namespace paxosme {
 
         void UpdateLogValue(const LogValue &value);
 
-        void OnReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message);
+        void HandleReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message);
 
-        bool TryUpdateProposerStateWithRejectionReply(const PaxAcceptorReplyMessage &message);
+        bool TryUpdateProposerStateWithAcceptorReply(const PaxAcceptorReplyMessage &message);
     };
 }
 #endif //PAXOSME_PAX_PROPOSER_HPP

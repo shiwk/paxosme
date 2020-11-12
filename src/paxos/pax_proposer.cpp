@@ -2,7 +2,6 @@
 // Created by shiwk on 2020/7/18.
 //
 
-
 #include <pax_proposer.hpp>
 
 namespace paxosme {
@@ -37,13 +36,13 @@ namespace paxosme {
         if (proposer_status_ != ProposerStatus::kPrePropose)
             return; // incompatible proposer status
 
-        OnReceivedReply(pax_reply_message);
+        HandleReceivedReply(pax_reply_message);
 
         if (pax_decider_->IsMajorityAccepted()) {
             Propose();
         } else if (!pax_decider_->IsStillPending()) {
             if (pax_decider_->IsMajorityRejected()) {
-                OnAbandonValue();
+                HandleAbandonValue();
             }
             // todo: another proposing to be prepared since the proposal is not pending anymore.
         }
@@ -67,13 +66,13 @@ namespace paxosme {
         if (proposer_status_ != ProposerStatus::kPropose)
             return; // incompatible proposer status
 
-        OnReceivedReply(pax_reply_message);
+        HandleReceivedReply(pax_reply_message);
 
         if (pax_decider_->IsMajorityAccepted()) {
-            OnChosenValue(); // value chosen
+            HandleChosenValue(); // value chosen
         } else {
             if (pax_decider_->IsMajorityRejected()) {
-                OnAbandonValue();
+                HandleAbandonValue();
             }
             // todo: another proposing to be prepared since the proposal is not pending anymore.
         }
@@ -82,26 +81,26 @@ namespace paxosme {
     /**
      * Handle message already accepted by majority
      */
-    void PaxProposer::OnChosenValue() {
+    void PaxProposer::HandleChosenValue() {
         proposer_status_ = ProposerStatus::kMajorityAccepted;
         PaxMessage pax_message = proposer_state_->GetPendingMessage();
         ProcessAcceptedMessage(pax_message);
     }
 
-    void PaxProposer::OnAbandonValue() {
+    void PaxProposer::HandleAbandonValue() {
         proposer_status_ = ProposerStatus::kMajorityRejected;
         // todo
     }
 
     void PaxProposer::LaunchPrePropose() {
         PaxMessage pax_message = proposer_state_->GetPendingMessage();
-        BroadCast(pax_message, RequestType::PreProposeBroadCast);
+        BroadCast(pax_message, MessageType::PreProposeBroadCast);
     }
 
     void PaxProposer::LaunchPropose() {
         proposer_status_ = ProposerStatus::kPropose;
         PaxMessage pax_message = proposer_state_->GetPendingMessage();
-        BroadCast(pax_message, RequestType::ProposeBroadCast);
+        BroadCast(pax_message, MessageType::ProposeBroadCast);
     }
 
     void PaxProposer::SetPaxMessage(const PaxMessage &message) {
@@ -112,7 +111,7 @@ namespace paxosme {
         proposer_state_->SetLogValue(value);
     }
 
-    void PaxProposer::OnReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message) {
+    void PaxProposer::HandleReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message) {
         if (pax_reply_message.GetProposerId() != GetNodeId())
             // reply not for the local node
             return;
@@ -125,7 +124,7 @@ namespace paxosme {
 
             // try to update log_value if
             if (proposer_status_ & 0x03)
-                TryUpdateProposerStateWithRejectionReply(pax_reply_message);
+                TryUpdateProposerStateWithAcceptorReply(pax_reply_message);
 
         } else {
             // reject and record proposal id promised by the replier
@@ -135,7 +134,7 @@ namespace paxosme {
         }
     }
 
-    bool PaxProposer::TryUpdateProposerStateWithRejectionReply(const PaxAcceptorReplyMessage &message) {
+    bool PaxProposer::TryUpdateProposerStateWithAcceptorReply(const PaxAcceptorReplyMessage &message) {
         return proposer_state_->TryUpdateLogValue(message.GetProposerId(), message.GetProposerId(),
                                                   message.GetAcceptedValue());
     }

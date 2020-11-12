@@ -60,7 +60,7 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(const paxosme::PaxMessage& me
     }
 
     // reply
-    ReplyProposer(pax_reply_message, proposer_id, RequestType::PreProposeReply);
+    ReplyProposer(pax_reply_message, proposer_id, MessageType::PreProposeReply);
 }
 
 void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& message) {
@@ -102,11 +102,11 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& messa
     }
 
     // reply
-    ReplyProposer(pax_reply_message, proposer_id, RequestType::ProposeReply);
+    ReplyProposer(pax_reply_message, proposer_id, MessageType::ProposeReply);
 }
 
 void paxosme::PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &pax_acceptor_reply_message,
-                                         node_id_t proposer_id, RequestType request_type) {
+                                         node_id_t proposer_id, MessageType request_type) {
     Send(pax_acceptor_reply_message, proposer_id, request_type);
 }
 

@@ -5,14 +5,15 @@
 #include <pax_learner.hpp>
 
 const paxosme::LogValue &paxosme::PaxLearner::GetLearnedValue() {
-    return pax_learner_state_->GetLearnedValue();
+    return learner_state_->GetLearnedValue();
 }
 
-void paxosme::PaxLearner::HandleNewValueRequestReply(const paxosme::PaxMessage &pax_message) {
+void paxosme::PaxLearner::HandleNewValueReceived(const paxosme::PaxMessage &pax_message) {
     instance_id_t instance_id = pax_message.GetInstanceId();
     if (instance_id != GetInstanceId())
         return;
-    pax_learner_state_->LearnNewValue(pax_message.GetLogValue());
+    learner_state_->LearnNew(pax_message.GetLogValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
+                             pax_message.GetProposerId());
 
     // persist needed since learned from other learners
     Persist(instance_id, pax_message.GetLogValue());
@@ -25,8 +26,86 @@ void paxosme::PaxLearner::HandleNewValueProposed(const paxosme::PaxMessage &pax_
 
     if (!IsAccepted(instance_id))
         return; // reject if not ever accepted
+
     // persist not needed since acceptor already persisted
-    pax_learner_state_->LearnNewValue(pax_message.GetLogValue());
+    learner_state_->LearnNew(pax_message.GetLogValue());
+}
+
+void paxosme::PaxLearner::RequestLearn() {
+    node_id_t node_id = GetNodeId();
+    node_id_t following_node_id = GetFollowingNodeId();
+    instance_id_t instance_id = GetInstanceId();
+    NewValueRequest new_value_request(node_id, following_node_id, instance_id);
+    Send(new_value_request, new_value_request.GetNodeId(), LearnerNewRequest);
+}
+
+void paxosme::PaxLearner::HandleRequestLearn(const paxosme::NewValueRequest &new_value_request) {
+    SetPossibleHigherInstanceId(new_value_request.GetInstanceId());
+
+    if (new_value_request.GetFollowingNodeId() == GetNodeId()) {
+        // todo : my follower
+    }
+
+    // todo: be careful race condition for learner state
+    if (new_value_request.GetInstanceId() + 1 != GetInstanceId()) {
+        // instance not matched
+        // tell my instance id
+        TellInstanceId(GetInstanceId(), new_value_request.GetNodeId());
+        return;
+    }
+
+    ReplyLearning(learner_state_->GetLearned(), new_value_request.GetNodeId());
+}
+
+void paxosme::PaxLearner::SetPossibleHigherInstanceId(const instance_id_t &instance_id) {
+    if (instance_id <= highest_known_instance_id_)
+        return;
+    highest_known_instance_id_ = instance_id;
+}
+
+void paxosme::PaxLearner::HandleTellNewInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
+    SetPossibleHigherInstanceId(instance_id);
+}
+
+void paxosme::PaxLearner::ReplyLearning(const paxosme::PaxMessage &pax_message, node_id_t node_id) {
+    Send(pax_message, node_id, LearnerNewReply);
+}
+
+void paxosme::PaxLearner::HandleReplyLearning(const paxosme::PaxMessage &pax_message) {
+    if (pax_message.GetInstanceId() != GetInstanceId()) {
+        // it is not learnabel if higher than local instance_id
+        // it is not needed if lower than local instance_id
+        return;
+    }
+
+    // learn new value
+    learner_state_->LearnNew(pax_message.GetLogValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
+                             pax_message.GetProposerId());
+    // todo: whether needs Learning ack
+}
+
+void paxosme::PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
+    Send(instance_id, node_id, InstanceIdTell);
+    // todo: whether needs confirm value learned
+}
+
+void paxosme::PaxLearner::TellLearnedToFollowers(const PaxMessage &message) {
+    SendToFollowers(message);
+}
+
+void paxosme::PaxLearner::LearnBySelf(const paxosme::PaxMessage &pax_message) {
+    if (pax_message.GetInstanceId() != GetInstanceId())
+        return; // instance id not matched
+    if (pax_message.GetProposerId() != GetNodeId())
+        return; // proposer not matched
+
+    learner_state_->LearnNew(pax_message.GetLogValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
+                             pax_message.GetProposerId());
+    TellLearnedToFollowers(pax_message); // tell followers
+}
+
+bool paxosme::PaxLearner::AnymoreToLearn() {
+    return GetInstanceId() + 1 < highest_known_instance_id_;
 }
 
 

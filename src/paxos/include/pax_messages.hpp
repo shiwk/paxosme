@@ -19,10 +19,9 @@ namespace paxosme {
     };
 
     class PaxMessage : public Serializable{
-        instance_id_t instance_id_;
-
 
     private:
+        instance_id_t instance_id_;
         proposal_id_t proposal_id_;
         node_id_t proposer_id_;
         LogValue log_value_;
@@ -31,7 +30,6 @@ namespace paxosme {
         PaxMessage(instance_id_t instance_id, proposal_id_t proposal_id, node_id_t node_id)
                 : instance_id_(instance_id), proposal_id_(proposal_id), proposer_id_(node_id) {}
 
-    public:
         instance_id_t GetInstanceId() const {
             return instance_id_;
         }
@@ -124,6 +122,7 @@ namespace paxosme {
         }
 
         std::string &Serialize() const override {
+            // todo: serialize
         }
     };
 }

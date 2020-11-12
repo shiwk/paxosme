@@ -63,7 +63,7 @@ namespace paxosme {
 
         void HandleProposeRequest(const PaxMessage& message);
 
-        void ReplyProposer(const PaxAcceptorReplyMessage& pax_acceptor_reply_message, node_id_t proposer_id, RequestType request_type);
+        void ReplyProposer(const PaxAcceptorReplyMessage& pax_acceptor_reply_message, node_id_t proposer_id, MessageType request_type);
 
         bool IsAccepted();
     };
