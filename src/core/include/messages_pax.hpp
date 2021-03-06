@@ -2,8 +2,8 @@
 // Created by shiwk on 2020/7/18.
 //
 
-#ifndef PAXOSME_PAX_MESSAGES_HPP
-#define PAXOSME_PAX_MESSAGES_HPP
+#ifndef PAXOSME_MESSAGES_PAX_HPP
+#define PAXOSME_MESSAGES_PAX_HPP
 
 
 #include <log_value.hpp>
@@ -12,6 +12,17 @@
 #include "common.hpp"
 
 namespace paxosme {
+
+    enum MessageType {
+        None,
+        PreProposeBroadCast,
+        ProposeBroadCast,
+        PreProposeReply,
+        ProposeReply,
+        LearnerNewRequest,
+        LearnerNewReply,
+        Choosen
+    };
 
     class Serializable{
     public:
@@ -127,4 +138,4 @@ namespace paxosme {
     };
 }
 
-#endif //PAXOSME_PAX_MESSAGES_HPP
+#endif //PAXOSME_MESSAGES_PAX_HPP

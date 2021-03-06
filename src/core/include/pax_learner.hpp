@@ -80,10 +80,13 @@ namespace paxosme {
         void BroadCastLearnedValue(LogValue log_value); // if chosen my local proposer
         void TellLearnedToFollowers(const PaxMessage &message);
 
-
         PaxLearnerState *learner_state_;
         instance_id_t highest_known_instance_id_;
         void SetPossibleHigherInstanceId(const instance_id_t &instance_id);
+
+        // send instance id to others
+        void SendInstanceId(instance_id_t instance_id, const node_id_t node_id);
+        void SendFollowers(const PaxMessage &message, MessageType request_type);
     };
 }
 

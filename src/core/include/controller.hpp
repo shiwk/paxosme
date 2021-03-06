@@ -5,10 +5,9 @@
 #ifndef PAXOSME_CONTROLLER_HPP
 #define PAXOSME_CONTROLLER_HPP
 
-
-#include "pax_messages.hpp"
+#include "messages_pax.hpp"
 #include "msg_queue.hpp"
-#include "pax_proposer.hpp"
+#include "proposer_pax.hpp"
 #include "pax_acceptor.hpp"
 #include "pax_learner.hpp"
 

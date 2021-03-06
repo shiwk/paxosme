@@ -46,7 +46,7 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(const paxosme::PaxMessage& me
         acceptor_state_->SetPromisedProposal(proposal_id, proposer_id);
 
         // an acceptor must remember this information even if it fails and then restarts.
-        Persist(message.GetInstanceId(), acceptor_state_->GetAcceptedValue());
+        Persist(message);
 
     } else {
 
@@ -94,7 +94,7 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& messa
         acceptor_state_->SetAcceptedValue(message.GetLogValue());
 
         // an acceptor must remember this information even if it fails and then restarts.
-        Persist(message.GetInstanceId(), acceptor_state_->GetAcceptedValue());
+        Persist(message);
 
     } else {
         pax_reply_message.SetIsRejected(true);
@@ -107,7 +107,7 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& messa
 
 void paxosme::PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &pax_acceptor_reply_message,
                                          node_id_t proposer_id, MessageType request_type) {
-    Send(pax_acceptor_reply_message, proposer_id, request_type);
+    SendMessage(pax_acceptor_reply_message, proposer_id);
 }
 
 bool paxosme::PaxAcceptor::IsAccepted() {

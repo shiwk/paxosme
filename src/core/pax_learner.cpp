@@ -16,7 +16,7 @@ void paxosme::PaxLearner::HandleNewValueReceived(const paxosme::PaxMessage &pax_
                              pax_message.GetProposerId());
 
     // persist needed since learned from other learners
-    Persist(instance_id, pax_message.GetLogValue());
+    Persist(pax_message);
 }
 
 void paxosme::PaxLearner::HandleNewValueProposed(const paxosme::PaxMessage &pax_message) {
@@ -28,7 +28,7 @@ void paxosme::PaxLearner::HandleNewValueProposed(const paxosme::PaxMessage &pax_
         return; // reject if not ever accepted
 
     // persist not needed since acceptor already persisted
-    learner_state_->LearnNew(pax_message.GetLogValue());
+    learner_state_->LearnNew(pax_message.GetLogValue(), instance_id, pax_message.GetProposerId(), pax_message.GetProposerId());
 }
 
 void paxosme::PaxLearner::RequestLearn() {
@@ -36,7 +36,7 @@ void paxosme::PaxLearner::RequestLearn() {
     node_id_t following_node_id = GetFollowingNodeId();
     instance_id_t instance_id = GetInstanceId();
     NewValueRequest new_value_request(node_id, following_node_id, instance_id);
-    Send(new_value_request, new_value_request.GetNodeId(), LearnerNewRequest);
+    SendMessage(new_value_request, new_value_request.GetNodeId(), LearnerNewRequest);
 }
 
 void paxosme::PaxLearner::HandleRequestLearn(const paxosme::NewValueRequest &new_value_request) {
@@ -68,7 +68,7 @@ void paxosme::PaxLearner::HandleTellNewInstanceId(const instance_id_t instance_i
 }
 
 void paxosme::PaxLearner::ReplyLearning(const paxosme::PaxMessage &pax_message, node_id_t node_id) {
-    Send(pax_message, node_id, LearnerNewReply);
+    SendMessage(pax_message, node_id, LearnerNewReply);
 }
 
 void paxosme::PaxLearner::HandleReplyLearning(const paxosme::PaxMessage &pax_message) {
@@ -85,12 +85,12 @@ void paxosme::PaxLearner::HandleReplyLearning(const paxosme::PaxMessage &pax_mes
 }
 
 void paxosme::PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
-    Send(instance_id, node_id, InstanceIdTell);
+    SendInstanceId(instance_id, node_id);
     // todo: whether needs confirm value learned
 }
 
 void paxosme::PaxLearner::TellLearnedToFollowers(const PaxMessage &message) {
-    SendToFollowers(message);
+    SendFollowers(message, MessageType::Choosen);
 }
 
 void paxosme::PaxLearner::LearnBySelf(const paxosme::PaxMessage &pax_message) {

@@ -22,6 +22,10 @@ bool paxosme::PaxPlayer::IsAccepted(const instance_id_t instance_id) {
     return controller_->IsAccepted(instance_id);
 }
 
+void paxosme::PaxPlayer::Persist(const paxosme::PaxMessage &pax_message) {
+    storage_->Write(pax_message.GetInstanceId(), pax_message);
+}
+
 
 
 

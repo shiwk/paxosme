@@ -7,6 +7,6 @@ add_library( node
 
 target_link_libraries(node paxosmecore)
 
-target_include_directories(node
-        PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/../paxos/include")
+#target_include_directories(node
+#        PUBLIC
+#        "${CMAKE_CURRENT_SOURCE_DIR}/../core/include")

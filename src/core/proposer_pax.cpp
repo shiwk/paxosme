@@ -2,7 +2,7 @@
 // Created by shiwk on 2020/7/18.
 //
 
-#include <pax_proposer.hpp>
+#include <proposer_pax.hpp>
 
 namespace paxosme {
 
@@ -21,7 +21,7 @@ namespace paxosme {
      */
     void PaxProposer::PrePropose(const LogValue &log_value) {
         proposer_status_ = ProposerStatus::kPrePropose;
-        auto pax_message = GeneratePreMessage();
+        auto pax_message = GeneratePreMessage(MessageType::PreProposeBroadCast);
         SetPaxMessage(pax_message);
         LaunchPrePropose();
         UpdateLogValue(log_value);
@@ -94,13 +94,13 @@ namespace paxosme {
 
     void PaxProposer::LaunchPrePropose() {
         PaxMessage pax_message = proposer_state_->GetPendingMessage();
-        BroadCast(pax_message, MessageType::PreProposeBroadCast);
+        BroadCastMessage(pax_message, MessageType::PreProposeBroadCast);
     }
 
     void PaxProposer::LaunchPropose() {
         proposer_status_ = ProposerStatus::kPropose;
         PaxMessage pax_message = proposer_state_->GetPendingMessage();
-        BroadCast(pax_message, MessageType::ProposeBroadCast);
+        BroadCastMessage(pax_message, MessageType::ProposeBroadCast);
     }
 
     void PaxProposer::SetPaxMessage(const PaxMessage &message) {
@@ -113,7 +113,7 @@ namespace paxosme {
 
     void PaxProposer::HandleReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message) {
         if (pax_reply_message.GetProposerId() != GetNodeId())
-            // reply not for the local node
+            // reply not for me
             return;
         if (pax_reply_message.GetProposerId() != proposer_state_->GetPendingProposalId())
             return; // something goes wrong!
@@ -139,7 +139,7 @@ namespace paxosme {
                                                   message.GetAcceptedValue());
     }
 
-    PaxMessage PaxProposer::GeneratePreMessage() const {
-        return {GetInstanceId(), proposer_state_->GetApplicableProposalId(), GetNodeId()};
+    PaxMessage PaxProposer::GeneratePreMessage(MessageType message_type) {
+        return {GetInstanceId(), proposer_state_->GetApplicableProposalId(), GetNodeId(), message_type};
     }
 }

@@ -6,7 +6,7 @@
 #define PAXOSME_PROPOSER_STATE_HPP
 
 
-#include "pax_messages.hpp"
+#include "messages_pax.hpp"
 #include "pax_config.hpp"
 
 namespace paxosme {

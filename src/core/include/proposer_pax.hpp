@@ -2,8 +2,8 @@
 // Created by shiwk on 2020/7/18.
 //
 
-#ifndef PAXOSME_PAX_PROPOSER_HPP
-#define PAXOSME_PAX_PROPOSER_HPP
+#ifndef PAXOSME_PROPOSER_PAX_HPP
+#define PAXOSME_PROPOSER_PAX_HPP
 
 
 #include <log_value.hpp>
@@ -17,9 +17,9 @@ namespace paxosme {
     enum class ProposerStatus : unsigned char {
         kNone = 0,
         kPrePropose = 1,
-        kPropose = 1u << 1u,
-        kMajorityAccepted = 1u << 2u,
-        kMajorityRejected = 1u << 3u
+        kPropose = 1 << 1,
+        kMajorityAccepted = 1 << 2,
+        kMajorityRejected = 1 << 3
     };
 
     inline constexpr int operator&(ProposerStatus a, unsigned char b) {
@@ -38,7 +38,7 @@ namespace paxosme {
         PaxProposer(const PaxConfig &pax_config);
 
     private:
-        PaxMessage GeneratePreMessage() const;
+        PaxMessage GeneratePreMessage(MessageType message_type);
 
         void PrePropose(const LogValue &log_value);
 
@@ -65,4 +65,4 @@ namespace paxosme {
         bool TryUpdateProposerStateWithAcceptorReply(const PaxAcceptorReplyMessage &message);
     };
 }
-#endif //PAXOSME_PAX_PROPOSER_HPP
+#endif //PAXOSME_PROPOSER_PAX_HPP

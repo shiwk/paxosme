@@ -1,5 +1,7 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/types)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/storage)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/network)
 
-add_subdirectory(paxos)
+add_subdirectory(core)
 add_subdirectory(node)
 
