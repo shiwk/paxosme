@@ -140,6 +140,6 @@ namespace paxosme {
     }
 
     PaxMessage PaxProposer::GeneratePreMessage(MessageType message_type) {
-        return {GetInstanceId(), proposer_state_->GetApplicableProposalId(), GetNodeId(), message_type};
+        return {GetInstanceId(), proposer_state_->GetApplicableProposalId(), GetNodeId()};
     }
 }

@@ -107,7 +107,7 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& messa
 
 void paxosme::PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &pax_acceptor_reply_message,
                                          node_id_t proposer_id, MessageType request_type) {
-    SendMessage(pax_acceptor_reply_message, proposer_id);
+    SendMessage(pax_acceptor_reply_message, proposer_id, request_type);
 }
 
 bool paxosme::PaxAcceptor::IsAccepted() {

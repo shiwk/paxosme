@@ -32,7 +32,7 @@ namespace paxosme {
 
         void BroadCastMessage(const PaxMessage &message, MessageType request_type);
 
-        void SendMessage(const PaxMessage &pax_message, const node_id_t node_id, MessageType request_type);
+        void SendMessage(const Serializable &pax_message, const node_id_t node_id, MessageType request_type);
 
         void Persist(const paxosme::PaxMessage &pax_message);
 
