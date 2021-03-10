@@ -9,8 +9,8 @@
 #include <log_value.hpp>
 #include "messages_pax.hpp"
 #include "pax_config.hpp"
-#include "pax_storage.hpp"
-#include "pax_communicate.hpp"
+#include "storage_pax.hpp"
+#include "communicate_pax.hpp"
 
 namespace paxosme {
 

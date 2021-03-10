@@ -2,8 +2,8 @@
 // Created by shiwk on 2021/3/5.
 //
 
-#ifndef PAXOSME_PAX_STORAGE_HPP
-#define PAXOSME_PAX_STORAGE_HPP
+#ifndef PAXOSME_STORAGE_PAX_HPP
+#define PAXOSME_STORAGE_PAX_HPP
 
 #include "common.hpp"
 #include <string>
@@ -23,4 +23,4 @@ namespace paxosme{
 }
 
 
-#endif //PAXOSME_PAX_STORAGE_HPP
+#endif //PAXOSME_STORAGE_PAX_HPP

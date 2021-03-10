@@ -4,5 +4,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/network)
 
 add_subdirectory(core)
 add_subdirectory(node)
-add_subdirectory(network)
+add_subdirectory(network/grpc)
 
