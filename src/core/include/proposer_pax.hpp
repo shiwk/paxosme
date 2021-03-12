@@ -29,18 +29,18 @@ namespace paxosme {
     class PaxProposer : public PaxPlayer {
 
     public:
-        void ProposeNew(const LogValue &log_value);
+        void ProposeNew();
 
-        void HandlePreProposeResponse(const PaxAcceptorReplyMessage &pax_reply_message);
+        void HandlePreProposeResponse(const PaxMessage &pax_reply_message);
 
-        void HandleProposeResponse(const PaxAcceptorReplyMessage &pax_reply_message);
+        void HandleProposeResponse(const PaxMessage &pax_reply_message);
 
         PaxProposer(const PaxConfig &pax_config);
 
     private:
-        PaxMessage GeneratePreMessage(MessageType message_type);
+        PaxMessage GenerateMessage(MessageType message_type);
 
-        void PrePropose(const LogValue &log_value);
+        void PrePropose();
 
         void Propose();
 
@@ -60,9 +60,9 @@ namespace paxosme {
 
         void UpdateLogValue(const LogValue &value);
 
-        void HandleReceivedReply(const PaxAcceptorReplyMessage &pax_reply_message);
+        void HandleReceivedReply(const PaxMessage &pax_reply_message);
 
-        bool TryUpdateProposerStateWithAcceptorReply(const PaxAcceptorReplyMessage &message);
+        bool TryUpdateProposerStateWithAcceptorReply(const PaxMessage &message);
     };
 }
 #endif //PAXOSME_PROPOSER_PAX_HPP

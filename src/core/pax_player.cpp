@@ -26,6 +26,14 @@ void paxosme::PaxPlayer::Persist(const paxosme::PaxMessage &pax_message) {
     storage_->Write(pax_message.GetInstanceId(), pax_message);
 }
 
+void paxosme::PaxPlayer::SendMessage(const paxosme::PaxMessage &pax_message, node_id_t node_id) {
+    communicate_->Send(node_id, pax_message);
+}
+
+void paxosme::PaxPlayer::BroadCastMessage(const paxosme::PaxMessage &message) {
+    communicate_->Broadcast(message);
+}
+
 
 
 

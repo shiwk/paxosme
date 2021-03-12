@@ -31,7 +31,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 #find_package(Protobuf REQUIRED)
 message(STATUS ${_PROTOBUF_LIBPROTOBUF})
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/../*.hpp )
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/../*.hpp)
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 # grpc_proto
@@ -48,3 +48,5 @@ target_link_libraries(network_grpc
         ${_GRPC_GRPCPP}
         ${_PROTOBUF_LIBPROTOBUF}
         paxosmecore)
+
+target_include_directories(network_grpc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

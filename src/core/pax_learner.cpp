@@ -13,7 +13,7 @@ void paxosme::PaxLearner::HandleNewValueReceived(const paxosme::PaxMessage &pax_
     if (instance_id != GetInstanceId())
         return;
     learner_state_->LearnNew(pax_message.GetLogValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
-                             pax_message.GetProposerId());
+                             pax_message.GetProposer());
 
     // persist needed since learned from other learners
     Persist(pax_message);
@@ -28,15 +28,18 @@ void paxosme::PaxLearner::HandleNewValueProposed(const paxosme::PaxMessage &pax_
         return; // reject if not ever accepted
 
     // persist not needed since acceptor already persisted
-    learner_state_->LearnNew(pax_message.GetLogValue(), instance_id, pax_message.GetProposerId(), pax_message.GetProposerId());
+    learner_state_->LearnNew(pax_message.GetLogValue(), instance_id, pax_message.GetProposer(),
+                             pax_message.GetProposer());
 }
 
 void paxosme::PaxLearner::RequestLearn() {
     node_id_t node_id = GetNodeId();
     node_id_t following_node_id = GetFollowingNodeId();
     instance_id_t instance_id = GetInstanceId();
-    NewValueRequest new_value_request(node_id, following_node_id, instance_id);
-    SendMessage(new_value_request, new_value_request.GetNodeId(), LearnerNewRequest);
+    PaxMessage new_value_request(node_id, MessageType::LearnerNewRequest);
+    new_value_request.SetFollowingNodeId(following_node_id);
+    new_value_request.SetInstanceId(instance_id);
+    SendMessage(new_value_request, following_node_id);
 }
 
 void paxosme::PaxLearner::HandleRequestLearn(const paxosme::NewValueRequest &new_value_request) {
@@ -68,7 +71,7 @@ void paxosme::PaxLearner::HandleTellNewInstanceId(const instance_id_t instance_i
 }
 
 void paxosme::PaxLearner::ReplyLearning(const paxosme::PaxMessage &pax_message, node_id_t node_id) {
-    SendMessage(pax_message, node_id, LearnerNewReply);
+    SendMessage(pax_message, node_id);
 }
 
 void paxosme::PaxLearner::HandleReplyLearning(const paxosme::PaxMessage &pax_message) {
@@ -80,7 +83,7 @@ void paxosme::PaxLearner::HandleReplyLearning(const paxosme::PaxMessage &pax_mes
 
     // learn new value
     learner_state_->LearnNew(pax_message.GetLogValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
-                             pax_message.GetProposerId());
+                             pax_message.GetProposer());
     // todo: whether needs Learning ack
 }
 
@@ -96,11 +99,11 @@ void paxosme::PaxLearner::TellLearnedToFollowers(const PaxMessage &message) {
 void paxosme::PaxLearner::LearnBySelf(const paxosme::PaxMessage &pax_message) {
     if (pax_message.GetInstanceId() != GetInstanceId())
         return; // instance id not matched
-    if (pax_message.GetProposerId() != GetNodeId())
+    if (pax_message.GetProposer() != GetNodeId())
         return; // proposer not matched
 
     learner_state_->LearnNew(pax_message.GetLogValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
-                             pax_message.GetProposerId());
+                             pax_message.GetProposer());
     TellLearnedToFollowers(pax_message); // tell followers
 }
 

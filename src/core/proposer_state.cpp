@@ -28,6 +28,7 @@ bool paxosme::ProposerState::TryUpdateHighestProposalId(proposal_id_t proposal_i
         highest_proposal_id_provider_ = node_id;
         return true;
     }
+
     return false;
 }
 

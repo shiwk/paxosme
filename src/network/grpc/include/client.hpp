@@ -28,13 +28,4 @@ public:
 private:
     std::unique_ptr<Paxosme::Stub> stub_;
 };
-
-paxos::PrepareReply PaxosmeClient::Prepare(paxos::PrepareRequest) {
-    return paxos::PrepareReply();
-}
-
-paxos::ProposeReply PaxosmeClient::Propose(paxos::ProposeRequest) {
-    return paxos::ProposeReply();
-}
-
 #endif //PAXOSME_CLIENT_HPP

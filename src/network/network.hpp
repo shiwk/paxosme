@@ -5,15 +5,15 @@
 #ifndef PAXOSME_NETWORK_HPP
 #define PAXOSME_NETWORK_HPP
 
-#include "grpc/communicator.hpp"
+#include <communicator.hpp>
 
-class NetworkConfig{
-
+struct NetworkConfig{
+    std::string listening;
 };
 
 class Network{
 public:
-    Network(Communicator *pax_communicator): communicator_(pax_communicator) {};
+    Network(Communicator *communicator): communicator_(communicator) {};
     void start();
 
 private:

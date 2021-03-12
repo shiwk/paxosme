@@ -2,7 +2,7 @@
 // Created by shiwk on 2020/7/18.
 //
 
-#include <pax_acceptor.hpp>
+#include <acceptor_pax.hpp>
 
 /**
  * Acceptor processing when received prepare request
@@ -15,19 +15,15 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(const paxosme::PaxMessage& me
      * it has not responded to a prepare request having a number greater than n."
      */
 
-    PaxAcceptorReplyMessage pax_reply_message;
-    pax_reply_message.SetProposerId(message.GetProposerId());
+    PaxAcceptorReplyMessage pax_reply_message{};
+    pax_reply_message.SetProposerId(message.GetProposer());
     pax_reply_message.SetReplierId(GetNodeId());
 
     proposal_id_t proposal_id = message.GetProposalId();
-    proposal_id_t proposer_id = message.GetProposerId();
+    proposal_id_t proposer = message.GetProposer();
 
-    proposal_id_t promised_proposal_id = acceptor_state_->GetPromisedId();
-    node_id_t promised_proposer = acceptor_state_->GetPromisedNodeId();
 
-    if (proposal_id > promised_proposal_id ||
-        proposal_id == promised_proposal_id &&
-        proposer_id > promised_proposer) {
+    if (IsHigherThanPromised(proposer, proposal_id)) {
 
         /**
          * "If an acceptor receives a prepare request with number n greater than that of any prepare request to
@@ -41,38 +37,39 @@ void paxosme::PaxAcceptor::HandlePreProposeRequest(const paxosme::PaxMessage& me
 
         if (accepted_proposal_id != 0) {
             pax_reply_message.SetAcceptedId(accepted_proposal_id);
-            pax_reply_message.SetAcceptedValue(acceptor_state_->GetAcceptedValue());
+            pax_reply_message.SetAcceptedValue(GetAcceptedValue());
         }
-        acceptor_state_->SetPromisedProposal(proposal_id, proposer_id);
+
+        UpdatePromised(proposer, proposal_id);
 
         // an acceptor must remember this information even if it fails and then restarts.
-        Persist(message);
+        acceptor_state_->Persist();
 
     } else {
 
         // lower than promised, then reject
         pax_reply_message.SetIsRejected(true);
-        proposal_id_t promised_id = acceptor_state_->GetPromisedId();
-        node_id_t promised_node_id = acceptor_state_->GetPromisedNodeId();
+        proposal_id_t promised_id = acceptor_state_->GetPromisedProposal();
+        node_id_t promised_node_id = acceptor_state_->GetPromisedProposer();
 
         pax_reply_message.SetPromisedId(promised_id);
         pax_reply_message.SetPromisedNodeId(promised_node_id);
     }
 
     // reply
-    ReplyProposer(pax_reply_message, proposer_id, MessageType::PreProposeReply);
+    ReplyProposer(pax_reply_message, proposer, MessageType::PreProposeReply);
 }
 
 void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& message) {
     PaxAcceptorReplyMessage pax_reply_message;
-    pax_reply_message.SetProposerId(message.GetProposerId());
+    pax_reply_message.SetProposerId(message.GetProposer());
     pax_reply_message.SetReplierId(GetNodeId());
 
     proposal_id_t proposal_id = message.GetProposalId();
-    proposal_id_t proposer_id = message.GetProposerId();
+    proposal_id_t proposer_id = message.GetProposer();
 
-    proposal_id_t promised_proposal_id = acceptor_state_->GetPromisedId();
-    node_id_t promised_proposer = acceptor_state_->GetPromisedNodeId();
+    proposal_id_t promised_proposal_id = acceptor_state_->GetPromisedProposal();
+    node_id_t promised_proposer = acceptor_state_->GetPromisedProposer();
     if (proposal_id > promised_proposal_id || proposal_id == promised_proposal_id && proposer_id > promised_proposer) {
         proposal_id_t accepted_proposal_id = acceptor_state_->GetAcceptedProposalId();
 
@@ -105,11 +102,35 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage& messa
     ReplyProposer(pax_reply_message, proposer_id, MessageType::ProposeReply);
 }
 
-void paxosme::PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &pax_acceptor_reply_message,
+void paxosme::PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &reply,
                                          node_id_t proposer_id, MessageType request_type) {
-    SendMessage(pax_acceptor_reply_message, proposer_id, request_type);
+    PaxMessage pax_message(reply.GetReplierId(), request_type);
+    pax_message.SetInstanceId(reply.GetInstanceId());
+    pax_message.SetPromisedNodeId(reply.GetPromisedNodeId());
+    pax_message.SetPromisedId(reply.GetPromisedId());
+    pax_message.SetAcceptedId(reply.GetAcceptedId());
+    pax_message.SetAcceptedValue(reply.GetAcceptedValue());
+    pax_message.SetRejected(reply.IsRejected());
+
+    SendMessage(pax_message, proposer_id);
 }
 
 bool paxosme::PaxAcceptor::IsAccepted() {
     return acceptor_state_->GetAcceptedNodeId() > 0;
+}
+
+bool paxosme::PaxAcceptor::IsHigherThanPromised(node_id_t proposer, proposal_id_t proposal_id) {
+    proposal_id_t promised_proposal_id = acceptor_state_->GetPromisedProposal();
+    node_id_t promised_proposer = acceptor_state_->GetPromisedProposer();
+    return proposal_id > promised_proposal_id ||
+           proposal_id == promised_proposal_id &&
+           proposer > promised_proposer;
+}
+
+void paxosme::PaxAcceptor::UpdatePromised(node_id_t proposer, proposal_id_t proposal_id) {
+    acceptor_state_->SetPromisedProposal(proposal_id, proposer);
+}
+
+const paxosme::LogValue& paxosme::PaxAcceptor::GetAcceptedValue() {
+    return acceptor_state_->GetAcceptedValue();
 }

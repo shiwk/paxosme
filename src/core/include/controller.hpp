@@ -8,7 +8,7 @@
 #include "messages_pax.hpp"
 #include "msg_queue.hpp"
 #include "proposer_pax.hpp"
-#include "pax_acceptor.hpp"
+#include "acceptor_pax.hpp"
 #include "pax_learner.hpp"
 
 namespace paxosme {

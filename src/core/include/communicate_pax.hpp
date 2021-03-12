@@ -9,7 +9,9 @@
 
 namespace paxosme {
     class PaxCommunicate {
+    public:
         virtual int Send(node_id_t node_id, const PaxMessage &pax_message) = 0;
+        virtual int Broadcast(const PaxMessage &pax_message) = 0;
         virtual int Receive(const PaxMessage &pax_message) = 0;
     };
 }

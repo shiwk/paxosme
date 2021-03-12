@@ -24,22 +24,100 @@ namespace paxosme {
         Choosen
     };
 
-    class Serializable{
+    class Serializable {
     public:
-         virtual std::string& Serialize() const= 0;
+        virtual std::string &Serialize() const = 0;
     };
 
-    class PaxMessage : public Serializable{
+    class PaxMessage {
 
     private:
+        LogValue accepted_value_;
+        proposal_id_t promised_id_;
+        node_id_t promised_node_id_;
+        node_id_t self_id_;
         instance_id_t instance_id_;
         proposal_id_t proposal_id_;
-        node_id_t proposer_id_;
+        node_id_t proposer_;
         LogValue log_value_;
+        node_id_t following_node_id_;
+        MessageType message_type_;
+        proposal_id_t accepted_id_;
+        bool rejected_;
+
 
     public:
-        PaxMessage(instance_id_t instance_id, proposal_id_t proposal_id, node_id_t node_id)
-                : instance_id_(instance_id), proposal_id_(proposal_id), proposer_id_(node_id) {}
+        bool IsRejected() const {
+            return rejected_;
+        }
+
+        void SetRejected(bool rejected) {
+            rejected_ = rejected;
+        }
+        void SetProposer(node_id_t proposer) {
+            proposer_ = proposer;
+        }
+
+        proposal_id_t GetAcceptedId() const {
+            return accepted_id_;
+        }
+
+        void SetAcceptedId(proposal_id_t accepted_id) {
+            accepted_id_ = accepted_id;
+        }
+
+        const LogValue &GetAcceptedValue() const {
+            return accepted_value_;
+        }
+
+        void SetAcceptedValue(const LogValue &accepted_value) {
+            accepted_value_ = accepted_value;
+        }
+
+        proposal_id_t GetPromisedId() const {
+            return promised_id_;
+        }
+
+        void SetPromisedId(proposal_id_t promised_id) {
+            promised_id_ = promised_id;
+        }
+
+        node_id_t GetPromisedNodeId() const {
+            return promised_node_id_;
+        }
+
+        void SetPromisedNodeId(node_id_t promised_node_id) {
+            promised_node_id_ = promised_node_id;
+        }
+
+        MessageType GetMessageType() const {
+            return message_type_;
+        }
+
+        void SetMessageType(MessageType message_type) {
+            message_type_ = message_type;
+        }
+        node_id_t GetFollowingNodeId() const {
+            return following_node_id_;
+        }
+
+        void SetFollowingNodeId(node_id_t following_node_id) {
+            following_node_id_ = following_node_id;
+        }
+        node_id_t GetSelfId() const {
+            return self_id_;
+        }
+
+        void SetSelfId(node_id_t self_id) {
+            self_id_ = self_id;
+        }
+
+        void SetInstanceId(instance_id_t instance_id) {
+            instance_id_ = instance_id;
+        }
+
+        PaxMessage(node_id_t node_id, MessageType message_type): self_id_(node_id), message_type_(message_type) {}
+
 
         instance_id_t GetInstanceId() const {
             return instance_id_;
@@ -61,79 +139,8 @@ namespace paxosme {
             proposal_id_ = proposal_id;
         }
 
-        node_id_t GetProposerId() const {
-            return proposer_id_;
-        }
-
-        std::string &Serialize() const override{
-
-        }
-    };
-
-    class PaxAcceptorReplyMessage : public Serializable{
-        node_id_t replier_id_;
-        proposal_id_t accepted_id_;
-        LogValue accepted_value_;
-        proposal_id_t promised_id_;
-        node_id_t promised_node_id_;
-
-    private:
-        bool is_rejected_;
-        node_id_t proposer_id_;
-
-    public:
-        void SetIsRejected(bool is_rejected) {
-            is_rejected_ = is_rejected;
-        }
-
-        node_id_t GetProposerId() const {
-            return proposer_id_;
-        }
-
-        node_id_t GetReplierId() const {
-            return replier_id_;
-        }
-
-        proposal_id_t GetAcceptedId() const {
-            return accepted_id_;
-        }
-
-        proposal_id_t GetPromisedId() const {
-            return promised_id_;
-        }
-
-        bool IsRejected() const {
-            return is_rejected_;
-        }
-
-        const LogValue &GetAcceptedValue() const {
-            return accepted_value_;
-        }
-
-        void SetProposerId(node_id_t proposer_id) {
-            proposer_id_ = proposer_id;
-        }
-
-        void SetReplierId(node_id_t replier_id) {
-            replier_id_ = replier_id;
-        }
-        void SetAcceptedId(proposal_id_t accepted_id) {
-            accepted_id_ = accepted_id;
-        }
-
-        void SetAcceptedValue(const LogValue &accepted_value) {
-            accepted_value_ = accepted_value;
-        }
-
-        void SetPromisedId(proposal_id_t promised_id) {
-            promised_id_ = promised_id;
-        }
-        void SetPromisedNodeId(node_id_t promised_node_id) {
-            promised_node_id_ = promised_node_id;
-        }
-
-        std::string &Serialize() const override {
-            // todo: serialize
+        node_id_t GetProposer() const {
+            return proposer_;
         }
     };
 }

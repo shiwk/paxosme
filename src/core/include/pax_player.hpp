@@ -30,9 +30,9 @@ namespace paxosme {
 
         bool IsAccepted(instance_id_t instance_id);
 
-        void BroadCastMessage(const PaxMessage &message, MessageType request_type);
+        void BroadCastMessage(const PaxMessage &message);
 
-        void SendMessage(const Serializable &pax_message, const node_id_t node_id, MessageType request_type);
+        void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
         void Persist(const paxosme::PaxMessage &pax_message);
 

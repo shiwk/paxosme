@@ -15,8 +15,8 @@ namespace paxosme {
         bool IsMajorityAccepted();
         bool IsMajorityRejected();
         bool IsStillPending();
-        void AddApproval(proposal_id_t proposal_id, node_id_t node_id);
-        void AddRejection(proposal_id_t proposal_id, node_id_t node_id);
+        bool AddApproval(proposal_id_t proposal_id, node_id_t node_id);
+        bool AddRejection(proposal_id_t proposal_id, node_id_t node_id);
         void Reset();
         int GetMajorityCount();
 
