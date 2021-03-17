@@ -2,8 +2,8 @@
 // Created by shiwk on 2020/7/18.
 //
 
-#ifndef PAXOSME_PAX_PLAYER_HPP
-#define PAXOSME_PAX_PLAYER_HPP
+#ifndef PAXOSME_PLAYER_PAX_HPP
+#define PAXOSME_PLAYER_PAX_HPP
 
 
 #include <log_value.hpp>
@@ -24,9 +24,10 @@ namespace paxosme {
         instance_id_t GetInstanceId() const;
 
         node_id_t GetNodeId() const;
+
         node_id_t GetFollowingNodeId() const;
 
-        void ProcessAcceptedMessage(PaxMessage &pax_message);
+        void ProcessChosenValue(const PaxMessage &message);
 
         bool IsAccepted(instance_id_t instance_id);
 
@@ -35,12 +36,13 @@ namespace paxosme {
         void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
         void Persist(const paxosme::PaxMessage &pax_message);
+        void Persist(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id, node_id_t proposer);
 
     private:
         node_id_t node_id_;
+        PaxCommunicate *communicate_;
+    protected:
         PaxController *controller_;
-        PaxStorage *storage_;
-        PaxCommunicate * communicate_;
     };
 }
-#endif //PAXOSME_PAX_PLAYER_HPP
+#endif //PAXOSME_PLAYER_PAX_HPP

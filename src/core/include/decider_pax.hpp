@@ -2,11 +2,11 @@
 // Created by shiwk on 2020/7/18.
 //
 
-#ifndef PAXOSME_PAX_DECIDER_HPP
-#define PAXOSME_PAX_DECIDER_HPP
+#ifndef PAXOSME_DECIDER_PAX_HPP
+#define PAXOSME_DECIDER_PAX_HPP
 
 #include <paxos_node.hpp>
-#include "pax_player.hpp"
+#include "player_pax.hpp"
 #include "pax_config.hpp"
 
 namespace paxosme {
@@ -26,4 +26,4 @@ namespace paxosme {
     };
 }
 
-#endif //PAXOSME_PAX_DECIDER_HPP
+#endif //PAXOSME_DECIDER_PAX_HPP

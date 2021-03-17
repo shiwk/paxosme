@@ -14,14 +14,16 @@
 namespace paxosme {
 
     enum MessageType {
-        None,
-        PreProposeBroadCast,
-        ProposeBroadCast,
-        PreProposeReply,
-        ProposeReply,
-        LearnerNewRequest,
-        LearnerNewReply,
-        Choosen
+        kNone,
+        kPrepareBroadCast,
+        kProposeBroadCast,
+        kPrepareReply,
+        kProposeReply,
+        kPublishChosenValue,
+        kLearnerNewRequest,
+        kLearnerNewReply,
+        kChosen,
+        kTellInstanceId
     };
 
     class Serializable {
@@ -37,16 +39,24 @@ namespace paxosme {
         node_id_t promised_node_id_;
         node_id_t self_id_;
         instance_id_t instance_id_;
+        instance_id_t confirmed_instance_id_;
         proposal_id_t proposal_id_;
         node_id_t proposer_;
-        LogValue log_value_;
+        LogValue proposed_log_value_;
         node_id_t following_node_id_;
         MessageType message_type_;
         proposal_id_t accepted_id_;
         bool rejected_;
 
-
     public:
+        instance_id_t GetConfirmedInstanceId() const {
+            return confirmed_instance_id_;
+        }
+
+        void SetConfirmedInstanceId(instance_id_t confirmed_instance_id) {
+            confirmed_instance_id_ = confirmed_instance_id;
+        }
+
         bool IsRejected() const {
             return rejected_;
         }
@@ -123,12 +133,12 @@ namespace paxosme {
             return instance_id_;
         }
 
-        void SetLogValue(const LogValue &log_value) {
-            log_value_ = log_value;
+        void SetProposedLogValue(const LogValue &log_value) {
+            proposed_log_value_ = const_cast<LogValue&>(log_value);
         }
 
-        const LogValue &GetLogValue() const {
-            return log_value_;
+        const LogValue& GetProposedLogValue() const {
+            return proposed_log_value_;
         }
 
         proposal_id_t GetProposalId() const {

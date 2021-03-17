@@ -7,16 +7,16 @@
 
 
 #include <log_value.hpp>
-#include "pax_player.hpp"
+#include "player_pax.hpp"
 #include "pax_config.hpp"
-#include "pax_decider.hpp"
+#include "decider_pax.hpp"
 #include "proposer_state.hpp"
 
 namespace paxosme {
 
     enum class ProposerStatus : unsigned char {
         kNone = 0,
-        kPrePropose = 1,
+        kPrepare = 1,
         kPropose = 1 << 1,
         kMajorityAccepted = 1 << 2,
         kMajorityRejected = 1 << 3
@@ -31,7 +31,7 @@ namespace paxosme {
     public:
         void ProposeNew();
 
-        void HandlePreProposeResponse(const PaxMessage &pax_reply_message);
+        void HandlePrepareResponse(const PaxMessage &pax_reply_message);
 
         void HandleProposeResponse(const PaxMessage &pax_reply_message);
 
@@ -40,11 +40,11 @@ namespace paxosme {
     private:
         PaxMessage GenerateMessage(MessageType message_type);
 
-        void PrePropose();
+        void Prepare();
 
         void Propose();
 
-        void HandleChosenValue();
+        void HandleChosenValue(const PaxMessage &message);
 
         void HandleAbandonValue();
 
@@ -52,15 +52,6 @@ namespace paxosme {
         PaxDecider *pax_decider_;
         ProposerState *proposer_state_;
 
-        void LaunchPrePropose();
-
-        void LaunchPropose();
-
-        void SetPaxMessage(const PaxMessage &message);
-
-        void UpdateLogValue(const LogValue &value);
-
-        void HandleReceivedReply(const PaxMessage &pax_reply_message);
 
         bool TryUpdateProposerStateWithAcceptorReply(const PaxMessage &message);
     };

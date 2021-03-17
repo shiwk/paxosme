@@ -17,6 +17,8 @@ namespace paxosme{
 
         int Read(instance_id_t instance_id, const PaxMessage & value);
 
+        instance_id_t ReadLastInstance();
+
     private:
         Database * db;
     };

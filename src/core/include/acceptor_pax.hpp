@@ -5,7 +5,7 @@
 #ifndef PAXOSME_ACCEPTOR_PAX_HPP
 #define PAXOSME_ACCEPTOR_PAX_HPP
 
-#include "pax_player.hpp"
+#include "player_pax.hpp"
 #include "pax_config.hpp"
 
 namespace paxosme {
@@ -15,8 +15,6 @@ namespace paxosme {
 
         proposal_id_t accepted_proposal_id_;
         node_id_t accepted_node_id_;
-
-    private:
         LogValue accepted_value_;
 
     public:
@@ -38,7 +36,7 @@ namespace paxosme {
             accepted_node_id_ = proposer_id;
         }
 
-        proposal_id_t GetAcceptedProposalId() const {
+        proposal_id_t GetAcceptedProposal() const {
             return accepted_proposal_id_;
         }
 
@@ -140,17 +138,20 @@ namespace paxosme {
     class PaxAcceptor : public PaxPlayer{
         AcceptorState *acceptor_state_;
     public:
-        void HandlePreProposeRequest(const PaxMessage& message);
+        void HandlePrepareRequest(const PaxMessage& message);
 
         void HandleProposeRequest(const PaxMessage& message);
 
-        void ReplyProposer(const PaxAcceptorReplyMessage& reply, node_id_t proposer_id, MessageType request_type);
+        void ReplyProposer(const PaxAcceptorReplyMessage& reply, MessageType request_type);
 
         bool IsAccepted();
 
         bool IsHigherThanPromised(node_id_t, proposal_id_t);
         void UpdatePromised(node_id_t, proposal_id_t);
         const LogValue &GetAcceptedValue();
+        proposal_id_t GetAcceptedProposal();
+        node_id_t GetAcceptedNodeId();
+        void init();
     };
 
 

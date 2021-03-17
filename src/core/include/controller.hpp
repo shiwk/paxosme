@@ -9,16 +9,16 @@
 #include "msg_queue.hpp"
 #include "proposer_pax.hpp"
 #include "acceptor_pax.hpp"
-#include "pax_learner.hpp"
+#include "learner_pax.hpp"
 
 namespace paxosme {
     class PaxController {
     public:
-        void HandleReceivedMessage();
+        void HandleReceivedMessage(const PaxMessage &message);
 
         void Propose(const PaxMessage &pax_message);
 
-        void Pick(const PaxMessage &pax_message); // for proposer
+        void Pick(const PaxMessage *pax_message); // for proposer
 
 
         void Init(); // start loop
@@ -29,12 +29,20 @@ namespace paxosme {
 
         bool IsAccepted(const instance_id_t i);
 
+        const LogValue &GetAcceptedValue();
+
+        proposal_id_t GetAcceptedProposal();
+
+        node_id_t GetAcceptedNodeId();
+
     private:
         MsgQueue msg_queue_;
         instance_id_t instance_id_;
-        PaxProposer* proposer_;
-        PaxAcceptor* acceptor_;
-        PaxLearner* learner_;
+        PaxProposer *proposer_;
+        PaxAcceptor *acceptor_;
+        PaxLearner *learner_;
+        PaxStorage *storage_;
+        bool is_init_;
     };
 }
 
