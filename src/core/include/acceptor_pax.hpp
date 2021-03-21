@@ -51,10 +51,6 @@ namespace paxosme {
         const LogValue &GetAcceptedValue() const {
             return accepted_value_;
         }
-
-        void Persist() {
-
-        }
     };
 
     class PaxAcceptorReplyMessage {

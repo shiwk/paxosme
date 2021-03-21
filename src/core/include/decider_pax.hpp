@@ -5,7 +5,6 @@
 #ifndef PAXOSME_DECIDER_PAX_HPP
 #define PAXOSME_DECIDER_PAX_HPP
 
-#include <paxos_node.hpp>
 #include "player_pax.hpp"
 #include "pax_config.hpp"
 

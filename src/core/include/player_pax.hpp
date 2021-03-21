@@ -7,6 +7,7 @@
 
 
 #include <log_value.hpp>
+#include <state.pb.h>
 #include "messages_pax.hpp"
 #include "pax_config.hpp"
 #include "storage_pax.hpp"
@@ -35,8 +36,7 @@ namespace paxosme {
 
         void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
-        void Persist(const paxosme::PaxMessage &pax_message);
-        void Persist(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id, node_id_t proposer);
+        void Persist(const paxosme::PaxosState &paxos_state);
 
     private:
         node_id_t node_id_;

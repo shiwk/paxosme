@@ -29,6 +29,6 @@ void paxosme::PaxController::Init() {
     instance_id_ = storage_->ReadLastInstance();
     // todo II : if instance_id > instance id in checkpoint, it means needs to execute some log_values
     // todo III : if instance_id < instance id in checkpoint, it means some special cases (like restart/crash, even worse) happened
-
+    acceptor_->init();
     is_init_ = true;
 }

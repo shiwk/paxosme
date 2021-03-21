@@ -5,8 +5,8 @@
 #ifndef PAXOSME_PAXOS_NODE_HPP
 #define PAXOSME_PAXOS_NODE_HPP
 
-#include <paxos_node.hpp>
 #include <controller.hpp>
+#include <node.hpp>
 
 namespace paxosme {
     class PaxosNode : public Node{

@@ -42,9 +42,6 @@ void paxosme::PaxAcceptor::HandlePrepareRequest(const paxosme::PaxMessage &messa
 
         UpdatePromised(proposer, proposal_id);
 
-        // an acceptor must remember this information even if it fails and then restarts.
-        acceptor_state_->Persist();
-
     } else {
 
         // lower than promised, then reject
@@ -66,9 +63,9 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage &messa
     pax_reply_message.SetReplierId(GetNodeId());
 
     proposal_id_t proposal_id = message.GetProposalId();
-    proposal_id_t proposer_id = message.GetProposer();
+    proposal_id_t proposer = message.GetProposer();
 
-    if (IsHigherThanPromised(proposer_id, proposal_id)) {
+    if (IsHigherThanPromised(proposer, proposal_id)) {
 
         /**
          * "For any v and n, if a proposal with value v and number n is issued,
@@ -78,12 +75,11 @@ void paxosme::PaxAcceptor::HandleProposeRequest(const paxosme::PaxMessage &messa
          */
 
         // update local
-        acceptor_state_->SetPromisedProposal(proposer_id, proposer_id);
-        acceptor_state_->SetAcceptedProposal(proposal_id, proposer_id);
+        acceptor_state_->SetPromisedProposal(proposal_id, proposer);
+        acceptor_state_->SetAcceptedProposal(proposal_id, proposer);
         acceptor_state_->SetAcceptedValue(message.GetProposedLogValue());
 
-        // an acceptor must remember this information even if it fails and then restarts.
-        Persist(message);
+        UpdatePromised(proposer, proposal_id);
 
     } else {
         pax_reply_message.SetIsRejected(true);
@@ -119,7 +115,23 @@ bool paxosme::PaxAcceptor::IsHigherThanPromised(node_id_t proposer, proposal_id_
 }
 
 void paxosme::PaxAcceptor::UpdatePromised(node_id_t proposer, proposal_id_t proposal_id) {
+    PaxosState paxos_state;
+
     acceptor_state_->SetPromisedProposal(proposal_id, proposer);
+
+    paxos_state.set_instance_id(GetInstanceId());
+    paxos_state.set_promised_node_id(proposer);
+    paxos_state.set_promised_proposal_id(proposal_id);
+
+    if (acceptor_state_->GetAcceptedProposal()) {
+        paxos_state.set_accepted_node_id(proposer);
+        paxos_state.set_accepted_proposal_id(acceptor_state_->GetAcceptedProposal());
+        LogValue accepted_value = acceptor_state_->GetAcceptedValue();
+        paxos_state.set_accepted_value(accepted_value.value);
+    }
+
+    // an acceptor must remember this information even if it fails and then restarts.
+    Persist(paxos_state);
 }
 
 const paxosme::LogValue &paxosme::PaxAcceptor::GetAcceptedValue() {

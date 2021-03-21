@@ -1,0 +1,12 @@
+syntax = "proto3";
+package paxosme;
+
+message PaxosState {
+    uint64 instance_id = 1;
+    uint64 promised_proposal_id = 2;
+    uint64 promised_node_id = 3;
+    uint64 accepted_proposal_id = 4;
+    uint64 accepted_node_id = 5;
+    bytes accepted_value = 6;
+};
+

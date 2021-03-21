@@ -4,10 +4,10 @@
 
 #ifndef PAXOSME_LOG_VALUE_HPP
 #define PAXOSME_LOG_VALUE_HPP
-
+#include <string>
 namespace paxosme{
-    class LogValue{
-
+    struct LogValue{
+        std::string value;
     };
 }
 #endif //PAXOSME_LOG_VALUE_HPP
