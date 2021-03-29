@@ -30,18 +30,18 @@ namespace paxosme {
     bool ProposerState::TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id,
                                           const paxosme::LogValue &log_value) {
         if (TryUpdateHighestProposalId(proposal_id, node_id)) {
-            pending_message_.SetLogValue(log_value);
+            log_value_ = log_value;
             return true;
         }
 
         return false;
     }
 
-    LogValue *ProposerState::GetLogValue() const {
+    const LogValue &ProposerState::GetLogValue() const {
         return log_value_;
     }
 
-    void ProposerState::SetLogValue(LogValue *log_value) {
+    void ProposerState::SetLogValue(LogValue &log_value) {
         log_value_ = log_value;
     }
 

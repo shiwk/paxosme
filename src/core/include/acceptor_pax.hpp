@@ -5,19 +5,20 @@
 #ifndef PAXOSME_ACCEPTOR_PAX_HPP
 #define PAXOSME_ACCEPTOR_PAX_HPP
 
+#include <utility>
+
 #include "player_pax.hpp"
-#include "pax_config.hpp"
+#include "config_pax.hpp"
 
 namespace paxosme {
-    class AcceptorState{
-        proposal_id_t promised_id_;
-        node_id_t promised_node_id_;
-
-        proposal_id_t accepted_proposal_id_;
-        node_id_t accepted_node_id_;
-        LogValue accepted_value_;
-
+    class AcceptorState {
     public:
+        AcceptorState(LogValue  logValue) : accepted_value_(std::move(logValue)){}
+        instance_id_t GetInstanceId() const;
+
+        void SetInstanceId(instance_id_t instance_id);
+            void init(const PaxosState &state);
+
         proposal_id_t GetPromisedProposal() const {
             return promised_id_;
         }
@@ -26,12 +27,12 @@ namespace paxosme {
             return promised_node_id_;
         }
 
-        void SetPromisedProposal(proposal_id_t proposal_id, node_id_t proposer_id){
+        void SetPromisedProposal(proposal_id_t proposal_id, node_id_t proposer_id) {
             promised_id_ = proposal_id;
             promised_node_id_ = proposer_id;
         }
 
-        void SetAcceptedProposal(proposal_id_t proposal_id, node_id_t proposer_id){
+        void SetAcceptedProposal(proposal_id_t proposal_id, node_id_t proposer_id) {
             accepted_proposal_id_ = proposer_id;
             accepted_node_id_ = proposer_id;
         }
@@ -51,6 +52,14 @@ namespace paxosme {
         const LogValue &GetAcceptedValue() const {
             return accepted_value_;
         }
+
+    private:
+        proposal_id_t promised_id_;
+        node_id_t promised_node_id_;
+        instance_id_t instance_id_;
+        proposal_id_t accepted_proposal_id_;
+        node_id_t accepted_node_id_;
+        LogValue accepted_value_;
     };
 
     class PaxAcceptorReplyMessage {
@@ -131,23 +140,28 @@ namespace paxosme {
         }
     };
 
-    class PaxAcceptor : public PaxPlayer{
+    class PaxAcceptor : public PaxPlayer {
         AcceptorState *acceptor_state_;
     public:
-        void HandlePrepareRequest(const PaxMessage& message);
+        void HandlePrepareRequest(const PaxMessage &message);
 
-        void HandleProposeRequest(const PaxMessage& message);
+        void HandleProposeRequest(const PaxMessage &message);
 
-        void ReplyProposer(const PaxAcceptorReplyMessage& reply, MessageType request_type);
+        void ReplyProposer(const PaxAcceptorReplyMessage &reply, MessageType request_type);
 
         bool IsAccepted();
 
         bool IsHigherThanPromised(node_id_t, proposal_id_t);
+
         void UpdatePromised(node_id_t, proposal_id_t);
+
         const LogValue &GetAcceptedValue();
+
         proposal_id_t GetAcceptedProposal();
+
         node_id_t GetAcceptedNodeId();
-        void init();
+
+        instance_id_t init();
     };
 
 

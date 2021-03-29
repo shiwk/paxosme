@@ -7,7 +7,7 @@
 
 #include <log_value.hpp>
 #include "player_pax.hpp"
-#include "pax_config.hpp"
+#include "config_pax.hpp"
 
 namespace paxosme {
     class PaxLearnerState {
@@ -21,7 +21,7 @@ namespace paxosme {
             log_value_ = log_value;
             instance_id_ =instance_id;
             proposal_id_ = proposal_id;
-            proposer_ = proposer_node_id
+            proposer_ = proposer_node_id;
         }
 
         const LogValue &GetLearnedValue() {

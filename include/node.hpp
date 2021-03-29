@@ -5,7 +5,6 @@
 #ifndef PAXOSME_NODE_HPP
 #define PAXOSME_NODE_HPP
 
-#include <log_value.hpp>
 #include <string>
 #include <vector>
 #include "common.hpp"
@@ -23,6 +22,8 @@ namespace paxosme {
 
     class Node {
     public:
+        virtual ~Node() {}
+
         void Start();
 
         void Propose(const LogValue &log_value, instance_id_t &instance_id);

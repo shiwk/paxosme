@@ -8,7 +8,7 @@
 
 #include <log_value.hpp>
 #include "player_pax.hpp"
-#include "pax_config.hpp"
+#include "config_pax.hpp"
 #include "decider_pax.hpp"
 #include "proposer_state.hpp"
 
@@ -29,7 +29,7 @@ namespace paxosme {
     class PaxProposer : public PaxPlayer {
 
     public:
-        void ProposeNew();
+        void ProposeNew(LogValue &log_value);
 
         void HandlePrepareResponse(const PaxMessage &pax_reply_message);
 
@@ -53,7 +53,7 @@ namespace paxosme {
         ProposerState *proposer_state_;
 
 
-        bool TryUpdateProposerStateWithAcceptorReply(const PaxMessage &message);
+        bool TryUpdateProposerStateWithPrepareReply(const PaxMessage &message);
     };
 }
 #endif //PAXOSME_PROPOSER_PAX_HPP

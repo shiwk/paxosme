@@ -10,6 +10,9 @@
 #include "proposer_pax.hpp"
 #include "acceptor_pax.hpp"
 #include "learner_pax.hpp"
+#include "proposal_prov.hpp"
+#include <future>
+#include <state_machine.hpp>
 
 namespace paxosme {
     class PaxController {
@@ -18,14 +21,9 @@ namespace paxosme {
 
         void Propose(const PaxMessage &pax_message);
 
-        void Pick(const PaxMessage *pax_message); // for proposer
-
-
-        void Init(); // start loop
+        void Init(PaxConfig*); // start loop
 
         instance_id_t GetInstanceId() const;
-
-        void FinalizeInstance();
 
         bool IsAccepted(const instance_id_t i);
 
@@ -34,6 +32,10 @@ namespace paxosme {
         proposal_id_t GetAcceptedProposal();
 
         node_id_t GetAcceptedNodeId();
+        void FlushProv();
+
+    private:
+        void PushSMByState(instance_id_t target_instance_id);
 
     private:
         MsgQueue msg_queue_;
@@ -41,8 +43,10 @@ namespace paxosme {
         PaxProposer *proposer_;
         PaxAcceptor *acceptor_;
         PaxLearner *learner_;
-        PaxStorage *storage_;
-        bool is_init_;
+        PaxConfig *pax_config_;
+        ProposalProv *proposal_prov_;
+        std::future <void*> prov_loop_;
+        StateMachine *state_machine_;
     };
 }
 

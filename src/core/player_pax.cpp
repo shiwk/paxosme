@@ -14,16 +14,8 @@ namespace paxosme {
         return node_id_;
     }
 
-    void PaxPlayer::ProcessAcceptedMessage(PaxMessage *pax_message) {
-        controller_->Pick(pax_message);
-    }
-
     bool PaxPlayer::IsAccepted(const instance_id_t instance_id) {
         return controller_->IsAccepted(instance_id);
-    }
-
-    void PaxPlayer::Persist(const PaxMessage &pax_message) {
-        storage_->Write(pax_message.GetInstanceId(), pax_message);
     }
 
     void PaxPlayer::SendMessage(const PaxMessage &pax_message, node_id_t node_id) {
@@ -36,6 +28,16 @@ namespace paxosme {
 
     void PaxPlayer::ProcessChosenValue(const PaxMessage &message) {
         controller_->HandleReceivedMessage(message);
+    }
+
+    void PaxPlayer::WriteState(const PaxosState &paxos_state) {
+        storage_->Write(paxos_state.instance_id(), paxos_state);
+    }
+
+    PaxosState PaxPlayer::ReadState(instance_id_t instance_id) {
+        PaxosState paxos_state;
+        storage_->Read(instance_id, paxos_state);
+        return paxos_state;
     }
 }
 

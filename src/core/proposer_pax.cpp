@@ -10,8 +10,11 @@ namespace paxosme {
      *  Propose a new value (trigger a new round)
      *  @param log_value
      */
-    void PaxProposer::ProposeNew() {
-        pax_decider_->Reset();
+    void PaxProposer::ProposeNew(LogValue &log_value) {
+        if (proposer_state_->GetLogValue().empty())
+        {
+            proposer_state_->SetLogValue(log_value);
+        }
         Prepare();
     }
 
@@ -43,7 +46,7 @@ namespace paxosme {
         if (!pax_reply_message.IsRejected()) {
             // count for approval
 
-            TryUpdateProposerStateWithAcceptorReply(pax_reply_message);
+            TryUpdateProposerStateWithPrepareReply(pax_reply_message);
             pax_decider_->AddApproval(proposer_state_->GetMyProposal(), GetNodeId());
 
         } else {
@@ -57,7 +60,7 @@ namespace paxosme {
             // got majority pre-accept
             Propose();
         } else if (pax_decider_->IsMajorityRejected() || !pax_decider_->IsStillPending()) {
-            //todo I: handle prepare failed case, another proposing to be prepared since the proposal is not pending anymore.
+            // todo I: handle prepare failed case, another proposing to be prepared since the proposal is not pending anymore.
             // todo: another proposing to be prepared since the proposal is not pending anymore.
         }
     }
@@ -113,7 +116,7 @@ namespace paxosme {
         }
     }
 
-    bool PaxProposer::TryUpdateProposerStateWithAcceptorReply(const PaxMessage &message) {
+    bool PaxProposer::TryUpdateProposerStateWithPrepareReply(const PaxMessage &message) {
         return proposer_state_->TryUpdateLogValue(message.GetProposalId(), message.GetProposer(),
                                                   message.GetAcceptedValue());
     }
@@ -123,8 +126,7 @@ namespace paxosme {
         message.SetInstanceId(GetInstanceId());
         message.SetProposer(GetNodeId());
         message.SetProposer(proposer_state_->GetNewProposalId());
-        message.SetProposedLogValue(*(proposer_state_->GetLogValue()));
+        message.SetProposedLogValue(proposer_state_->GetLogValue());
         return message;
     }
-
 }

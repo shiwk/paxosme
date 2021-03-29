@@ -127,11 +127,11 @@ void paxosme::PaxAcceptor::UpdatePromised(node_id_t proposer, proposal_id_t prop
         paxos_state.set_accepted_node_id(proposer);
         paxos_state.set_accepted_proposal_id(acceptor_state_->GetAcceptedProposal());
         LogValue accepted_value = acceptor_state_->GetAcceptedValue();
-        paxos_state.set_accepted_value(accepted_value.value);
+        paxos_state.set_accepted_value(accepted_value.GetValue());
     }
 
     // an acceptor must remember this information even if it fails and then restarts.
-    Persist(paxos_state);
+    WriteState(paxos_state);
 }
 
 const paxosme::LogValue &paxosme::PaxAcceptor::GetAcceptedValue() {
@@ -146,6 +146,24 @@ node_id_t paxosme::PaxAcceptor::GetAcceptedNodeId() {
     return acceptor_state_->GetAcceptedNodeId();
 }
 
-void paxosme::PaxAcceptor::init() {
+instance_id_t paxosme::PaxAcceptor::init() {
+    PaxosState paxos_state = ReadState(-1);
+    acceptor_state_->init(paxos_state);
+    return paxos_state.instance_id();
+}
 
+void paxosme::AcceptorState::init(const PaxosState &state) {
+    LogValue log_value{state.accepted_value()};
+    SetAcceptedValue(log_value);
+    SetAcceptedProposal(state.accepted_proposal_id(), state.accepted_node_id());
+    SetPromisedProposal(state.promised_proposal_id(), state.promised_node_id());
+    SetInstanceId(state.instance_id());
+}
+
+instance_id_t paxosme::AcceptorState::GetInstanceId() const {
+    return instance_id_;
+}
+
+void paxosme::AcceptorState::SetInstanceId(instance_id_t instance_id) {
+    instance_id_ = instance_id;
 }

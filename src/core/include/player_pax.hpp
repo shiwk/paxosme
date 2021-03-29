@@ -9,7 +9,7 @@
 #include <log_value.hpp>
 #include <state.pb.h>
 #include "messages_pax.hpp"
-#include "pax_config.hpp"
+#include "config_pax.hpp"
 #include "storage_pax.hpp"
 #include "communicate_pax.hpp"
 
@@ -20,8 +20,10 @@ namespace paxosme {
     class PaxPlayer {
     public:
         virtual void Reset() = 0; // reset status for new instance
+        PaxosState ReadState(instance_id_t instance_id);
 
     protected:
+        PaxController *controller_;
         instance_id_t GetInstanceId() const;
 
         node_id_t GetNodeId() const;
@@ -36,13 +38,11 @@ namespace paxosme {
 
         void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
-        void Persist(const paxosme::PaxosState &paxos_state);
-
+        void WriteState(const paxosme::PaxosState &paxos_state);
     private:
         node_id_t node_id_;
         PaxCommunicate *communicate_;
-    protected:
-        PaxController *controller_;
+        PaxStorage *storage_;
     };
 }
 #endif //PAXOSME_PLAYER_PAX_HPP

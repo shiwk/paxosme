@@ -6,7 +6,7 @@
 #define PAXOSME_DECIDER_PAX_HPP
 
 #include "player_pax.hpp"
-#include "pax_config.hpp"
+#include "config_pax.hpp"
 
 namespace paxosme {
     class PaxDecider{

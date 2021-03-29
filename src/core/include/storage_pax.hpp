@@ -9,16 +9,14 @@
 #include <string>
 #include <database.hpp>
 #include <messages_pax.hpp>
+#include <state.pb.h>
 
 namespace paxosme{
     class PaxStorage {
     public:
-        int Write(instance_id_t instance_id, const PaxMessage & value);
+        int Write(instance_id_t instance_id, const PaxosState & value);
 
-        int Read(instance_id_t instance_id, const PaxMessage & value);
-
-        instance_id_t ReadLastInstance();
-
+        int Read(instance_id_t instance_id, PaxosState & value);
     private:
         Database * db;
     };

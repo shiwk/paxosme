@@ -134,7 +134,7 @@ namespace paxosme {
         }
 
         void SetProposedLogValue(const LogValue &log_value) {
-            proposed_log_value_ = const_cast<LogValue&>(log_value);
+            proposed_log_value_ = log_value.GetValue();
         }
 
         const LogValue& GetProposedLogValue() const {
