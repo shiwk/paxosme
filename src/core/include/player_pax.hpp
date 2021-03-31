@@ -12,6 +12,7 @@
 #include "config_pax.hpp"
 #include "storage_pax.hpp"
 #include "communicate_pax.hpp"
+#include "schedule.hpp"
 
 namespace paxosme {
 
@@ -39,10 +40,13 @@ namespace paxosme {
         void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
         void WriteState(const paxosme::PaxosState &paxos_state);
+
+        void AddTimer(EventType event_type, const event_callback& callback, int delayInMilli);
     private:
         node_id_t node_id_;
         PaxCommunicate *communicate_;
         PaxStorage *storage_;
+        Schedule *schedule_;
     };
 }
 #endif //PAXOSME_PLAYER_PAX_HPP

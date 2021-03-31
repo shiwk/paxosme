@@ -54,6 +54,8 @@ namespace paxosme {
 
 
         bool TryUpdateProposerStateWithPrepareReply(const PaxMessage &message);
+
+        int prepare_delay_;
     };
 }
 #endif //PAXOSME_PROPOSER_PAX_HPP

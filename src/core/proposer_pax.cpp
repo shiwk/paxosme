@@ -7,15 +7,13 @@
 namespace paxosme {
 
     /**
-     *  Propose a new value (trigger a new round)
+     *  Found a new value
      *  @param log_value
      */
     void PaxProposer::ProposeNew(LogValue &log_value) {
-        if (proposer_state_->GetLogValue().empty())
-        {
+        if (proposer_state_->GetLogValue().empty()) {
             proposer_state_->SetLogValue(log_value);
         }
-        Prepare();
     }
 
     /**
@@ -26,6 +24,8 @@ namespace paxosme {
         proposer_status_ = ProposerStatus::kPrepare;
         auto pax_message = GenerateMessage(MessageType::kPrepareBroadCast);
         BroadCastMessage(pax_message);
+        event_callback callback = [this] { Prepare(); };
+        AddTimer(EventType::kPrepare, callback, prepare_delay_);
     }
 
     /**
@@ -60,8 +60,8 @@ namespace paxosme {
             // got majority pre-accept
             Propose();
         } else if (pax_decider_->IsMajorityRejected() || !pax_decider_->IsStillPending()) {
-            // todo I: handle prepare failed case, another proposing to be prepared since the proposal is not pending anymore.
-            // todo: another proposing to be prepared since the proposal is not pending anymore.
+            event_callback callback = [this] { Prepare(); };
+            AddTimer(EventType::kPrepare, callback, prepare_delay_);
         }
     }
 
@@ -75,6 +75,8 @@ namespace paxosme {
         PaxMessage pax_message = GenerateMessage(MessageType::kProposeBroadCast);
         pax_decider_->Reset(); // reset for propose stage counter before broadcast
         BroadCastMessage(pax_message);
+        event_callback callback = [this] { Prepare(); };
+        AddTimer(EventType::kPrepare, callback, prepare_delay_);
     }
 
 /**
@@ -112,7 +114,8 @@ namespace paxosme {
             ProcessChosenValue(msg);
             BroadCastMessage(msg);
         } else if (pax_decider_->IsMajorityRejected() || !pax_decider_->IsStillPending()) {
-            // todo II: handle value abandoned
+            event_callback callback = [this] { Prepare(); };
+            AddTimer(EventType::kPrepare, callback, prepare_delay_);
         }
     }
 

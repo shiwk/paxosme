@@ -10,18 +10,6 @@ namespace paxosme {
         return learner_state_->GetLearnedValue();
     }
 
-    void PaxLearner::LearnFromOthers(const PaxMessage &pax_message) {
-        instance_id_t instance_id = pax_message.GetInstanceId();
-        if (instance_id != GetInstanceId())
-            return;
-
-        // todo I: check already learned or not
-        // persist needed since learned from other learners
-        LearnNew(pax_message.GetProposedLogValue(), pax_message.GetInstanceId(),
-                                 pax_message.GetProposalId(),
-                                 pax_message.GetProposer(), true);
-    }
-
     void PaxLearner::RequestLearning() {
         node_id_t node_id = GetNodeId();
         instance_id_t instance_id = GetInstanceId();
@@ -29,12 +17,14 @@ namespace paxosme {
         PaxMessage message(node_id, MessageType::kLearnerNewRequest);
         message.SetInstanceId(instance_id);
         BroadCastMessage(message);
+        event_callback callback = [this] { RequestLearning(); };
+        AddTimer(EventType::kRequestLearning, callback, request_learning_delay_);
     }
 
     void PaxLearner::HandleLearningRequest(const NewValueRequest &new_value_request) {
         SetPossibleHigherInstanceId(new_value_request.GetInstanceId());
 
-        // todo I: checke state is confirmed
+        // todo I: check state is confirmed
         // todo II: be careful race condition for learner state
         if (new_value_request.GetInstanceId() + 1 != GetInstanceId()) {
             // instance not matched
@@ -44,6 +34,18 @@ namespace paxosme {
         }
 
         ReplyLearning(new_value_request.GetNodeId());
+    }
+
+    void PaxLearner::HandleRequestLearningReply(const PaxMessage &pax_message) {
+        instance_id_t instance_id = pax_message.GetInstanceId();
+        if (instance_id != GetInstanceId())
+            return;
+
+        // todo I: check already learned or not
+        // persist needed since learned from other learners
+        LearnNew(pax_message.GetProposedLogValue(), pax_message.GetInstanceId(),
+                 pax_message.GetProposalId(),
+                 pax_message.GetProposer(), true);
     }
 
     void PaxLearner::SetPossibleHigherInstanceId(const instance_id_t &instance_id) {
@@ -56,18 +58,6 @@ namespace paxosme {
         SetPossibleHigherInstanceId(instance_id);
         // todo II : checkpoint update needed
     }
-
-//    void PaxLearner::HandleReplyLearning(const PaxMessage &pax_message) {
-//        if (pax_message.GetInstanceId() != GetInstanceId()) {
-//            // instance not match
-//            return;
-//        }
-//
-//        // learn new value
-//        learner_state_->LearnNew(pax_message.GetProposedLogValue(), pax_message.GetInstanceId(),
-//                                 pax_message.GetProposalId(),
-//                                 pax_message.GetProposer());
-//    }
 
     void PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
         PaxMessage message(GetNodeId(), MessageType::kTellInstanceId);

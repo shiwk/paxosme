@@ -19,7 +19,7 @@ namespace paxosme {
         void LearnNew(const LogValue &log_value, instance_id_t instance_id, proposal_id_t proposal_id,
                       node_id_t proposer_node_id) {
             log_value_ = log_value;
-            instance_id_ =instance_id;
+            instance_id_ = instance_id;
             proposal_id_ = proposal_id;
             proposer_ = proposer_node_id;
         }
@@ -32,7 +32,7 @@ namespace paxosme {
     class NewValueRequest : public Serializable {
     public:
         NewValueRequest(node_id_t node_id, node_id_t following_node_id, instance_id_t instance_id) :
-        node_id_(node_id),following_node_id_(following_node_id),instance_id_(instance_id) {}
+                node_id_(node_id), following_node_id_(following_node_id), instance_id_(instance_id) {}
 
         const node_id_t &GetNodeId() const {
             return node_id_;
@@ -57,14 +57,10 @@ namespace paxosme {
 
     class PaxLearner : public PaxPlayer {
     public:
-//        void HandleNewValueProposed(const PaxMessage &pax_message);
-
-        void LearnFromOthers(const PaxMessage &pax_message);
+        void HandleRequestLearningReply(const PaxMessage &pax_message);
 
         void RequestLearning(); // request learn from others
         void HandleLearningRequest(const NewValueRequest &new_value_request);
-
-//        void HandleReplyLearning(const PaxMessage &pax_message);
 
         void HandleTellNewInstanceId(instance_id_t instance_id, node_id_t node_id);
 
@@ -75,8 +71,6 @@ namespace paxosme {
         bool AnymoreToLearn();
 
     private:
-//        void ReplyLearnedValue(node_id_t node_id, LogValue log_value); // HandleLearnRequest
-//        void BroadCastLearnedValue(LogValue log_value); // if chosen my local proposer
         void TellOtherLearners();
 
         void TellInstanceId(instance_id_t instance_id, node_id_t node_id); // tell others current instance_id
@@ -88,10 +82,10 @@ namespace paxosme {
 
         void SetPossibleHigherInstanceId(const instance_id_t &instance_id);
 
-        // send instance id to others
-//        void SendInstanceId(instance_id_t instance_id, const node_id_t node_id);
-//        void SendFollowers(const PaxMessage &message, MessageType request_type);
-        void LearnNew(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id, node_id_t proposer, bool writeState);
+        void LearnNew(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id, node_id_t proposer,
+                      bool writeState);
+
+        int request_learning_delay_;
     };
 }
 
