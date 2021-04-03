@@ -29,8 +29,8 @@ namespace paxosme {
 
     };
 
-    class PaxosmeServer {
-        PaxosmeServer(NetworkConfig *network_config);
+        class PaxosmeServer {
+        PaxosmeServer(std::string &listening);
     };
 }
 #endif //PAXOSME_SERVER_HPP

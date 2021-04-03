@@ -6,7 +6,7 @@
 #include <client.hpp>
 
 namespace paxosme {
-    bool GrpcClient::Prepare(PaxMessage &pax_message, paxos::PrepareReply *prepare_reply) {
+    bool GrpcClient::Prepare(const PaxMessage &pax_message) {
         paxos::PrepareRequest prepare_request;
         prepare_request.set_instance_id(pax_message.GetInstanceId());
         prepare_request.set_proposal_id(pax_message.GetProposalId());
@@ -20,7 +20,7 @@ namespace paxosme {
         return true;
     }
 
-    bool GrpcClient::Propose(PaxMessage &pax_message, paxos::ProposeReply *) {
+    bool GrpcClient::Propose(const PaxMessage &pax_message) {
         paxos::ProposeRequest propose_request;
         propose_request.set_proposer_id(pax_message.GetProposer());
         propose_request.set_proposal_id(pax_message.GetProposalId());

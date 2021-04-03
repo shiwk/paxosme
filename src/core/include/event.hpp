@@ -20,7 +20,7 @@ namespace paxosme {
 
     struct Event {
 
-        Event(event_callback cb, const event_time &time, EventType type) : callback(std::move(cb)), when(time),
+            Event(event_callback cb, const event_time &time, EventType type) : callback(std::move(cb)), when(time),
                                                                            event_type(type) {}
 
         event_callback callback;

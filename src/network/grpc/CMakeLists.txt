@@ -15,6 +15,8 @@ set(proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.pb.h")
 set(grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.grpc.pb.cc")
 set(grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.grpc.pb.h")
 
+#INCLUDE(FindProtobuf)
+#FIND_PACKAGE(Protobuf REQUIRED)
 
 add_custom_command(
         OUTPUT "${proto_srcs}" "${proto_hdrs}" "${grpc_srcs}" "${grpc_hdrs}"

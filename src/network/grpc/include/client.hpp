@@ -5,7 +5,7 @@
 #ifndef PAXOSME_CLIENT_HPP
 #define PAXOSME_CLIENT_HPP
 
-#include <acceptor_pax.hpp>
+#include <messages_pax.hpp>
 #include "paxosme.grpc.pb.h"
 
 using grpc::Channel;
@@ -45,9 +45,9 @@ namespace paxosme {
         explicit GrpcClient(const std::shared_ptr<ChannelInterface> &channel)
                 : stub_(Paxosme::NewStub(channel)) {}
 
-        bool Prepare(PaxMessage &pax_message, paxos::PrepareReply*);
+        bool Prepare(const PaxMessage &pax_message);
 
-        bool Propose(PaxMessage &pax_message, paxos::ProposeReply*);
+        bool Propose(const PaxMessage &pax_message);
 
     private:
         std::unique_ptr<Paxosme::Stub> stub_;
@@ -63,7 +63,8 @@ namespace paxosme {
             // Because we are using the asynchronous API, we need to hold on to
             // the "call" instance in order to get updates on the ongoing RPC.
             ::grpc::CompletionQueue cq;
-            call->response_reader = async_request(call->context, cq);
+            call->response_reader = async_request(&call->context, &cq);
+//            call->response_reader = async_request();
             // StartCall initiates the RPC call
             call->response_reader->StartCall();
             // Request that, upon completion of the RPC, "reply" be updated with the
