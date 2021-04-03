@@ -5,7 +5,6 @@
 #ifndef PAXOSME_EVENT_HPP
 #define PAXOSME_EVENT_HPP
 
-#endif //PAXOSME_EVENT_HPP
 
 #include <chrono>
 
@@ -35,3 +34,5 @@ namespace paxosme {
         }
     };
 }
+
+#endif //PAXOSME_EVENT_HPP

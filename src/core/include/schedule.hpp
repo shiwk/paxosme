@@ -6,6 +6,7 @@
 #define PAXOSME_SCHEDULE_HPP
 
 #include <event.hpp>
+#include <queue>
 namespace paxosme{
     class Schedule{
     public:
@@ -16,7 +17,6 @@ namespace paxosme{
         void run();
     private:
         std::priority_queue<Event, std::vector<Event>, std::less<>> event_queue;
-
     };
 }
 

@@ -18,4 +18,3 @@ add_library(paxosmecore
         ${PROTO_SRC})
 
 target_include_directories(paxosmecore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )
-

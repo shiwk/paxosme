@@ -7,20 +7,25 @@
 
 #include <communicator.hpp>
 
-struct NetworkConfig{
-    std::string listening;
-};
+namespace paxosme {
+    struct NetworkConfig {
+        std::string listening;
+        std::vector<std::string> peers;
+    };
 
-class Network{
-public:
-    Network(Communicator *communicator): communicator_(communicator) {};
-    void start();
+    class Network {
+    public:
+        Network(Communicator *communicator) : communicator_(communicator) {};
 
-private:
-    Communicator* communicator_;
-};
+        void start();
 
-void Network::start() {
+    private:
+        Communicator *communicator_;
+    };
+
+    void Network::start() {
+
+    }
 
 }
 #endif //PAXOSME_NETWORK_HPP

@@ -12,19 +12,25 @@
 using paxos::Paxosme;
 using grpc::ServerBuilder;
 using grpc::Server;
+
 class NetworkConfig;
 
-class PaxosmeImpl final : public Paxosme::Service{
-public:
+namespace paxosme {
+    class PaxosmeImpl final : public Paxosme::Service {
+    public:
 
-    grpc::Status Prepare(grpc::ServerContext* context, const paxos::PrepareRequest* request, paxos::PrepareReply* response) override ;
+        grpc::Status Prepare(grpc::ServerContext *context, const paxos::PrepareRequest *request,
+                             paxos::PrepareReply *response) override;
 
-    grpc::Status Propose(grpc::ServerContext* context, const paxos::ProposeRequest* request, paxos::ProposeReply* response) override ;
-private:
+        grpc::Status Propose(grpc::ServerContext *context, const paxos::ProposeRequest *request,
+                             paxos::ProposeReply *response) override;
 
-};
+    private:
 
-class PaxosmeServer {
-    PaxosmeServer(NetworkConfig *network_config);
-};
+    };
+
+    class PaxosmeServer {
+        PaxosmeServer(NetworkConfig *network_config);
+    };
+}
 #endif //PAXOSME_SERVER_HPP

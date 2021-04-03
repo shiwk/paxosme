@@ -8,18 +8,22 @@
 #include <communicate_pax.hpp>
 #include <client.hpp>
 
-class NetworkConfig;
 
-class Communicator : public paxosme::PaxCommunicate {
-public:
-    explicit Communicator(NetworkConfig *network_config) : config_(network_config) {}
+namespace paxosme {
+    class NetworkConfig;
 
-    int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) override;
+    class Communicator : public PaxCommunicate {
+    public:
+        explicit Communicator(std::vector<node_id_t> &);
 
-    int Receive(const paxosme::PaxMessage &pax_message) override;
+        int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) override;
 
-private:
-    std::unordered_map<node_id_t, PaxosmeClient*> clientTable_;
-    NetworkConfig* config_;
-};
+        int Receive(const paxosme::PaxMessage &pax_message) override;
+
+    private:
+        std::string ParseNodeId(node_id_t);
+        std::shared_ptr<GrpcClient> NewClient(std::string &);
+        std::unordered_map<node_id_t, std::shared_ptr<GrpcClient>> clientTable_;
+    };
+}
 #endif //PAXOSME_COMUNICATOR_HPP
