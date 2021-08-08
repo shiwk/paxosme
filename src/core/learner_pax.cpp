@@ -17,8 +17,6 @@ namespace paxosme {
         PaxMessage message(node_id, MessageType::kLearnerNewRequest);
         message.SetInstanceId(instance_id);
         BroadCastMessage(message);
-//        event_callback callback = [this] { RequestLearning(); };
-//        AddTimer(EventType::kRequestLearning, callback, request_learning_delay_);
     }
 
     void PaxLearner::HandleLearningRequest(const NewValueRequest &new_value_request) {
