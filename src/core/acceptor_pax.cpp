@@ -122,6 +122,7 @@ void paxosme::PaxAcceptor::UpdatePromised(node_id_t proposer, proposal_id_t prop
     paxos_state.set_instance_id(GetInstanceId());
     paxos_state.set_promised_node_id(proposer);
     paxos_state.set_promised_proposal_id(proposal_id);
+    paxos_state.set_proposer_id(proposer);
 
     if (acceptor_state_->GetAcceptedProposal()) {
         paxos_state.set_accepted_node_id(proposer);

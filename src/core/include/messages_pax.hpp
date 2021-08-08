@@ -22,6 +22,7 @@ namespace paxosme {
         kPublishChosenValue,
         kLearnerNewRequest,
         kLearnerNewReply,
+        kSendValue,
         kChosen,
         kTellInstanceId
     };
@@ -35,9 +36,20 @@ namespace paxosme {
 
     private:
         LogValue accepted_value_;
+        LogValue learned_value_;
+    public:
+        const LogValue &GetLearnedValue() const {
+            return learned_value_;
+        }
+
+        void SetLearnedValue(const LogValue &learnedValue) {
+            learned_value_ = learnedValue;
+        }
+
+    private:
         proposal_id_t promised_id_;
         node_id_t promised_node_id_;
-        node_id_t self_id_;
+        node_id_t generator_id_;
         instance_id_t instance_id_;
         instance_id_t confirmed_instance_id_;
         proposal_id_t proposal_id_;
@@ -64,6 +76,7 @@ namespace paxosme {
         void SetRejected(bool rejected) {
             rejected_ = rejected;
         }
+
         void SetProposer(node_id_t proposer) {
             proposer_ = proposer;
         }
@@ -107,6 +120,7 @@ namespace paxosme {
         void SetMessageType(MessageType message_type) {
             message_type_ = message_type;
         }
+
         node_id_t GetFollowingNodeId() const {
             return following_node_id_;
         }
@@ -114,19 +128,20 @@ namespace paxosme {
         void SetFollowingNodeId(node_id_t following_node_id) {
             following_node_id_ = following_node_id;
         }
-        node_id_t GetSelfId() const {
-            return self_id_;
+
+        node_id_t GetGeneratorId() const {
+            return generator_id_;
         }
 
-        void SetSelfId(node_id_t self_id) {
-            self_id_ = self_id;
+        void SetGeneratorId(node_id_t self_id) {
+            generator_id_ = self_id;
         }
 
         void SetInstanceId(instance_id_t instance_id) {
             instance_id_ = instance_id;
         }
 
-        PaxMessage(node_id_t node_id, MessageType message_type): self_id_(node_id), message_type_(message_type) {}
+        PaxMessage(node_id_t node_id, MessageType message_type) : generator_id_(node_id), message_type_(message_type) {}
 
 
         instance_id_t GetInstanceId() const {
@@ -137,7 +152,7 @@ namespace paxosme {
             proposed_log_value_ = log_value.GetValue();
         }
 
-        const LogValue& GetProposedLogValue() const {
+        const LogValue &GetProposedLogValue() const {
             return proposed_log_value_;
         }
 

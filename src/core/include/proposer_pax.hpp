@@ -41,8 +41,10 @@ namespace paxosme {
         PaxMessage GenerateMessage(MessageType message_type);
 
         void Prepare();
+        void Prepare_Timeout_Callback(instance_id_t);
 
         void Propose();
+        void Propose_Timeout_Callback(instance_id_t);
 
         void HandleChosenValue(const PaxMessage &message);
 

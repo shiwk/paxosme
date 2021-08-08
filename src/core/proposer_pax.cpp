@@ -18,15 +18,29 @@ namespace paxosme {
 
     /**
      * prepare the new value wrapped in message.
-     * @param log_value
      */
     void PaxProposer::Prepare() {
         proposer_status_ = ProposerStatus::kPrepare;
         auto pax_message = GenerateMessage(MessageType::kPrepareBroadCast);
+        instance_id_t instanceId = pax_message.GetInstanceId();
         BroadCastMessage(pax_message);
-        event_callback callback = [this] { Prepare(); };
+        event_callback callback = [this, instanceId] { Prepare_Timeout_Callback(instanceId); };
         AddTimer(EventType::kPrepare, callback, prepare_delay_);
     }
+
+    /**
+     * Callback if prepare not accepted before timout
+     * @param instanceId
+     */
+    void PaxProposer::Prepare_Timeout_Callback(instance_id_t instanceId) {
+        if (instanceId != GetInstanceId()) {
+            return; // timeout id inconsistent with instance id
+        }
+
+        // prepare again
+        Prepare();
+    }
+
 
     /**
      * Process prepare reply from other acceptors
@@ -52,7 +66,7 @@ namespace paxosme {
         } else {
             // reject and record proposal id promised by the replier
             proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                        pax_reply_message.GetSelfId());
+                                                        pax_reply_message.GetGeneratorId());
             pax_decider_->AddRejection(proposer_state_->GetMyProposal(), GetNodeId());
         }
 
@@ -60,29 +74,42 @@ namespace paxosme {
             // got majority pre-accept
             Propose();
         } else if (pax_decider_->IsMajorityRejected() || !pax_decider_->IsStillPending()) {
+            // re-launch prepare
             event_callback callback = [this] { Prepare(); };
             AddTimer(EventType::kPrepare, callback, prepare_delay_);
         }
     }
 
 
-/**
- * Propose value once prepare finished
- */
+    /**
+     * Propose value once prepare finished.
+     */
     void PaxProposer::Propose() {
         proposer_status_ = ProposerStatus::kPropose;
-        // todo : check whether need update proposal_id
         PaxMessage pax_message = GenerateMessage(MessageType::kProposeBroadCast);
         pax_decider_->Reset(); // reset for propose stage counter before broadcast
         BroadCastMessage(pax_message);
-        event_callback callback = [this] { Prepare(); };
+        instance_id_t instanceId = pax_message.GetInstanceId();
+        event_callback callback = [this, instanceId] { Propose_Timeout_Callback(instanceId); };
         AddTimer(EventType::kPrepare, callback, prepare_delay_);
     }
 
-/**
- *
- * @param pax_reply_message
- */
+    /**
+     * Callback if propose not accepted before timeout.
+     */
+    void PaxProposer::Propose_Timeout_Callback(instance_id_t instanceId) {
+        if (instanceId != GetInstanceId()) {
+            return; // timeout id inconsistent with instance id
+        }
+
+        // prepare again
+        Prepare();
+    }
+
+    /**
+     *
+     * @param pax_reply_message
+     */
     void PaxProposer::HandleProposeResponse(const PaxMessage &pax_reply_message) {
 
         if (proposer_status_ != ProposerStatus::kPropose)
@@ -100,7 +127,7 @@ namespace paxosme {
         } else {
             // reject and record proposal id promised by the replier
             proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                        pax_reply_message.GetSelfId());
+                                                        pax_reply_message.GetGeneratorId());
             pax_decider_->AddRejection(proposer_state_->GetMyProposal(), GetNodeId());
         }
 

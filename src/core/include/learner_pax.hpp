@@ -12,14 +12,24 @@
 namespace paxosme {
     class PaxLearnerState {
         LogValue log_value_;
-        instance_id_t instance_id_;
+        instance_id_t learned_instance_id_;
+    public:
+        instance_id_t GetLearnedInstanceId() const {
+            return learned_instance_id_;
+        }
+
+        void SetLearnedInstanceId(instance_id_t learnedInstanceId) {
+            learned_instance_id_ = learnedInstanceId;
+        }
+
+    private:
         proposal_id_t proposal_id_;
         node_id_t proposer_;
     public:
         void LearnNew(const LogValue &log_value, instance_id_t instance_id, proposal_id_t proposal_id,
                       node_id_t proposer_node_id) {
             log_value_ = log_value;
-            instance_id_ = instance_id;
+            learned_instance_id_ = instance_id;
             proposal_id_ = proposal_id;
             proposer_ = proposer_node_id;
         }
@@ -76,6 +86,8 @@ namespace paxosme {
         void TellInstanceId(instance_id_t instance_id, node_id_t node_id); // tell others current instance_id
 
         void ReplyLearning(instance_id_t instance_id); // reply learn request
+
+        void SendLearnedValue(instance_id_t, node_id_t);
 
         PaxLearnerState *learner_state_;
         instance_id_t highest_known_instance_id_;

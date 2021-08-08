@@ -8,5 +8,6 @@ message PaxosState {
     uint64 accepted_proposal_id = 4;
     uint64 accepted_node_id = 5;
     bytes accepted_value = 6;
+    uint64 proposer_id = 7;
 };
 
