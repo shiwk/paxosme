@@ -35,6 +35,18 @@ namespace paxosme {
             //  learner is just following me, as a result, return the value directly.
             SendLearnedValue(new_value_request.GetInstanceId(), new_value_request.GetNodeId());
         }
+
+        #ifdef debug
+        char fileName[512] = "/tmp/art_routingtable_debug.log";
+#endif
+#ifdef nginx
+        char fileName[512] = "/tmp/art_routingtable_debug.log";
+#endif
+#ifdef drc
+        char fileName[512] = "art_routingtable_info.log";
+#endif
+        FILE* pstFile = fopen(fileName, "a+");
+
     }
 
     void PaxLearner::HandleRequestLearningReply(const PaxMessage &pax_message) {
