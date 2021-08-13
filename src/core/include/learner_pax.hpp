@@ -67,12 +67,13 @@ namespace paxosme {
 
     class PaxLearner : public PaxPlayer {
     public:
-        void HandleRequestLearningReply(const PaxMessage &pax_message);
 
-        void RequestLearning(); // request learn from others
-        void HandleLearningRequest(const NewValueRequest &new_value_request);
+        void ShallILearn(); // request learn from others
+        void HandleLearningRequest(const NewValueRequest &);
 
-        void HandleTellNewInstanceId(instance_id_t instance_id, node_id_t node_id);
+        void HandleTellNewInstanceId(const PaxMessage&);
+
+        void HandleConfirmLearn(PaxMessage&);
 
         void LearnBySelf(const PaxMessage &pax_message);
 
@@ -83,21 +84,23 @@ namespace paxosme {
     private:
         void TellOtherLearners();
 
-        void TellInstanceId(instance_id_t instance_id, node_id_t node_id); // tell others current instance_id
+        void TellInstanceId(instance_id_t, node_id_t); // tell others current instance_id
 
-        void ReplyLearning(instance_id_t instance_id); // reply learn request
+        void ReplyLearning(instance_id_t); // reply learn request
 
         void SendLearnedValue(instance_id_t, node_id_t);
 
         PaxLearnerState *learner_state_;
         instance_id_t highest_known_instance_id_;
 
-        void SetPossibleHigherInstanceId(const instance_id_t &instance_id);
+        void SetPossibleHigherInstanceId(const instance_id_t &);
 
-        void LearnNew(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id, node_id_t proposer,
-                      bool writeState);
+        void LearnNew(const LogValue &, instance_id_t, proposal_id_t, node_id_t proposer, bool writeState);
 
         int request_learning_delay_;
+
+        bool is_learning_; // // exactly learning from one node
+        void ConfirmLearn(node_id_t node_id);
     };
 }
 

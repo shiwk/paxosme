@@ -10,11 +10,11 @@ namespace paxosme {
         return learner_state_->GetLearnedValue();
     }
 
-    void PaxLearner::RequestLearning() {
+    void PaxLearner::ShallILearn() {
         node_id_t node_id = GetNodeId();
         instance_id_t instance_id = GetInstanceId();
 
-        PaxMessage message(node_id, MessageType::kLearnerNewRequest);
+        PaxMessage message(node_id, MessageType::kShallILearn);
         message.SetInstanceId(instance_id);
         BroadCastMessage(message);
     }
@@ -23,31 +23,19 @@ namespace paxosme {
         SetPossibleHigherInstanceId(new_value_request.GetInstanceId());
 
         // todo II: be careful race condition for learner state
-        if ((new_value_request.GetInstanceId() < learner_state_->GetLearnedInstanceId() ||
-             new_value_request.GetInstanceId() + 1 != GetInstanceId())) {
-            // case 1 : learner is much lower than me
-            // case 2 : learner is not following me
+        if (new_value_request.GetInstanceId() < learner_state_->GetLearnedInstanceId() // learner is much lower than me
+            || new_value_request.GetInstanceId() + 1 != GetInstanceId()// or learner is not catching me
+                )
+        {
+
             TellInstanceId(GetInstanceId(), new_value_request.GetNodeId());
             return;
         }
 
-        if (new_value_request.GetInstanceId() + 1 == GetInstanceId()){
-            //  learner is just following me, as a result, return the value directly.
+        if (new_value_request.GetInstanceId() + 1 == GetInstanceId()) {
+            //  learner is just following me, and in this case return the value directly.
             SendLearnedValue(new_value_request.GetInstanceId(), new_value_request.GetNodeId());
         }
-    }
-
-    void PaxLearner::HandleRequestLearningReply(const PaxMessage &pax_message) {
-        instance_id_t instance_id = pax_message.GetInstanceId();
-        if (instance_id != GetInstanceId())
-            return;
-
-        // todo I : confirm the
-        // todo I: check already learned or not
-        // persist needed since learned from other learners
-        LearnNew(pax_message.GetProposedLogValue(), pax_message.GetInstanceId(),
-                 pax_message.GetProposalId(),
-                 pax_message.GetProposer(), true);
     }
 
     void PaxLearner::SetPossibleHigherInstanceId(const instance_id_t &instance_id) {
@@ -56,16 +44,30 @@ namespace paxosme {
         highest_known_instance_id_ = instance_id;
     }
 
-    void PaxLearner::HandleTellNewInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
-        SetPossibleHigherInstanceId(instance_id);
-        // todo II : checkpoint update needed
+    void PaxLearner::HandleTellNewInstanceId(const PaxMessage& pax_message) {
+        SetPossibleHigherInstanceId(pax_message.GetLeaderInstanceId());
+
+        if (pax_message.GetInstanceId() != GetInstanceId()) {
+            // ignore message because out of date
+            return;
+        }
+
+        if (pax_message.GetLeaderInstanceId() < GetInstanceId()) {
+            // ignore because it does not lead on me
+            return;
+        }
+        // todo II : compare checkpoint and sync checkpoint if needed
+
+        if (!is_learning_)
+            ConfirmLearn(pax_message.GetSenderId());
     }
 
     void PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
         PaxMessage message(GetNodeId(), MessageType::kTellInstanceId);
-        message.SetInstanceId(GetInstanceId());
-        // todo I : set my new instance id to help learner to confirm.
-        // todo II : should send checkpoint if much lower than me.
+        message.SetInstanceId(instance_id);
+        message.SetLeaderInstanceId(GetInstanceId());
+
+        // todo II : should send my checkpoint if much lower than me.
         SendMessage(message, node_id);
     }
 
@@ -130,5 +132,15 @@ namespace paxosme {
         pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
         pax_message.SetProposer(paxosState.proposer_id());
         SendMessage(pax_message, toNodeId);
+    }
+
+    void PaxLearner::ConfirmLearn(node_id_t node_id) {
+        is_learning_ = true;
+        PaxMessage pax_message(node_id, MessageType::kSendValue);
+        pax_message.SetInstanceId(GetInstanceId());
+    }
+
+    void PaxLearner::HandleConfirmLearn(PaxMessage pax_message) {
+        // todo I : send data to my learner
     }
 }

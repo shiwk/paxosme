@@ -20,8 +20,8 @@ namespace paxosme {
         kPrepareReply,
         kProposeReply,
         kPublishChosenValue,
-        kLearnerNewRequest,
-        kLearnerNewReply,
+        kShallILearn,
+        kConfirmLearn,
         kSendValue,
         kChosen,
         kTellInstanceId
@@ -47,18 +47,38 @@ namespace paxosme {
         }
 
     private:
-        proposal_id_t promised_id_;
-        node_id_t promised_node_id_;
+        proposal_id_t promised_id_{};
+        node_id_t promised_node_id_{};
         node_id_t generator_id_;
-        instance_id_t instance_id_;
-        instance_id_t confirmed_instance_id_;
-        proposal_id_t proposal_id_;
-        node_id_t proposer_;
+        instance_id_t instance_id_{};
+        instance_id_t confirmed_instance_id_{};
+        proposal_id_t proposal_id_{};
+        node_id_t proposer_{};
         LogValue proposed_log_value_;
-        node_id_t following_node_id_;
+        node_id_t following_node_id_{};
         MessageType message_type_;
-        proposal_id_t accepted_id_;
-        bool rejected_;
+        proposal_id_t accepted_id_{};
+        instance_id_t leader_instance_id_{};
+        node_id_t sender_id_{};
+
+        bool rejected_{};
+
+    public:
+        node_id_t GetSenderId() const {
+            return sender_id_;
+        }
+
+        void SetSenderId(node_id_t sender_id) {
+            sender_id_ = sender_id;
+        }
+
+        instance_id_t GetLeaderInstanceId() const {
+            return leader_instance_id_;
+        }
+
+        void SetLeaderInstanceId(instance_id_t leaderInstanceId) {
+            leader_instance_id_ = leaderInstanceId;
+        }
 
     public:
         instance_id_t GetConfirmedInstanceId() const {

@@ -9,5 +9,6 @@ message PaxosState {
     uint64 accepted_node_id = 5;
     bytes accepted_value = 6;
     uint64 proposer_id = 7;
+    uint64 leader_instance_id = 8;
 };
 

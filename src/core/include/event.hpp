@@ -15,7 +15,7 @@ namespace paxosme {
 
     enum EventType {
         kPrepare,
-        kRequestLearning
+        kShallILearn
     };
 
     struct Event {
