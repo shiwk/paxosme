@@ -22,10 +22,10 @@ namespace paxosme {
     public:
         virtual void Reset() = 0; // reset status for new instance
         PaxosState ReadState(instance_id_t instance_id);
+        instance_id_t GetInstanceId() const;
 
     protected:
         PaxController *controller_;
-        instance_id_t GetInstanceId() const;
 
         node_id_t GetNodeId() const;
 

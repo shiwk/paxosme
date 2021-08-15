@@ -19,24 +19,6 @@ namespace paxosme {
         BroadCastMessage(message);
     }
 
-    void PaxLearner::HandleLearningRequest(const NewValueRequest &new_value_request) {
-        SetPossibleHigherInstanceId(new_value_request.GetInstanceId());
-
-        // todo II: be careful race condition for learner state
-        if (new_value_request.GetInstanceId() < learner_state_->GetLearnedInstanceId() // learner is much lower than me
-            || new_value_request.GetInstanceId() + 1 != GetInstanceId()// or learner is not catching me
-                )
-        {
-
-            TellInstanceId(GetInstanceId(), new_value_request.GetNodeId());
-            return;
-        }
-
-        if (new_value_request.GetInstanceId() + 1 == GetInstanceId()) {
-            //  learner is just following me, and in this case return the value directly.
-            SendLearnedValue(new_value_request.GetInstanceId(), new_value_request.GetNodeId());
-        }
-    }
 
     void PaxLearner::SetPossibleHigherInstanceId(const instance_id_t &instance_id) {
         if (instance_id <= highest_known_instance_id_)
@@ -44,7 +26,7 @@ namespace paxosme {
         highest_known_instance_id_ = instance_id;
     }
 
-    void PaxLearner::HandleTellNewInstanceId(const PaxMessage& pax_message) {
+    void PaxLearner::HandleTellNewInstanceId(const PaxMessage &pax_message) {
         SetPossibleHigherInstanceId(pax_message.GetLeaderInstanceId());
 
         if (pax_message.GetInstanceId() != GetInstanceId()) {
@@ -58,17 +40,16 @@ namespace paxosme {
         }
         // todo II : compare checkpoint and sync checkpoint if needed
 
+        std::unique_lock<std::mutex> lck(mutex_follow_);
         if (!is_learning_)
             ConfirmLearn(pax_message.GetSenderId());
     }
 
-    void PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
-        PaxMessage message(GetNodeId(), MessageType::kTellInstanceId);
-        message.SetInstanceId(instance_id);
-        message.SetLeaderInstanceId(GetInstanceId());
-
-        // todo II : should send my checkpoint if much lower than me.
-        SendMessage(message, node_id);
+    void PaxLearner::ConfirmLearn(node_id_t node_id) {
+        std::unique_lock<std::mutex> lck(mutex_follow_);
+        is_learning_ = true;
+        PaxMessage pax_message(node_id, MessageType::kSendValue);
+        pax_message.SetInstanceId(GetInstanceId());
     }
 
     void PaxLearner::TellOtherLearners() {
@@ -122,25 +103,7 @@ namespace paxosme {
         }
     }
 
-
-    void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId) {
-        PaxosState paxosState = ReadState(instanceId);
-
-        PaxMessage pax_message(toNodeId, MessageType::kSendValue);
-        pax_message.SetInstanceId(instanceId);
-        pax_message.SetLearnedValue(LogValue(paxosState.accepted_value()));
-        pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
-        pax_message.SetProposer(paxosState.proposer_id());
-        SendMessage(pax_message, toNodeId);
-    }
-
-    void PaxLearner::ConfirmLearn(node_id_t node_id) {
-        is_learning_ = true;
-        PaxMessage pax_message(node_id, MessageType::kSendValue);
-        pax_message.SetInstanceId(GetInstanceId());
-    }
-
-    void PaxLearner::HandleConfirmLearn(PaxMessage pax_message) {
-        // todo I : send data to my learner
+    void PaxLearner::Init() {
+        learner_send_loop_ = std::async(std::launch::async, &PaxLearner::SendingLoop, this);
     }
 }

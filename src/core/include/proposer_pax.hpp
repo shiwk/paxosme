@@ -37,6 +37,8 @@ namespace paxosme {
 
         PaxProposer(const PaxConfig &pax_config);
 
+        void Init();
+
     private:
         PaxMessage GenerateMessage(MessageType message_type);
 

@@ -161,7 +161,7 @@ namespace paxosme {
 
         node_id_t GetAcceptedNodeId();
 
-        instance_id_t init();
+        instance_id_t Init();
     };
 
 

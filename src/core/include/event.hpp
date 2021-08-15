@@ -14,8 +14,7 @@ using event_time = std::chrono::time_point<std::chrono::system_clock>;
 namespace paxosme {
 
     enum EventType {
-        kPrepare,
-        kShallILearn
+        kPrepare
     };
 
     struct Event {

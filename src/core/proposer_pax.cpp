@@ -159,4 +159,8 @@ namespace paxosme {
         message.SetProposedLogValue(proposer_state_->GetLogValue());
         return message;
     }
+
+    void PaxProposer::Init() {
+
+    }
 }

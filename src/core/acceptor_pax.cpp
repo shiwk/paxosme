@@ -147,7 +147,7 @@ node_id_t paxosme::PaxAcceptor::GetAcceptedNodeId() {
     return acceptor_state_->GetAcceptedNodeId();
 }
 
-instance_id_t paxosme::PaxAcceptor::init() {
+instance_id_t paxosme::PaxAcceptor::Init() {
     PaxosState paxos_state = ReadState(-1);
     acceptor_state_->init(paxos_state);
     return paxos_state.instance_id();

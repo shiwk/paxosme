@@ -28,7 +28,7 @@ namespace paxosme{
 
     void PaxController::Init(PaxConfig* pax_config) {
         pax_config_ = pax_config;
-        instance_id_t instanceInState = acceptor_->init();
+        instance_id_t instanceInState = acceptor_->Init();
         instance_id_t instanceInSM = state_machine_->GetInstanceId();
 
         if (instanceInState > instanceInSM + 1) {
@@ -44,6 +44,8 @@ namespace paxosme{
         }
 
         prov_loop_ = std::async(std::launch::async, thread_func, this);
+        proposer_->Init();
+        learner_->Init();
     }
 
     void PaxController::FlushProv() {
