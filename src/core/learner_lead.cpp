@@ -3,6 +3,9 @@
 //
 #include <learner_pax.hpp>
 
+#define LEAD_FOLLOW_DIS 10
+#define SENDING_INTERNAL 5000
+
 namespace paxosme {
     [[noreturn]] void PaxLearner::SendingLoop() {
         while (true) {
@@ -26,10 +29,10 @@ namespace paxosme {
         SetPossibleHigherInstanceId(pax_message.GetInstanceId());
 
         // todo II: be careful race condition for learner state
-        if ( // todo I : learner is lower than my checkpoint, so it is much lower than me
-        // ||
-        pax_message.GetInstanceId() + 1 != GetInstanceId()// or learner is not catching me
-        ) {
+        if ( // todo II : learner is lower than my checkpoint, so it is much lower than me
+            // ||
+                pax_message.GetInstanceId() + 1 != GetInstanceId()// or learner is not catching me
+                ) {
 
             TellInstanceId(GetInstanceId(), pax_message.GetSenderId());
             return;
@@ -53,6 +56,7 @@ namespace paxosme {
         pax_message.SetLearnedValue(LogValue(paxosState.accepted_value()));
         pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
         pax_message.SetProposer(paxosState.proposer_id());
+
         SendMessage(pax_message, toNodeId);
     }
 
@@ -74,10 +78,11 @@ namespace paxosme {
             SendLearnedValue(to_send, receiver);
             instance_id_t last_send = to_send;
             to_send++;
-            while (last_send - ack_send_ < 10) {
+            while (last_send - ack_send_ < LEAD_FOLLOW_DIS) {
                 uint64_t timeNow = Time::NowSinceEpochInMS();
-                if (timeNow - timeBegin > 5000)
+                if (timeNow - timeBegin > SENDING_INTERNAL)
                     return; // sync too slow
+
                 cond_v_.wait_for(lck, Time::MS(10));
             }
 
@@ -98,10 +103,44 @@ namespace paxosme {
 
     void PaxLearner::MakeReady(node_id_t receiver) {
         std::unique_lock<std::mutex> lck(mutex_send_);
+
         if (job_status_ == LearnerSendingJobStatus::kReady || is_sending_)
             return;
 
         job_status_ = LearnerSendingJobStatus::kReady;
         receiver_ = receiver;
+    }
+
+
+    void PaxLearner::LearnFromSelf(const PaxMessage &pax_message) {
+        if (pax_message.GetInstanceId() != GetInstanceId())
+            return; // instance id not matched
+        if (pax_message.GetProposer() != GetNodeId())
+            return; // proposer not matched
+
+        auto proposal = GetAcceptedProposal();
+        if (proposal.proposal_id == 0 || pax_message.GetProposalId() != proposal.proposal_id)
+            return; // proposalId == 0 means not accepted yet
+
+        node_id_t node_id = proposal.node_id;
+        if (node_id != GetNodeId())
+            return;
+
+        const LogValue &log_value = GetAcceptedValue();
+
+        // no need to persist since acceptor should have done
+        LearnNew(log_value, pax_message.GetInstanceId(), proposal.proposal_id, node_id);
+
+        TellFollowers(proposal.proposal_id, node_id, log_value); // tell others
+    }
+
+    void PaxLearner::TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue& log_value) {
+        PaxMessage message(GetNodeId(), MessageType::kBroadCastChosen);
+        message.SetInstanceId(GetInstanceId());
+        message.SetProposalId(proposal_id);
+        message.SetProposer(node_id);
+        message.SetChosenValue(log_value);
+
+        BroadCastMessage(message);
     }
 }

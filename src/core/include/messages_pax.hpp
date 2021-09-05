@@ -19,11 +19,11 @@ namespace paxosme {
         kProposeBroadCast,
         kPrepareReply,
         kProposeReply,
-        kPublishChosenValue,
+        kSenderPublishChosenValue,
         kShallILearn,
         kConfirmLearn,
         kSendValue,
-        kChosen,
+        kBroadCastChosen,
         kTellInstanceId
     };
 
@@ -35,9 +35,19 @@ namespace paxosme {
     class PaxMessage {
 
     private:
+        LogValue proposed_log_value_;
         LogValue accepted_value_;
         LogValue learned_value_;
+        LogValue chosen_value_;
     public:
+        const LogValue &GetChosenValue() const {
+            return chosen_value_;
+        }
+
+        void SetChosenValue(const LogValue &chosen_value) {
+            chosen_value_ = chosen_value;
+        }
+
         const LogValue &GetLearnedValue() const {
             return learned_value_;
         }
@@ -54,7 +64,6 @@ namespace paxosme {
         instance_id_t confirmed_instance_id_{};
         proposal_id_t proposal_id_{};
         node_id_t proposer_{};
-        LogValue proposed_log_value_;
         node_id_t following_node_id_{};
         MessageType message_type_;
         proposal_id_t accepted_id_{};

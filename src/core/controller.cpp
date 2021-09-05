@@ -4,11 +4,12 @@
 
 #include <controller.hpp>
 
-static void* thread_func(paxosme::PaxController *p){
-    p->FlushProv();
-}
+namespace paxosme {
+    static void *thread_func(paxosme::PaxController *p) {
+        p->FlushProv();
+        return nullptr;
+    }
 
-namespace paxosme{
     instance_id_t PaxController::GetInstanceId() const {
         return instance_id_;
     }
@@ -25,8 +26,13 @@ namespace paxosme{
         return acceptor_->GetAcceptedNodeId();
     }
 
+    ProposalTriplet PaxController::GetAcceptedProposal() {
+        proposal_id_t proposalId = acceptor_->GetAcceptedProposalId();
+        node_id_t nodeId = acceptor_->GetAcceptedNodeId();
+        return {GetInstanceId(), proposalId, nodeId};
+    }
 
-    void PaxController::Init(PaxConfig* pax_config) {
+    void PaxController::Init(PaxConfig *pax_config) {
         pax_config_ = pax_config;
         instance_id_t instanceInState = acceptor_->Init();
         instance_id_t instanceInSM = state_machine_->GetInstanceId();
@@ -37,8 +43,7 @@ namespace paxosme{
             instance_id_ = instanceInState;
         }
 
-        if (instanceInState < instanceInSM)
-        {
+        if (instanceInState < instanceInSM) {
             // todo III : if instance_id < instance id in checkpoint, it means some special cases (like restart/crash, even worse) happened
             instance_id_ = instanceInSM + 1;
         }
@@ -62,6 +67,33 @@ namespace paxosme{
         for (int i = instanceInSM; i < target_instance_id; ++i) {
             PaxosState paxos_state = acceptor_->ReadState(i);
             state_machine_->Execute(i, paxos_state.accepted_value());
+        }
+    }
+
+    void PaxController::HandleMessage(const PaxMessage &message) {
+        switch (message.GetMessageType()) {
+            case MessageType::kSenderPublishChosenValue: {
+                if (!acceptor_->HandleSenderPublish(message)) {
+                    // acceptor failed
+                    return;
+                }
+
+                if (!learner_->HandleSenderPublish(message)) {
+                    // learner failed
+                    return;
+                }
+            }
+
+            case MessageType::kBroadCastChosen : {
+                learner_->HandleLeaderPublish(message);
+            }
+
+            // todo I: more cases
+        }
+
+
+        if (learner_->Learned()) {
+            // todo I: new instance
         }
     }
 }

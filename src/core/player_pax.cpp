@@ -27,7 +27,7 @@ namespace paxosme {
     }
 
     void PaxPlayer::ProcessChosenValue(const PaxMessage &message) {
-        controller_->HandleReceivedMessage(message);
+        controller_->HandleMessage(message);
     }
 
     void PaxPlayer::WriteState(const PaxosState &paxos_state) {
@@ -45,6 +45,14 @@ namespace paxosme {
         event_time t = std::chrono::system_clock::now();
         t.operator+=(delay);
         schedule_->add(callback, t, event_type);
+    }
+
+    ProposalTriplet PaxPlayer::GetAcceptedProposal() {
+        return controller_->GetAcceptedProposal();
+    }
+
+    const LogValue &PaxPlayer::GetAcceptedValue() {
+        return controller_->GetAcceptedValue();
     }
 }
 

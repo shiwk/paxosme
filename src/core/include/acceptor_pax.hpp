@@ -34,15 +34,15 @@ namespace paxosme {
 
         void SetAcceptedProposal(proposal_id_t proposal_id, node_id_t proposer_id) {
             accepted_proposal_id_ = proposer_id;
-            accepted_node_id_ = proposer_id;
+            accepted_proposer_ = proposer_id;
         }
 
-        proposal_id_t GetAcceptedProposal() const {
+        proposal_id_t GetAcceptedProposalId() const {
             return accepted_proposal_id_;
         }
 
         node_id_t GetAcceptedNodeId() const {
-            return accepted_node_id_;
+            return accepted_proposer_;
         }
 
         void SetAcceptedValue(const LogValue &accepted_value) {
@@ -53,12 +53,14 @@ namespace paxosme {
             return accepted_value_;
         }
 
+
+
     private:
         proposal_id_t promised_id_;
         node_id_t promised_node_id_;
         instance_id_t instance_id_;
         proposal_id_t accepted_proposal_id_;
-        node_id_t accepted_node_id_;
+        node_id_t accepted_proposer_;
         LogValue accepted_value_;
     };
 
@@ -157,11 +159,15 @@ namespace paxosme {
 
         const LogValue &GetAcceptedValue();
 
-        proposal_id_t GetAcceptedProposal();
+        proposal_id_t GetAcceptedProposalId();
 
         node_id_t GetAcceptedNodeId();
 
         instance_id_t Init();
+
+        bool HandleSenderPublish(const PaxMessage &message);
+
+        bool IsProposalAccepted(proposal_id_t proposal_id, node_id_t node_id);
     };
 
 

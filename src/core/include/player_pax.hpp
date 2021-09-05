@@ -13,6 +13,7 @@
 #include "storage_pax.hpp"
 #include "communicate_pax.hpp"
 #include "schedule.hpp"
+#include <base.hpp>
 
 namespace paxosme {
 
@@ -22,6 +23,7 @@ namespace paxosme {
     public:
         virtual void Reset() = 0; // reset status for new instance
         PaxosState ReadState(instance_id_t instance_id);
+
         instance_id_t GetInstanceId() const;
 
     protected:
@@ -41,7 +43,12 @@ namespace paxosme {
 
         void WriteState(const paxosme::PaxosState &paxos_state);
 
-        void AddTimer(EventType event_type, const event_callback& callback, int delayInMilli);
+        void AddTimer(EventType event_type, const event_callback &callback, int delayInMilli);
+
+        ProposalTriplet GetAcceptedProposal();
+
+        const LogValue &GetAcceptedValue();
+
     private:
         node_id_t node_id_;
         PaxCommunicate *communicate_;

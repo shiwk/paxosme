@@ -17,9 +17,7 @@
 namespace paxosme {
     class PaxController {
     public:
-        void HandleReceivedMessage(const PaxMessage &message);
-
-        void Propose(const PaxMessage &pax_message);
+        void HandleMessage(const PaxMessage &message);
 
         void Init(PaxConfig*); // start loop
 
@@ -29,7 +27,7 @@ namespace paxosme {
 
         const LogValue &GetAcceptedValue();
 
-        proposal_id_t GetAcceptedProposal();
+        ProposalTriplet GetAcceptedProposal();
 
         node_id_t GetAcceptedNodeId();
         void FlushProv();

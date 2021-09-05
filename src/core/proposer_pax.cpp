@@ -133,7 +133,7 @@ namespace paxosme {
 
         if (pax_decider_->IsMajorityAccepted()) {
             proposer_status_ = ProposerStatus::kMajorityAccepted;
-            PaxMessage msg(GetNodeId(), MessageType::kPublishChosenValue);
+            PaxMessage msg(GetNodeId(), MessageType::kSenderPublishChosenValue);
             // no log_value in msg
             msg.SetInstanceId(pax_reply_message.GetInstanceId());
             msg.SetProposalId(pax_reply_message.GetProposalId());

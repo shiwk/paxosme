@@ -46,27 +46,31 @@ namespace paxosme {
 
     class PaxLearner : public PaxPlayer {
     public:
+        // follow
         void ShallILearn(); // request learn from others
-        void HandleShallILearn(const PaxMessage &);
 
         void HandleTellNewInstanceId(const PaxMessage&);
 
         void HandleConfirmLearn(const PaxMessage&);
-
-        void LearnBySelf(const PaxMessage &pax_message);
 
         const LogValue &GetLearnedValue();
 
         bool AnymoreToLearn();
 
         void Init();
+        bool HandleSenderPublish(const PaxMessage &);
+        void HandleLeaderPublish(const PaxMessage&);
+        bool Learned();
 
-        void SendLearnedValue(instance_id_t, node_id_t);
+    public:
+        // lead
+        void HandleShallILearn(const PaxMessage &);
 
+    private:
+        void LearnFromSelf(const PaxMessage &);
 
-    private: // follow
-        void TellOtherLearners();
-
+    private:
+        // follow
         void TellInstanceId(instance_id_t, node_id_t); // tell others current instance_id
 
         PaxLearnerState *learner_state_;
@@ -74,11 +78,12 @@ namespace paxosme {
 
         void SetPossibleHigherInstanceId(const instance_id_t &);
 
-        void LearnNew(const LogValue &, instance_id_t, proposal_id_t, node_id_t proposer, bool writeState);
+        void LearnNew(const LogValue &, instance_id_t, proposal_id_t, node_id_t proposer, bool writeState = false);
 
         bool is_learning_; // // exactly learning from one node
         std::mutex mutex_follow_;
         void ConfirmLearn(node_id_t node_id);
+        void LearnFromOthers(const PaxMessage &);
 
     private: // lead
         enum LearnerSendingJobStatus{
@@ -101,6 +106,8 @@ namespace paxosme {
         void ClearSendingState();
         void SendLearnedValues(instance_id_t begin_instance_id, node_id_t receiver);
         void MakeReady(node_id_t receiver);
+        void SendLearnedValue(instance_id_t, node_id_t);
+        void TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue& value);
     };
 }
 
