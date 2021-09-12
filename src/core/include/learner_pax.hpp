@@ -59,12 +59,13 @@ namespace paxosme {
 
         void Init();
         bool HandleSenderPublish(const PaxMessage &);
-        void HandleLeaderPublish(const PaxMessage&);
+        void HandleOthersPublish(const PaxMessage &pax_message);
         bool Learned();
 
     public:
         // lead
         void HandleShallILearn(const PaxMessage &);
+        void HandleAck(const PaxMessage &);
 
     private:
         void LearnFromSelf(const PaxMessage &);
@@ -89,7 +90,7 @@ namespace paxosme {
         enum LearnerSendingJobStatus{
             kStale,
             kPrepared,
-            kReady
+            kSending
         };
 
         LearnerSendingJobStatus job_status_;
@@ -105,9 +106,12 @@ namespace paxosme {
         void WaitForReady();
         void ClearSendingState();
         void SendLearnedValues(instance_id_t begin_instance_id, node_id_t receiver);
-        void MakeReady(node_id_t receiver);
-        void SendLearnedValue(instance_id_t, node_id_t);
+        void MakeReady(node_id_t receiver, instance_id_t i);
+        void SendLearnedValue(instance_id_t, node_id_t, bool syn = false);
         void TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue& value);
+        void Ack(node_id_t id);
+
+        void HandleValueAck(const PaxMessage &message);
     };
 }
 

@@ -19,7 +19,6 @@ namespace paxosme {
 
         PaxAcceptorReplyMessage pax_reply_message{};
         pax_reply_message.SetProposerId(message.GetProposer());
-        pax_reply_message.SetReplierId(GetNodeId());
 
         proposal_id_t proposal_id = message.GetProposalId();
         proposal_id_t proposer = message.GetProposer();
@@ -62,7 +61,6 @@ namespace paxosme {
     void PaxAcceptor::HandleProposeRequest(const PaxMessage &message) {
         PaxAcceptorReplyMessage pax_reply_message{};
         pax_reply_message.SetProposerId(message.GetProposer());
-        pax_reply_message.SetReplierId(GetNodeId());
 
         proposal_id_t proposal_id = message.GetProposalId();
         proposal_id_t proposer = message.GetProposer();
@@ -93,7 +91,7 @@ namespace paxosme {
     }
 
     void PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &reply, MessageType request_type) {
-        PaxMessage pax_message(reply.GetReplierId(), request_type);
+        PaxMessage pax_message(GetNodeId(), request_type);
         pax_message.SetInstanceId(reply.GetInstanceId());
         pax_message.SetPromisedNodeId(reply.GetPromisedNodeId());
         pax_message.SetPromisedId(reply.GetPromisedId());

@@ -65,7 +65,6 @@ namespace paxosme {
     };
 
     class PaxAcceptorReplyMessage {
-        node_id_t replier_id_;
         proposal_id_t accepted_id_;
         LogValue accepted_value_;
         proposal_id_t promised_id_;
@@ -97,10 +96,6 @@ namespace paxosme {
             return proposer_id_;
         }
 
-        node_id_t GetReplierId() const {
-            return replier_id_;
-        }
-
         proposal_id_t GetAcceptedId() const {
             return accepted_id_;
         }
@@ -119,10 +114,6 @@ namespace paxosme {
 
         void SetProposerId(node_id_t proposer_id) {
             proposer_id_ = proposer_id;
-        }
-
-        void SetReplierId(node_id_t replier_id) {
-            replier_id_ = replier_id;
         }
 
         void SetAcceptedId(proposal_id_t accepted_id) {

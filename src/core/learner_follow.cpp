@@ -41,22 +41,18 @@ namespace paxosme {
 
         std::unique_lock<std::mutex> lck(mutex_follow_);
         if (!is_learning_)
-            ConfirmLearn(pax_message.GetSenderId());
+            ConfirmLearn(pax_message.GetSender());
     }
 
     void PaxLearner::ConfirmLearn(node_id_t node_id) {
         std::unique_lock<std::mutex> lck(mutex_follow_);
         is_learning_ = true;
-        PaxMessage pax_message(node_id, MessageType::kSendValue);
+        PaxMessage pax_message(node_id, MessageType::kConfirmLearn);
         pax_message.SetInstanceId(GetInstanceId());
     }
 
     bool PaxLearner::AnymoreToLearn() {
         return GetInstanceId() + 1 < highest_known_instance_id_;
-    }
-
-    void PaxLearner::Init() {
-        learner_send_loop_ = std::async(std::launch::async, &PaxLearner::SendingLoop, this);
     }
 
     void PaxLearner::LearnFromOthers(const PaxMessage &pax_message) {
@@ -65,5 +61,14 @@ namespace paxosme {
 
         LearnNew(pax_message.GetChosenValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
                  pax_message.GetProposer(), true);
+
+        if (pax_message.GetMessageType() == MessageType::kValue_SYN)
+            Ack(pax_message.GetSender());
+    }
+
+    void PaxLearner::Ack(node_id_t node_id) {
+        PaxMessage pax_message(GetNodeId(), MessageType::kValue_ACK);
+        pax_message.SetInstanceId(GetInstanceId());
+        SendMessage(pax_message, node_id);
     }
 }

@@ -15,14 +15,22 @@ namespace paxosme {
 
     enum MessageType {
         kNone,
+        // for acceptor
         kPrepareBroadCast,
         kProposeBroadCast,
+
+        // for proposer
         kPrepareReply,
         kProposeReply,
+
+        // for learner
         kSenderPublishChosenValue,
         kShallILearn,
         kConfirmLearn,
         kSendValue,
+        kValue_SYN,
+        kValue_ACK,
+
         kBroadCastChosen,
         kTellInstanceId
     };
@@ -59,7 +67,6 @@ namespace paxosme {
     private:
         proposal_id_t promised_id_{};
         node_id_t promised_node_id_{};
-        node_id_t generator_id_;
         instance_id_t instance_id_{};
         instance_id_t confirmed_instance_id_{};
         proposal_id_t proposal_id_{};
@@ -73,11 +80,11 @@ namespace paxosme {
         bool rejected_{};
 
     public:
-        node_id_t GetSenderId() const {
+        node_id_t GetSender() const {
             return sender_id_;
         }
 
-        void SetSenderId(node_id_t sender_id) {
+        void SetSender(node_id_t sender_id) {
             sender_id_ = sender_id;
         }
 
@@ -90,14 +97,6 @@ namespace paxosme {
         }
 
     public:
-        instance_id_t GetConfirmedInstanceId() const {
-            return confirmed_instance_id_;
-        }
-
-        void SetConfirmedInstanceId(instance_id_t confirmed_instance_id) {
-            confirmed_instance_id_ = confirmed_instance_id;
-        }
-
         bool IsRejected() const {
             return rejected_;
         }
@@ -158,19 +157,11 @@ namespace paxosme {
             following_node_id_ = following_node_id;
         }
 
-        node_id_t GetGeneratorId() const {
-            return generator_id_;
-        }
-
-        void SetGeneratorId(node_id_t self_id) {
-            generator_id_ = self_id;
-        }
-
         void SetInstanceId(instance_id_t instance_id) {
             instance_id_ = instance_id;
         }
 
-        PaxMessage(node_id_t node_id, MessageType message_type) : generator_id_(node_id), message_type_(message_type) {}
+        PaxMessage(node_id_t sender_id, MessageType message_type) : sender_id_(sender_id), message_type_(message_type) {}
 
 
         instance_id_t GetInstanceId() const {

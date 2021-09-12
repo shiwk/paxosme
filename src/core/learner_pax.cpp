@@ -4,6 +4,11 @@
 #include <learner_pax.hpp>
 
 namespace paxosme {
+    void PaxLearner::Init() {
+        learner_send_loop_ = std::async(std::launch::async, &PaxLearner::SendingLoop, this);
+        // todo I : add event schedule for AskForLearn
+    }
+
     bool PaxLearner::Learned() {
         return false;
     }
@@ -13,22 +18,7 @@ namespace paxosme {
         return true;
     }
 
-    void PaxLearner::HandleLeaderPublish(const PaxMessage& pax_message) {
+    void PaxLearner::HandleOthersPublish(const PaxMessage& pax_message) {
         LearnFromOthers(pax_message);
-    }
-
-    void PaxLearner::LearnNew(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id,
-                              node_id_t proposer, bool writeState) {
-        learner_state_->LearnNew(value, instance_id, proposal_id, proposer);
-        if (writeState) {
-            PaxosState paxos_state;
-            paxos_state.set_promised_proposal_id(proposal_id);
-            paxos_state.set_promised_node_id(proposer);
-            paxos_state.set_instance_id(instance_id);
-            paxos_state.set_accepted_proposal_id(proposal_id);
-            paxos_state.set_accepted_node_id(proposer);
-            paxos_state.set_accepted_value(value.GetValue());
-            WriteState(paxos_state);
-        }
     }
 }

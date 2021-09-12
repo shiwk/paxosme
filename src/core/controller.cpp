@@ -72,23 +72,57 @@ namespace paxosme {
 
     void PaxController::HandleMessage(const PaxMessage &message) {
         switch (message.GetMessageType()) {
-            case MessageType::kSenderPublishChosenValue: {
+            // for proposer
+            case kPrepareReply: {
+                proposer_->HandlePrepareReply(message);
+                break;
+            }
+            case kProposeReply:
+                proposer_->HandleProposeReply(message);
+                break;
+
+                // for acceptor
+            case kPrepareBroadCast:
+                acceptor_->HandlePrepareRequest(message);
+                break;
+
+            case kProposeBroadCast:
+                acceptor_->HandleProposeRequest(message);
+                break;
+
+                //for learner
+            case kSenderPublishChosenValue: {
                 if (!acceptor_->HandleSenderPublish(message)) {
                     // acceptor failed
-                    return;
+                    break;
                 }
 
                 if (!learner_->HandleSenderPublish(message)) {
                     // learner failed
-                    return;
+                    break;
                 }
             }
-
-            case MessageType::kBroadCastChosen : {
-                learner_->HandleLeaderPublish(message);
-            }
-
-            // todo I: more cases
+            case kBroadCastChosen :
+                learner_->HandleOthersPublish(message);
+                break;
+            case kShallILearn:
+                learner_->HandleShallILearn(message);
+                break;
+            case kConfirmLearn:
+                learner_->HandleConfirmLearn(message);
+                break;
+            case kSendValue:
+            case kValue_SYN:
+                learner_->HandleOthersPublish(message);
+                break;
+            case kValue_ACK:
+                learner_->HandleAck(message);
+                break;
+            case kTellInstanceId:
+                learner_->HandleTellNewInstanceId(message);
+                break;
+            default:
+                break;
         }
 
 

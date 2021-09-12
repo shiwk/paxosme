@@ -46,7 +46,7 @@ namespace paxosme {
      * Process prepare reply from other acceptors
      * @param pax_reply_message
      */
-    void PaxProposer::HandlePrepareResponse(const PaxMessage &pax_reply_message) {
+    void PaxProposer::HandlePrepareReply(const PaxMessage &pax_reply_message) {
 
         if (proposer_status_ != ProposerStatus::kPrepare)
             return; // incompatible proposer status
@@ -66,7 +66,7 @@ namespace paxosme {
         } else {
             // reject and record proposal id promised by the replier
             proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                        pax_reply_message.GetGeneratorId());
+                                                        pax_reply_message.GetPromisedNodeId());
             pax_decider_->AddRejection(proposer_state_->GetMyProposal(), GetNodeId());
         }
 
@@ -110,7 +110,7 @@ namespace paxosme {
      *
      * @param pax_reply_message
      */
-    void PaxProposer::HandleProposeResponse(const PaxMessage &pax_reply_message) {
+    void PaxProposer::HandleProposeReply(const PaxMessage &pax_reply_message) {
 
         if (proposer_status_ != ProposerStatus::kPropose)
             return; // incompatible proposer status
@@ -127,7 +127,7 @@ namespace paxosme {
         } else {
             // reject and record proposal id promised by the replier
             proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                        pax_reply_message.GetGeneratorId());
+                                                        pax_reply_message.GetPromisedNodeId());
             pax_decider_->AddRejection(proposer_state_->GetMyProposal(), GetNodeId());
         }
 

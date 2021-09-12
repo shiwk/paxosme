@@ -31,9 +31,9 @@ namespace paxosme {
     public:
         void ProposeNew(LogValue &log_value);
 
-        void HandlePrepareResponse(const PaxMessage &pax_reply_message);
+        void HandlePrepareReply(const PaxMessage &pax_reply_message);
 
-        void HandleProposeResponse(const PaxMessage &pax_reply_message);
+        void HandleProposeReply(const PaxMessage &pax_reply_message);
 
         PaxProposer(const PaxConfig &pax_config);
 
