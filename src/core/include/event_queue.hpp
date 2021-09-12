@@ -14,12 +14,13 @@ using event_time = std::chrono::time_point<std::chrono::system_clock>;
 namespace paxosme {
 
     enum EventType {
-        kPrepare
+        kPrepare = 1
     };
 
+    using EventId = uint64_t;
     struct Event {
 
-            Event(event_callback cb, const event_time &time, EventType type) : callback(std::move(cb)), when(time),
+        Event(event_callback cb, const event_time &time, EventType type) : callback(std::move(cb)), when(time),
                                                                            event_type(type) {}
 
         event_callback callback;
