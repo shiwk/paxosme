@@ -40,7 +40,7 @@ namespace paxosme {
         return paxos_state;
     }
 
-    void PaxPlayer::AddTimer(EventType event_type, const event_callback &callback, int delayInMilli) {
+    void PaxPlayer::Publish(EventType event_type, const event_callback &callback, int delayInMilli) {
         const std::chrono::duration<int> delay(delayInMilli);
         event_time t = std::chrono::system_clock::now();
         t.operator+=(delay);

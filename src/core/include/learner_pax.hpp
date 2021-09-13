@@ -13,6 +13,8 @@
 #include <Time.hpp>
 #include <future>
 
+#define SHALLILEARN_TIMEOUT_CONST 3000
+
 namespace paxosme {
     class PaxLearnerState {
         LogValue log_value_;
@@ -65,7 +67,7 @@ namespace paxosme {
     public:
         // lead
         void HandleShallILearn(const PaxMessage &);
-        void HandleAck(const PaxMessage &);
+        void HandleValueAck(const PaxMessage &);
 
     private:
         void LearnFromSelf(const PaxMessage &);
@@ -111,7 +113,7 @@ namespace paxosme {
         void TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue& value);
         void Ack(node_id_t id);
 
-        void HandleValueAck(const PaxMessage &message);
+        static int SHALLILEARN_DELAY;
     };
 }
 

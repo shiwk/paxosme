@@ -5,6 +5,8 @@
 #ifndef PAXOSME_PROPOSER_PAX_HPP
 #define PAXOSME_PROPOSER_PAX_HPP
 
+#define PREPARE_TIMEOUT_CONST 50
+#define PROPOSE_TIMEOUT_CONST 50
 
 #include <log_value.hpp>
 #include "player_pax.hpp"
@@ -59,7 +61,8 @@ namespace paxosme {
 
         bool TryUpdateProposerStateWithPrepareReply(const PaxMessage &message);
 
-        int prepare_delay_;
+        static int PREPARE_DELAY;
+        static int PROPOSE_DELAY;
     };
 }
 #endif //PAXOSME_PROPOSER_PAX_HPP

@@ -116,7 +116,7 @@ namespace paxosme {
                 learner_->HandleOthersPublish(message);
                 break;
             case kValue_ACK:
-                learner_->HandleAck(message);
+                learner_->HandleValueAck(message);
                 break;
             case kTellInstanceId:
                 learner_->HandleTellNewInstanceId(message);

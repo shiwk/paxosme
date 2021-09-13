@@ -43,7 +43,7 @@ namespace paxosme {
 
         void WriteState(const paxosme::PaxosState &paxos_state);
 
-        void AddTimer(EventType event_type, const event_callback &callback, int delayInMilli);
+        void Publish(EventType event_type, const event_callback &callback, int delayInMilli = 0);
 
         ProposalTriplet GetAcceptedProposal();
 

@@ -6,6 +6,9 @@
 
 namespace paxosme {
 
+    int PaxProposer::PREPARE_DELAY = PREPARE_TIMEOUT_CONST;
+    int PaxProposer::PROPOSE_DELAY = PROPOSE_TIMEOUT_CONST;
+
     /**
      *  Found a new value
      *  @param log_value
@@ -25,7 +28,7 @@ namespace paxosme {
         instance_id_t instanceId = pax_message.GetInstanceId();
         BroadCastMessage(pax_message);
         event_callback callback = [this, instanceId] { Prepare_Timeout_Callback(instanceId); };
-        AddTimer(EventType::kPrepare, callback, prepare_delay_);
+        Publish(EventType::kPrepareTimeout, callback, PREPARE_DELAY);
     }
 
     /**
@@ -76,7 +79,7 @@ namespace paxosme {
         } else if (pax_decider_->IsMajorityRejected() || !pax_decider_->IsStillPending()) {
             // re-launch prepare
             event_callback callback = [this] { Prepare(); };
-            AddTimer(EventType::kPrepare, callback, prepare_delay_);
+            Publish(EventType::kPrepareTimeout, callback, PREPARE_DELAY);
         }
     }
 
@@ -91,7 +94,7 @@ namespace paxosme {
         BroadCastMessage(pax_message);
         instance_id_t instanceId = pax_message.GetInstanceId();
         event_callback callback = [this, instanceId] { Propose_Timeout_Callback(instanceId); };
-        AddTimer(EventType::kPrepare, callback, prepare_delay_);
+        Publish(EventType::kProposeTimeout, callback, PROPOSE_DELAY);
     }
 
     /**
@@ -142,7 +145,7 @@ namespace paxosme {
             BroadCastMessage(msg);
         } else if (pax_decider_->IsMajorityRejected() || !pax_decider_->IsStillPending()) {
             event_callback callback = [this] { Prepare(); };
-            AddTimer(EventType::kPrepare, callback, prepare_delay_);
+            Publish(EventType::kProposeTimeout, callback, PROPOSE_DELAY);
         }
     }
 
