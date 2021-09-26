@@ -49,7 +49,9 @@ namespace paxosme {
         }
 
         prov_loop_ = std::async(std::launch::async, thread_func, this);
-        proposer_->Init();
+        proposal_id_t proposalId = acceptor_->GetAcceptedProposalId();
+
+        proposer_->Init(proposalId + 1);
         learner_->Init();
     }
 

@@ -45,18 +45,17 @@ namespace paxosme {
         log_value_ = log_value;
     }
 
-    proposal_id_t ProposerState::GetNewProposalId() {
-        my_proposal_ = (my_proposal_ > highest_known_proposal_ ? my_proposal_ : highest_known_proposal_) +1;
-        return my_proposal_;
+    proposal_id_t ProposerState::NewProposalId() {
+        my_proposal_Id_ = (my_proposal_Id_ > highest_known_proposal_ ? my_proposal_Id_ : highest_known_proposal_) + 1;
+        return my_proposal_Id_;
     }
 
-    proposal_id_t ProposerState::GetMyProposal() const {
-        return my_proposal_;
+    proposal_id_t ProposerState::GetMyProposalId() const {
+        return my_proposal_Id_;
     }
 
-    void ProposerState::SetMyProposal(proposal_id_t my_proposal) {
-        my_proposal_ = my_proposal;
+    void ProposerState::Init(proposal_id_t init_proposal_id) {
+        my_proposal_Id_ = init_proposal_id;
     }
-
 }
 

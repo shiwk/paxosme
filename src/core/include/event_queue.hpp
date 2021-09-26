@@ -45,7 +45,7 @@ namespace paxosme {
 
     class EventQueue {
     public:
-        void Add(const Event &);
+        void Push(const Event &event);
 
         bool HasTimeout(Event &);
 

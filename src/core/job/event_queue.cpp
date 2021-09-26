@@ -6,7 +6,7 @@
 #include <event_queue.hpp>
 
 namespace paxosme {
-    void EventQueue::Add(const Event& event) {
+    void EventQueue::Push(const Event& event) {
         events_.emplace_back(event);
         std::push_heap(events_.begin(), events_.end());
     }

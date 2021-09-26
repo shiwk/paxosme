@@ -39,17 +39,14 @@ namespace paxosme {
 
         PaxProposer(const PaxConfig &pax_config);
 
-        void Init();
+        void Init(proposal_id_t);
 
     private:
-        PaxMessage GenerateMessage(MessageType message_type);
+        PaxMessage GenerateMessage(MessageType, proposal_id_t);
 
-        void Prepare();
-        void Prepare_Timeout_Callback(instance_id_t);
-
+        void Prepare(bool newPrepare);
         void Propose();
-        void Propose_Timeout_Callback(instance_id_t);
-
+        void ProposerTimeoutCallback(instance_id_t instanceId, bool needNewPrepare);
         void HandleChosenValue(const PaxMessage &message);
 
         void HandleAbandonValue();
@@ -61,8 +58,8 @@ namespace paxosme {
 
         bool TryUpdateProposerStateWithPrepareReply(const PaxMessage &message);
 
-        static int PREPARE_DELAY;
-        static int PROPOSE_DELAY;
+        static int PREPARE_TIMEOUT;
+        static int PROPOSE_TIMEOUT;
     };
 }
 #endif //PAXOSME_PROPOSER_PAX_HPP
