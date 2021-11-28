@@ -7,7 +7,6 @@
 namespace paxosme {
     static void *thread_func(paxosme::PaxController *p) {
         p->FlushProv();
-        return nullptr;
     }
 
     instance_id_t PaxController::GetInstanceId() const {
@@ -55,7 +54,7 @@ namespace paxosme {
         learner_->Init();
     }
 
-    void PaxController::FlushProv() {
+    [[noreturn]] void PaxController::FlushProv() {
         while (true) {
             LogValue log_value;
             if (proposal_prov_->GetNewSubmit(instance_id_, log_value)) {
@@ -129,7 +128,16 @@ namespace paxosme {
 
 
         if (learner_->Learned()) {
+            // todo II: state machine execute
             // todo I: new instance
+
         }
+    }
+
+    void PaxController::NewInstance() {
+        instance_id_++;
+        acceptor_->NewInstance();
+        proposer_->NewInstance();
+        learner_->NewInstance();
     }
 }

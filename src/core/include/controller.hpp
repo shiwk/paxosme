@@ -12,7 +12,7 @@
 #include "learner_pax.hpp"
 #include "proposal_prov.hpp"
 #include <future>
-#include <state_machine.hpp>
+#include "../../sm/state_machine.hpp"
 
 namespace paxosme {
     class PaxController {
@@ -30,7 +30,10 @@ namespace paxosme {
         ProposalTriplet GetAcceptedProposal();
 
         node_id_t GetAcceptedNodeId();
-        void FlushProv();
+
+        [[noreturn]] void FlushProv();
+
+        void NewInstance();
 
     private:
         void PushSMByState(instance_id_t target_instance_id);

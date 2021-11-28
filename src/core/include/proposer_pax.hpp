@@ -41,18 +41,16 @@ namespace paxosme {
 
         void Init(proposal_id_t);
 
+        void NewInstance() override;
     private:
         PaxMessage GenerateMessage(MessageType, proposal_id_t);
 
         void Prepare(bool newPrepare);
         void Propose();
         void ProposerTimeoutCallback(instance_id_t instanceId, bool needNewPrepare);
-        void HandleChosenValue(const PaxMessage &message);
-
-        void HandleAbandonValue();
 
         ProposerStatus proposer_status_;
-        PaxDecider *pax_decider_;
+        PaxDecider *proposal_decider_;
         ProposerState *proposer_state_;
 
 

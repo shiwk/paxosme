@@ -12,7 +12,7 @@ public:
 
     virtual ~StateMachine() {}
 
-    virtual bool Execute(const instance_id_t instance_id, const std::string &sPaxosValue) = 0;
+    virtual bool Execute(instance_id_t instance_id, const std::string &sPaxosValue) = 0;
 
     instance_id_t GetInstanceId();
 };

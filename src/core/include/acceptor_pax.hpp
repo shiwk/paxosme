@@ -13,14 +13,17 @@
 namespace paxosme {
     class AcceptorState {
     public:
-        AcceptorState(LogValue  logValue) : accepted_value_(std::move(logValue)){}
-        instance_id_t GetInstanceId() const;
+        AcceptorState(LogValue logValue) : accepted_value_(std::move(logValue)) {}
 
-        void SetInstanceId(instance_id_t instance_id);
-            void init(const PaxosState &state);
+//        instance_id_t GetInstanceId() const;
+
+//        void SetInstanceId(instance_id_t instance_id);
+
+        void Init(const PaxosState &state);
+        void Reset();
 
         proposal_id_t GetPromisedProposal() const {
-            return promised_id_;
+            return promised_proposal_id_;
         }
 
         node_id_t GetPromisedProposer() const {
@@ -28,7 +31,7 @@ namespace paxosme {
         }
 
         void SetPromisedProposal(proposal_id_t proposal_id, node_id_t proposer_id) {
-            promised_id_ = proposal_id;
+            promised_proposal_id_ = proposal_id;
             promised_node_id_ = proposer_id;
         }
 
@@ -54,11 +57,9 @@ namespace paxosme {
         }
 
 
-
     private:
-        proposal_id_t promised_id_;
+        proposal_id_t promised_proposal_id_;
         node_id_t promised_node_id_;
-        instance_id_t instance_id_;
         proposal_id_t accepted_proposal_id_;
         node_id_t accepted_proposer_;
         LogValue accepted_value_;
@@ -159,6 +160,8 @@ namespace paxosme {
         bool HandleSenderPublish(const PaxMessage &message);
 
         bool IsProposalAccepted(proposal_id_t proposal_id, node_id_t node_id);
+
+        void NewInstance() override;
     };
 
 

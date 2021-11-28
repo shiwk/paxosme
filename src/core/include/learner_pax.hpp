@@ -28,20 +28,20 @@ namespace paxosme {
             learned_instance_id_ = learnedInstanceId;
         }
 
-    private:
-        proposal_id_t proposal_id_;
-        node_id_t proposer_;
     public:
         void LearnNew(const LogValue &log_value, instance_id_t instance_id, proposal_id_t proposal_id,
                       node_id_t proposer_node_id) {
             log_value_ = log_value;
             learned_instance_id_ = instance_id;
-            proposal_id_ = proposal_id;
-            proposer_ = proposer_node_id;
         }
 
         const LogValue &GetLearnedValue() {
             return log_value_;
+        }
+
+        void Reset(){
+            log_value_ = "";
+            learned_instance_id_ = 0;
         }
     };
 
@@ -63,6 +63,8 @@ namespace paxosme {
         bool HandleSenderPublish(const PaxMessage &);
         void HandleOthersPublish(const PaxMessage &pax_message);
         bool Learned();
+
+        void NewInstance() override;
 
     public:
         // lead

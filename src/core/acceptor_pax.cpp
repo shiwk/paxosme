@@ -131,7 +131,7 @@ namespace paxosme {
             paxos_state.set_accepted_value(accepted_value.GetValue());
         }
 
-        // an acceptor must remember this information even if it fails and then restarts.
+        // an acceptor is supposed to remember this information even if it fails and then restarts.
         WriteState(paxos_state);
     }
 
@@ -140,7 +140,7 @@ namespace paxosme {
     }
 
     proposal_id_t PaxAcceptor::GetAcceptedProposalId() {
-       return acceptor_state_->GetAcceptedProposalId();
+        return acceptor_state_->GetAcceptedProposalId();
     }
 
     node_id_t PaxAcceptor::GetAcceptedNodeId() {
@@ -149,7 +149,7 @@ namespace paxosme {
 
     instance_id_t PaxAcceptor::Init() {
         PaxosState paxos_state = ReadState(-1);
-        acceptor_state_->init(paxos_state);
+        acceptor_state_->Init(paxos_state);
         return paxos_state.instance_id();
     }
 
@@ -167,24 +167,32 @@ namespace paxosme {
         return true;
     }
 
-    void AcceptorState::init(const PaxosState &state) {
+    void AcceptorState::Init(const PaxosState &state) {
         LogValue log_value{state.accepted_value()};
         SetAcceptedValue(log_value);
         SetAcceptedProposal(state.accepted_proposal_id(), state.accepted_node_id());
         SetPromisedProposal(state.promised_proposal_id(), state.promised_node_id());
-        SetInstanceId(state.instance_id());
+//        SetInstanceId(state.instance_id());
     }
 
-    instance_id_t AcceptorState::GetInstanceId() const {
-        return instance_id_;
-    }
+//    void AcceptorState::SetInstanceId(instance_id_t instance_id) {
+//        instance_id_ = instance_id;
+//    }
 
-    void AcceptorState::SetInstanceId(instance_id_t instance_id) {
-        instance_id_ = instance_id;
+    void AcceptorState::Reset() {
+        accepted_value_ = "";
+        accepted_proposal_id_ = 0;
+        accepted_proposer_ = 0;
+        promised_proposal_id_ = 0;
+        promised_node_id_ = 0;
     }
 
     bool PaxAcceptor::IsProposalAccepted(proposal_id_t proposal_id, node_id_t node_id) {
         return acceptor_state_->GetAcceptedProposalId() == proposal_id &&
                acceptor_state_->GetAcceptedNodeId() == node_id;
+    }
+
+    void PaxAcceptor::NewInstance() {
+        acceptor_state_->Reset();
     }
 }

@@ -71,4 +71,8 @@ namespace paxosme {
         pax_message.SetInstanceId(GetInstanceId());
         SendMessage(pax_message, node_id);
     }
+
+    void PaxLearner::NewInstance() {
+        learner_state_->Reset();
+    }
 }

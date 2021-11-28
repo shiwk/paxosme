@@ -57,5 +57,9 @@ namespace paxosme {
     void ProposerState::Init(proposal_id_t init_proposal_id) {
         my_proposal_Id_ = init_proposal_id;
     }
+
+    void ProposerState::Reset() {
+
+    }
 }
 

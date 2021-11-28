@@ -11,6 +11,7 @@
 
 namespace paxosme {
     class ProposerState {
+        // todo I: initialization
         LogValue& log_value_;
         proposal_id_t highest_known_proposal_;
         proposal_id_t my_proposal_Id_;
@@ -28,6 +29,7 @@ namespace paxosme {
         bool TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id, const LogValue &log_value);
 
         proposal_id_t NewProposalId();
+        void Reset();
     };
 }
 

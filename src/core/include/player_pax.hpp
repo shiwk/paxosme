@@ -26,6 +26,8 @@ namespace paxosme {
 
         instance_id_t GetInstanceId() const;
 
+        virtual void NewInstance() = 0;
+
     protected:
         PaxController *controller_;
 
