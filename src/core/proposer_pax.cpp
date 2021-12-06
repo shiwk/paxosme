@@ -14,8 +14,8 @@ namespace paxosme {
      *  @param log_value
      */
     void PaxProposer::ProposeNew(LogValue &log_value) {
-        if (proposer_state_->GetLogValue().empty()) {
-            proposer_state_->SetLogValue(log_value);
+        if (proposer_state_.GetLogValue().Empty()) {
+            proposer_state_.SetLogValue(log_value);
         }
     }
 
@@ -24,7 +24,7 @@ namespace paxosme {
      */
     void PaxProposer::Prepare(bool newPrepare) {
         proposer_status_ = ProposerStatus::kPrepare;
-        proposal_id_t proposalId = newPrepare ? proposer_state_->NewProposalId() : proposer_state_->GetMyProposalId();
+        proposal_id_t proposalId = newPrepare ? proposer_state_.NewProposalId() : proposer_state_.GetMyProposalId();
         auto pax_message = GenerateMessage(MessageType::kPrepareBroadCast, proposalId);
         instance_id_t instanceId = pax_message.GetInstanceId();
         BroadCastMessage(pax_message);
@@ -57,23 +57,23 @@ namespace paxosme {
         if (pax_reply_message.GetProposer() != GetNodeId())
             // reply not for me
             return;
-        if (pax_reply_message.GetProposalId() != proposer_state_->GetMyProposalId())
+        if (pax_reply_message.GetProposalId() != proposer_state_.GetMyProposalId())
             return; // something goes wrong!
 
         if (!pax_reply_message.IsRejected()) {
             // count for approval
 
             TryUpdateProposerStateWithPrepareReply(pax_reply_message);
-            proposal_decider_->AddApproval(proposer_state_->GetMyProposalId(), GetNodeId());
+            proposal_decider_->AddPromise(proposer_state_.GetMyProposalId(), GetNodeId());
 
         } else {
             // reject and record proposal id promised by the replier
-            proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
+            proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
                                                         pax_reply_message.GetPromisedNodeId());
-            proposal_decider_->AddRejection(proposer_state_->GetMyProposalId(), GetNodeId());
+            proposal_decider_->AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
         }
 
-        if (proposal_decider_->IsMajorityAccepted()) {
+        if (proposal_decider_->IsMajorityPromised()) {
             // got majority pre-accept
             Propose();
         } else if (proposal_decider_->IsMajorityRejected() || !proposal_decider_->IsStillPending()) {
@@ -90,8 +90,8 @@ namespace paxosme {
      */
     void PaxProposer::Propose() {
         proposer_status_ = ProposerStatus::kPropose;
-        PaxMessage pax_message = GenerateMessage(MessageType::kProposeBroadCast, proposer_state_->GetMyProposalId());
-        proposal_decider_->Clear(); // reset for propose stage counter before broadcast
+        PaxMessage pax_message = GenerateMessage(MessageType::kProposeBroadCast, proposer_state_.GetMyProposalId());
+        proposal_decider_->Reset(); // reset for propose stage counter before broadcast
         BroadCastMessage(pax_message);
         instance_id_t instanceId = pax_message.GetInstanceId();
         event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, false); };
@@ -110,17 +110,17 @@ namespace paxosme {
         if (pax_reply_message.GetProposer() != GetNodeId())
             // reply not for me
             return;
-        if (pax_reply_message.GetProposalId() != proposer_state_->GetMyProposalId())
+        if (pax_reply_message.GetProposalId() != proposer_state_.GetMyProposalId())
             return; // something goes wrong!
 
         if (!pax_reply_message.IsRejected()) {
             // count for approval
-            proposal_decider_->AddApproval(proposer_state_->GetMyProposalId(), GetNodeId());
+            proposal_decider_->AddAccept(proposer_state_.GetMyProposalId(), GetNodeId());
         } else {
             // reject and record proposal id promised by the replier
-            proposer_state_->TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
+            proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
                                                         pax_reply_message.GetPromisedNodeId());
-            proposal_decider_->AddRejection(proposer_state_->GetMyProposalId(), GetNodeId());
+            proposal_decider_->AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
         }
 
         if (proposal_decider_->IsMajorityAccepted()) {
@@ -140,7 +140,7 @@ namespace paxosme {
     }
 
     bool PaxProposer::TryUpdateProposerStateWithPrepareReply(const PaxMessage &message) {
-        return proposer_state_->TryUpdateLogValue(message.GetProposalId(), message.GetProposer(),
+        return proposer_state_.TryUpdateLogValue(message.GetProposalId(), message.GetProposer(),
                                                   message.GetAcceptedValue());
     }
 
@@ -149,17 +149,17 @@ namespace paxosme {
         message.SetInstanceId(GetInstanceId());
         message.SetProposer(GetNodeId());
         message.SetProposer(proposal_id);
-        message.SetProposedLogValue(proposer_state_->GetLogValue());
+        message.SetProposedLogValue(proposer_state_.GetLogValue());
         return message;
     }
 
     void PaxProposer::Init(proposal_id_t proposal_id) {
-        proposer_state_->Init(proposal_id);
+        proposer_state_.Init(proposal_id);
     }
 
     void PaxProposer::NewInstance() {
-        proposal_decider_->Clear();
-        proposer_state_->Reset();
+        proposal_decider_->Reset();
+        proposer_state_.Reset();
         proposer_status_ = ProposerStatus::kNone;
     }
 }

@@ -16,10 +16,16 @@ namespace paxosme{
             value_ = std::move(str);
         }
 
-        bool empty() const
+        bool Empty() const
         {
             return value_.empty();
         }
+
+        void Clear()
+        {
+            value_.clear();
+        }
+
 
     private:
         std::string value_;

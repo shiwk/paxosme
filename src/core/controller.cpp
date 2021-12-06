@@ -129,7 +129,7 @@ namespace paxosme {
 
         if (learner_->Learned()) {
             // todo II: state machine execute
-            // todo I: new instance
+            NewInstance();
 
         }
     }

@@ -2,7 +2,7 @@
 // Created by shiwk on 2020/8/16.
 //
 
-#include <proposer_state.hpp>
+#include <proposer_pax.hpp>
 
 namespace paxosme {
     bool ProposerState::TryUpdateHighestProposalId(proposal_id_t proposal_id, node_id_t node_id) {
@@ -55,11 +55,12 @@ namespace paxosme {
     }
 
     void ProposerState::Init(proposal_id_t init_proposal_id) {
-        my_proposal_Id_ = init_proposal_id;
+        my_proposal_Id_ = init_proposal_id; // only init once
     }
 
     void ProposerState::Reset() {
-
+        highest_known_proposal_ = 0;
+        log_value_.Clear();
     }
 }
 
