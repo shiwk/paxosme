@@ -1,4 +1,2 @@
 todo:
   keyword: ['@todo','TODO', 'todo']
-  bodyKeyword: ['TODO', 'todo I:']
-  label: ['TODO', 'TODO I']

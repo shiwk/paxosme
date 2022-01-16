@@ -57,7 +57,9 @@ namespace paxosme {
         void Init(const PaxController *controller);
         bool HandleSenderPublish(const PaxMessage &);
         void HandleOthersPublish(const PaxMessage &pax_message);
-        bool Learned(); // TODO: leanrd definition.
+
+        //@todo: leanrd definition.
+        bool Learned();
 
         void NewInstance() override;
 
