@@ -5,6 +5,7 @@
 #ifndef PAXOSME_DATABASE_HPP
 #define PAXOSME_DATABASE_HPP
 
+#include <string>
 
 class Database {
     int Get(const std::string &key, std::string & sValue);

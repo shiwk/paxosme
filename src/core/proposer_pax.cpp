@@ -9,6 +9,13 @@ namespace paxosme {
     int PaxProposer::PREPARE_TIMEOUT = PREPARE_TIMEOUT_CONST;
     int PaxProposer::PROPOSE_TIMEOUT = PROPOSE_TIMEOUT_CONST;
 
+    PaxProposer::PaxProposer(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
+                             const Schedule *schedule)
+                             : PaxPlayer(config, communicator, storage, schedule),
+                             proposal_counter_(config) {
+        proposer_status_ = ProposerStatus::kNone;
+    }
+
     /**
      *  Found a new value
      *  @param log_value
@@ -64,19 +71,19 @@ namespace paxosme {
             // count for approval
 
             TryUpdateProposerStateWithPrepareReply(pax_reply_message);
-            proposal_decider_->AddPromise(proposer_state_.GetMyProposalId(), GetNodeId());
+            proposal_counter_.AddPromise(proposer_state_.GetMyProposalId(), GetNodeId());
 
         } else {
             // reject and record proposal id promised by the replier
             proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                        pax_reply_message.GetPromisedNodeId());
-            proposal_decider_->AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
+                                                       pax_reply_message.GetPromisedNodeId());
+            proposal_counter_.AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
         }
 
-        if (proposal_decider_->IsMajorityPromised()) {
+        if (proposal_counter_.IsMajorityPromised()) {
             // got majority pre-accept
             Propose();
-        } else if (proposal_decider_->IsMajorityRejected() || !proposal_decider_->IsStillPending()) {
+        } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
             // re-launch prepare
             instance_id_t instanceId = pax_reply_message.GetInstanceId();
             event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, true); };
@@ -91,7 +98,7 @@ namespace paxosme {
     void PaxProposer::Propose() {
         proposer_status_ = ProposerStatus::kPropose;
         PaxMessage pax_message = GenerateMessage(MessageType::kProposeBroadCast, proposer_state_.GetMyProposalId());
-        proposal_decider_->Reset(); // reset for propose stage counter before broadcast
+        proposal_counter_.Reset(); // reset for propose stage counter before broadcast
         BroadCastMessage(pax_message);
         instance_id_t instanceId = pax_message.GetInstanceId();
         event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, false); };
@@ -115,15 +122,15 @@ namespace paxosme {
 
         if (!pax_reply_message.IsRejected()) {
             // count for approval
-            proposal_decider_->AddAccept(proposer_state_.GetMyProposalId(), GetNodeId());
+            proposal_counter_.AddAccept(proposer_state_.GetMyProposalId(), GetNodeId());
         } else {
             // reject and record proposal id promised by the replier
             proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                        pax_reply_message.GetPromisedNodeId());
-            proposal_decider_->AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
+                                                       pax_reply_message.GetPromisedNodeId());
+            proposal_counter_.AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
         }
 
-        if (proposal_decider_->IsMajorityAccepted()) {
+        if (proposal_counter_.IsMajorityAccepted()) {
             proposer_status_ = ProposerStatus::kMajorityAccepted;
             PaxMessage msg(GetNodeId(), MessageType::kSenderPublishChosenValue);
             // no log_value in msg
@@ -132,7 +139,7 @@ namespace paxosme {
 
             ProcessChosenValue(msg);
             BroadCastMessage(msg);
-        } else if (proposal_decider_->IsMajorityRejected() || !proposal_decider_->IsStillPending()) {
+        } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
             instance_id_t instanceId = pax_reply_message.GetInstanceId();
             event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, true); };
             Publish(EventType::kProposeTimeout, callback, PROPOSE_TIMEOUT);
@@ -141,7 +148,7 @@ namespace paxosme {
 
     bool PaxProposer::TryUpdateProposerStateWithPrepareReply(const PaxMessage &message) {
         return proposer_state_.TryUpdateLogValue(message.GetProposalId(), message.GetProposer(),
-                                                  message.GetAcceptedValue());
+                                                 message.GetAcceptedValue());
     }
 
     PaxMessage PaxProposer::GenerateMessage(MessageType message_type, proposal_id_t proposal_id) {
@@ -153,12 +160,13 @@ namespace paxosme {
         return message;
     }
 
-    void PaxProposer::Init(proposal_id_t proposal_id) {
+    void PaxProposer::Init(proposal_id_t proposal_id, const PaxController *controller) {
+        PaxPlayer::InitController(controller);
         proposer_state_.Init(proposal_id);
     }
 
     void PaxProposer::NewInstance() {
-        proposal_decider_->Reset();
+        proposal_counter_.Reset();
         proposer_state_.Reset();
         proposer_status_ = ProposerStatus::kNone;
     }

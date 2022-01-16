@@ -27,16 +27,19 @@ namespace paxosme {
     }
 
     class ProposerState {
-        // todo I: initialization
-        LogValue& log_value_;
+
+        LogValue log_value_;
         proposal_id_t highest_known_proposal_;
-        proposal_id_t my_proposal_Id_;
-        node_id_t highest_proposal_id_provider_;
+        proposal_id_t my_proposal_id_;
+        node_id_t highest_proposal_provider_;
 
     public:
+        ProposerState();
 
         proposal_id_t GetMyProposalId() const;
+
         void Init(proposal_id_t);
+
         const LogValue &GetLogValue() const;
 
         void SetLogValue(LogValue &log_value);
@@ -46,22 +49,32 @@ namespace paxosme {
         bool TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id, const LogValue &log_value);
 
         proposal_id_t NewProposalId();
+
         void Reset();
     };
 
-    class ProposalCounter{
+    class ProposalCounter {
     public:
+        explicit ProposalCounter(const PaxConfig *);
+
         bool IsMajorityAccepted();
+
         bool IsMajorityPromised();
+
         bool IsMajorityRejected();
+
         bool IsStillPending();
+
         bool AddAccept(proposal_id_t, node_id_t);
+
         bool AddPromise(proposal_id_t, node_id_t);
+
         bool AddRejection(proposal_id_t, node_id_t);
+
         void Reset();
 
     private:
-        PaxConfig* pax_config_;
+        PaxConfig *pax_config_;
         int32_t vote_count_;
 
         std::set<node_id_t> approvals_;
@@ -72,26 +85,29 @@ namespace paxosme {
     class PaxProposer : public PaxPlayer {
 
     public:
+        explicit PaxProposer(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
+
         void ProposeNew(LogValue &log_value);
 
         void HandlePrepareReply(const PaxMessage &pax_reply_message);
 
         void HandleProposeReply(const PaxMessage &pax_reply_message);
 
-        PaxProposer(const PaxConfig &pax_config);
-
-        void Init(proposal_id_t);
+        void Init(proposal_id_t, const PaxController *);
 
         void NewInstance() override;
+
     private:
         PaxMessage GenerateMessage(MessageType, proposal_id_t);
 
         void Prepare(bool newPrepare);
+
         void Propose();
+
         void ProposerTimeoutCallback(instance_id_t instanceId, bool needNewPrepare);
 
         ProposerStatus proposer_status_;
-        ProposalCounter *proposal_decider_;
+        ProposalCounter proposal_counter_;
         ProposerState proposer_state_;
 
 

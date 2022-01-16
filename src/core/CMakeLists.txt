@@ -38,4 +38,7 @@ add_library(paxosmecore
         ${PROTO_HEADER}
         ${PROTO_SRC})
 
+target_link_libraries(paxosmecore sm)
+target_link_libraries(paxosmecore db)
+
 target_include_directories(paxosmecore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )

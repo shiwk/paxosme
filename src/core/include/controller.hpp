@@ -12,14 +12,15 @@
 #include "learner_pax.hpp"
 #include "proposal_prov.hpp"
 #include <future>
-#include "../../sm/state_machine.hpp"
+#include <state_machine.hpp>
 
 namespace paxosme {
     class PaxController {
     public:
+        explicit PaxController(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
         void HandleMessage(const PaxMessage &message);
 
-        void Init(PaxConfig*); // start loop
+        void Init(); // start loop
 
         instance_id_t GetInstanceId() const;
 
@@ -41,9 +42,9 @@ namespace paxosme {
     private:
         MsgQueue msg_queue_;
         instance_id_t instance_id_;
-        PaxProposer *proposer_;
-        PaxAcceptor *acceptor_;
-        PaxLearner *learner_;
+        PaxProposer proposer_;
+        PaxAcceptor acceptor_;
+        PaxLearner learner_;
         PaxConfig *pax_config_;
         ProposalProv *proposal_prov_;
         std::future <void*> prov_loop_;

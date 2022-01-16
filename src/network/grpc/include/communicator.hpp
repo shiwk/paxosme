@@ -8,11 +8,10 @@
 #include <communicate_pax.hpp>
 #include <client.hpp>
 
-
 namespace paxosme {
     class NetworkConfig;
 
-    class Communicator : public PaxCommunicate {
+    class Communicator : public PaxCommunicator {
     public:
         explicit Communicator(std::vector<node_id_t> &);
 

@@ -18,21 +18,14 @@
 namespace paxosme {
     class PaxLearnerState {
         LogValue log_value_;
-        instance_id_t learned_instance_id_;
-    public:
-        instance_id_t GetLearnedInstanceId() const {
-            return learned_instance_id_;
-        }
-
-        void SetLearnedInstanceId(instance_id_t learnedInstanceId) {
-            learned_instance_id_ = learnedInstanceId;
-        }
+        PaxConfig *config_;
 
     public:
+        explicit PaxLearnerState(const PaxConfig *config) : config_(const_cast<PaxConfig *>(config)){}
+
         void LearnNew(const LogValue &log_value, instance_id_t instance_id, proposal_id_t proposal_id,
                       node_id_t proposer_node_id) {
             log_value_ = log_value;
-            learned_instance_id_ = instance_id;
         }
 
         const LogValue &GetLearnedValue() {
@@ -41,12 +34,14 @@ namespace paxosme {
 
         void Reset(){
             log_value_ = "";
-            learned_instance_id_ = 0;
         }
     };
 
 
     class PaxLearner : public PaxPlayer {
+    public:
+        PaxLearner(const PaxConfig*, const PaxCommunicator *, const Storage *, const Schedule *);
+
     public:
         // follow
         void ShallILearn(); // request learn from others
@@ -59,10 +54,10 @@ namespace paxosme {
 
         bool AnymoreToLearn();
 
-        void Init();
+        void Init(const PaxController *controller);
         bool HandleSenderPublish(const PaxMessage &);
         void HandleOthersPublish(const PaxMessage &pax_message);
-        bool Learned();
+        bool Learned(); // todo I: definition
 
         void NewInstance() override;
 
@@ -78,7 +73,7 @@ namespace paxosme {
         // follow
         void TellInstanceId(instance_id_t, node_id_t); // tell others current instance_id
 
-        PaxLearnerState *learner_state_;
+        PaxLearnerState learner_state_;
         instance_id_t highest_known_instance_id_;
 
         void SetPossibleHigherInstanceId(const instance_id_t &);
@@ -111,7 +106,7 @@ namespace paxosme {
         void ClearSendingState();
         void SendLearnedValues(instance_id_t begin_instance_id, node_id_t receiver);
         void MakeReady(node_id_t receiver, instance_id_t i);
-        void SendLearnedValue(instance_id_t, node_id_t, bool syn = false);
+        void SendLearnedValue(instance_id_t, node_id_t, bool sync = false);
         void TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue& value);
         void Ack(node_id_t id);
 

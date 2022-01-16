@@ -12,7 +12,7 @@
 #include <state.pb.h>
 
 namespace paxosme{
-    class PaxStorage {
+    class Storage {
     public:
         int Write(instance_id_t instance_id, const PaxosState & value);
 

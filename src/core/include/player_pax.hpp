@@ -21,8 +21,10 @@ namespace paxosme {
 
     class PaxPlayer {
     public:
-        virtual void Reset() = 0; // reset status for new instance
+        explicit PaxPlayer(const PaxConfig*, const PaxCommunicator*, const Storage *storage, const Schedule *schedule);
         PaxosState ReadState(instance_id_t instance_id);
+
+        void InitController(const PaxController*);
 
         instance_id_t GetInstanceId() const;
 
@@ -32,8 +34,6 @@ namespace paxosme {
         PaxController *controller_;
 
         node_id_t GetNodeId() const;
-
-        node_id_t GetFollowingNodeId() const;
 
         void ProcessChosenValue(const PaxMessage &message);
 
@@ -49,13 +49,13 @@ namespace paxosme {
 
         ProposalTriplet GetAcceptedProposal();
 
-        const LogValue &GetAcceptedValue();
+        const LogValue &GetAccepted();
 
     private:
-        node_id_t node_id_;
-        PaxCommunicate *communicate_;
-        PaxStorage *storage_;
+        PaxCommunicator *communicator_;
+        Storage *storage_;
         Schedule *schedule_;
+        PaxConfig *config_;
     };
 }
 #endif //PAXOSME_PLAYER_PAX_HPP

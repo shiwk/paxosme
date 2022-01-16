@@ -52,6 +52,7 @@ namespace paxosme {
         void Pop();
 
     private:
+        // no lock as event queue guarantees sequential
         std::vector<Event> events_;
     };
 }

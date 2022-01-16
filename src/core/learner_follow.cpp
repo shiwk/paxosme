@@ -6,10 +6,13 @@
 
 namespace paxosme {
     const LogValue &PaxLearner::GetLearnedValue() {
-        return learner_state_->GetLearnedValue();
+        return learner_state_.GetLearnedValue();
     }
 
     void PaxLearner::ShallILearn() {
+        // re-launch message
+        Publish(EventType::kShallILearnTimeout, [this] { ShallILearn(); }, SHALLILEARN_DELAY);
+
         node_id_t node_id = GetNodeId();
         instance_id_t instance_id = GetInstanceId();
 
@@ -56,13 +59,16 @@ namespace paxosme {
     }
 
     void PaxLearner::LearnFromOthers(const PaxMessage &pax_message) {
+        // re-launch message
+        Publish(EventType::kShallILearnTimeout, [this] { ShallILearn(); }, SHALLILEARN_DELAY);
+
         if (pax_message.GetInstanceId() != GetInstanceId())
             return; // instance id not matched
 
         LearnNew(pax_message.GetChosenValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
                  pax_message.GetProposer(), true);
 
-        if (pax_message.GetMessageType() == MessageType::kValue_SYN)
+        if (pax_message.GetMessageType() == MessageType::kValue_SYNC)
             Ack(pax_message.GetSender());
     }
 
@@ -73,6 +79,6 @@ namespace paxosme {
     }
 
     void PaxLearner::NewInstance() {
-        learner_state_->Reset();
+        learner_state_.Reset();
     }
 }

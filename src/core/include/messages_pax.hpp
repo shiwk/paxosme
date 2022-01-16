@@ -28,7 +28,7 @@ namespace paxosme {
         kShallILearn,
         kConfirmLearn,
         kSendValue,
-        kValue_SYN,
+        kValue_SYNC,
         kValue_ACK,
 
         kBroadCastChosen,

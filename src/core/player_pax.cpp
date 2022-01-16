@@ -6,12 +6,21 @@
 #include <controller.hpp>
 
 namespace paxosme {
+    PaxPlayer::PaxPlayer(const PaxConfig *config, const PaxCommunicator *communicator,
+                         const Storage *storage,
+                         const Schedule *schedule)
+            : config_(const_cast<PaxConfig *>(config)),
+              communicator_(const_cast<PaxCommunicator *>(communicator)),
+              storage_(const_cast<Storage *>(storage)),
+              schedule_(const_cast<Schedule *>(schedule)) {
+    }
+
     instance_id_t PaxPlayer::GetInstanceId() const {
         return controller_->GetInstanceId();
     }
 
     node_id_t PaxPlayer::GetNodeId() const {
-        return node_id_;
+        return config_->GetNodeId();
     }
 
     bool PaxPlayer::IsAccepted(const instance_id_t instance_id) {
@@ -19,11 +28,11 @@ namespace paxosme {
     }
 
     void PaxPlayer::SendMessage(const PaxMessage &pax_message, node_id_t node_id) {
-        communicate_->Send(node_id, pax_message);
+        communicator_->Send(node_id, pax_message);
     }
 
     void PaxPlayer::BroadCastMessage(const PaxMessage &message) {
-        communicate_->Broadcast(message);
+        communicator_->Broadcast(message);
     }
 
     void PaxPlayer::ProcessChosenValue(const PaxMessage &message) {
@@ -51,8 +60,12 @@ namespace paxosme {
         return controller_->GetAcceptedProposal();
     }
 
-    const LogValue &PaxPlayer::GetAcceptedValue() {
+    const LogValue &PaxPlayer::GetAccepted() {
         return controller_->GetAcceptedValue();
+    }
+
+    void PaxPlayer::InitController(const PaxController *controller) {
+        controller_ = const_cast<PaxController *> (controller);
     }
 }
 

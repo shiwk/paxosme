@@ -26,6 +26,7 @@ namespace paxosme {
 
 
     void PaxLearner::HandleShallILearn(const PaxMessage &pax_message) {
+
         SetPossibleHigherInstanceId(pax_message.GetInstanceId());
 
         // todo II: be careful race condition for learner state
@@ -48,10 +49,10 @@ namespace paxosme {
         MakeReady(pax_message.GetSender(), pax_message.GetInstanceId()); // make sending loop continue work
     }
 
-    void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId, bool syn) {
+    void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId, bool sync) {
         PaxosState paxosState = ReadState(instanceId);
 
-        PaxMessage pax_message(toNodeId, syn ? MessageType::kSendValue : MessageType::kValue_SYN);
+        PaxMessage pax_message(toNodeId, sync ? MessageType::kSendValue : MessageType::kValue_SYNC);
         pax_message.SetInstanceId(instanceId);
         pax_message.SetLearnedValue(LogValue(paxosState.accepted_value()));
         pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
@@ -133,7 +134,7 @@ namespace paxosme {
         if (node_id != GetNodeId())
             return;
 
-        const LogValue &log_value = GetAcceptedValue();
+        const LogValue &log_value = GetAccepted();
 
         // no need to persist since acceptor should have done
         LearnNew(log_value, pax_message.GetInstanceId(), proposal.proposal_id, node_id);
@@ -153,7 +154,7 @@ namespace paxosme {
 
     void PaxLearner::LearnNew(const LogValue &value, instance_id_t instance_id, proposal_id_t proposal_id,
                               node_id_t proposer, bool writeState) {
-        learner_state_->LearnNew(value, instance_id, proposal_id, proposer);
+        learner_state_.LearnNew(value, instance_id, proposal_id, proposer);
 
         if (writeState) {
             PaxosState paxos_state;

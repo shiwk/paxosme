@@ -13,11 +13,12 @@
 namespace paxosme {
     class AcceptorState {
     public:
-        AcceptorState(LogValue logValue) : accepted_value_(std::move(logValue)) {}
-
-//        instance_id_t GetInstanceId() const;
-
-//        void SetInstanceId(instance_id_t instance_id);
+        explicit AcceptorState(const PaxConfig *config) : config_(const_cast<PaxConfig *>(config)) {
+            promised_proposal_id_ = 0;
+            promised_node_id_ = 0;
+            accepted_proposal_id_ = 0;
+            accepted_proposer_ = 0;
+        }
 
         void Init(const PaxosState &state);
         void Reset();
@@ -56,13 +57,13 @@ namespace paxosme {
             return accepted_value_;
         }
 
-
     private:
         proposal_id_t promised_proposal_id_;
         node_id_t promised_node_id_;
         proposal_id_t accepted_proposal_id_;
         node_id_t accepted_proposer_;
         LogValue accepted_value_;
+        PaxConfig *config_;
     };
 
     class PaxAcceptorReplyMessage {
@@ -135,8 +136,9 @@ namespace paxosme {
     };
 
     class PaxAcceptor : public PaxPlayer {
-        AcceptorState *acceptor_state_;
+        AcceptorState acceptor_state_;
     public:
+        PaxAcceptor(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
         void HandlePrepareRequest(const PaxMessage &message);
 
         void HandleProposeRequest(const PaxMessage &message);
@@ -155,7 +157,7 @@ namespace paxosme {
 
         node_id_t GetAcceptedNodeId();
 
-        instance_id_t Init();
+        instance_id_t Init(const PaxController*);
 
         bool HandleSenderPublish(const PaxMessage &message);
 

@@ -10,6 +10,12 @@ namespace paxosme {
     struct PaxConfig {
     private:
         node_id_t node_id_;
+    public:
+        node_id_t GetNodeId() const {
+            return node_id_;
+        }
+
+    private:
         int32_t node_count_;
         double majority_threshold_;
     public:
