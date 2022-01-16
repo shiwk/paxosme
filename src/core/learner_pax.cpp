@@ -15,7 +15,6 @@ namespace paxosme {
         PaxPlayer::InitController(controller);
         learner_send_loop_ = std::async(std::launch::async, &PaxLearner::SendingLoop, this);
         Publish(EventType::kShallILearnTimeout, [this] { ShallILearn(); }, SHALLILEARN_DELAY);
-        // todo I: need publish this kShallILearnTimeout event in other case
     }
 
 //    bool PaxLearner::Learned() {
