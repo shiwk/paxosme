@@ -58,7 +58,9 @@ namespace paxosme {
         bool HandleSenderPublish(const PaxMessage &);
         void HandleOthersPublish(const PaxMessage &pax_message);
 
-        //@todo learned definition.
+        /*
+         * @todo learned definition.
+        */
         bool Learned();
 
         void NewInstance() override;
