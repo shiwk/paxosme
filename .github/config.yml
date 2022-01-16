@@ -1,2 +1,4 @@
 todo:
-  keyword: "@makeAnIssue"
+  keyword: ['@todo','TODO', 'todo']
+  bodyKeyword: ['TODO', 'todo I:']
+  label: ['TODO', 'TODO I']
