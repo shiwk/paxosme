@@ -41,4 +41,4 @@ add_library(paxosmecore
 target_link_libraries(paxosmecore sm)
 target_link_libraries(paxosmecore db)
 
-target_include_directories(paxosmecore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+target_include_directories(paxosmecore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}" ${PROTOBUF_INCLUDE_DIR})

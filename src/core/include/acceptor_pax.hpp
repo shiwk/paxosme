@@ -14,10 +14,10 @@ namespace paxosme {
     class AcceptorState {
     public:
         explicit AcceptorState(const PaxConfig *config) : config_(const_cast<PaxConfig *>(config)) {
-            promised_proposal_id_ = 0;
-            promised_node_id_ = 0;
-            accepted_proposal_id_ = 0;
-            accepted_proposer_ = 0;
+            promised_proposal_id_ = PROPOSAL_DUMMY;
+            promised_node_id_ = NODE_DUMMY;
+            accepted_proposal_id_ = PROPOSAL_DUMMY;
+            accepted_proposer_ = NODE_DUMMY;
         }
 
         void Init(const PaxosState &state);

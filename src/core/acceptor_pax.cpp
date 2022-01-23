@@ -9,7 +9,6 @@ namespace paxosme {
     PaxAcceptor::PaxAcceptor(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
                              const Schedule *schedule)
             : PaxPlayer(config, communicator, storage, schedule), acceptor_state_(config) {
-
     }
 
     /**
@@ -42,7 +41,7 @@ namespace paxosme {
             pax_reply_message.SetIsRejected(false);
             proposal_id_t accepted_proposal_id = acceptor_state_.GetAcceptedProposalId();
 
-            if (accepted_proposal_id != 0) {
+            if (accepted_proposal_id != PROPOSAL_DUMMY) {
                 pax_reply_message.SetAcceptedId(accepted_proposal_id);
                 pax_reply_message.SetAcceptedValue(GetAccepted());
             }
@@ -188,10 +187,10 @@ namespace paxosme {
 
     void AcceptorState::Reset() {
         accepted_value_ = "";
-        accepted_proposal_id_ = 0;
-        accepted_proposer_ = 0;
-        promised_proposal_id_ = 0;
-        promised_node_id_ = 0;
+        accepted_proposal_id_ = PROPOSAL_DUMMY;
+        accepted_proposer_ = NODE_DUMMY;
+        promised_proposal_id_ = PROPOSAL_DUMMY;
+        promised_node_id_ = NODE_DUMMY;
     }
 
     bool PaxAcceptor::IsProposalAccepted(proposal_id_t proposal_id, node_id_t node_id) {

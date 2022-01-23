@@ -63,6 +63,8 @@ namespace paxosme {
 
     [[noreturn]] void PaxController::FlushProv() {
         while (true) {
+            // todo I : peek up from message queue and handle message
+
             LogValue log_value;
             if (proposal_prov_->GetNewSubmit(instance_id_, log_value)) {
                 proposer_.ProposeNew(log_value);

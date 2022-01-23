@@ -7,7 +7,6 @@
 
 
 #include <log_value.hpp>
-#include <state.pb.h>
 #include "messages_pax.hpp"
 #include "config_pax.hpp"
 #include "storage_pax.hpp"

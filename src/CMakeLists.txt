@@ -5,5 +5,5 @@ add_subdirectory(sm)
 add_subdirectory(storage)
 add_subdirectory(core)
 
-add_subdirectory(node)
 add_subdirectory(network/grpc)
+add_subdirectory(node)

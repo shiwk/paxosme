@@ -3,9 +3,6 @@
 //
 #include <learner_pax.hpp>
 
-#define LEAD_FOLLOW_DIS 10
-#define SENDING_INTERNAL 5000
-
 namespace paxosme {
     [[noreturn]] void PaxLearner::SendingLoop() {
         while (true) {
@@ -127,8 +124,8 @@ namespace paxosme {
             return; // proposer not matched
 
         auto proposal = GetAcceptedProposal();
-        if (proposal.proposal_id == 0 || pax_message.GetProposalId() != proposal.proposal_id)
-            return; // proposalId == 0 means not accepted yet
+        if (proposal.proposal_id == PROPOSAL_DUMMY || pax_message.GetProposalId() != proposal.proposal_id)
+            return; // proposalId == PROPOSAL_DUMMY means not accepted yet
 
         node_id_t node_id = proposal.node_id;
         if (node_id != GetNodeId())

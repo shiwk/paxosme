@@ -9,8 +9,8 @@ namespace paxosme {
 
     ProposerState::ProposerState() {
         my_proposal_id_ = 1;
-        highest_known_proposal_ = 0;
-        highest_proposal_provider_ = 0;
+        highest_known_proposal_ = PROPOSAL_DUMMY;
+        highest_proposal_provider_ = NODE_DUMMY;
     }
 
     bool ProposerState::TryUpdateHighestProposalId(proposal_id_t proposal_id, node_id_t node_id) {
@@ -67,8 +67,8 @@ namespace paxosme {
     }
 
     void ProposerState::Reset() {
-        highest_known_proposal_ = 0;
-        highest_proposal_provider_ = 0;
+        highest_known_proposal_ = PROPOSAL_DUMMY;
+        highest_proposal_provider_ = NODE_DUMMY;
         log_value_.Clear();
     }
 }
