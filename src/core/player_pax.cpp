@@ -49,11 +49,11 @@ namespace paxosme {
         return paxos_state;
     }
 
-    void PaxPlayer::Publish(EventType event_type, const event_callback &callback, int delayInMilli) {
+    void PaxPlayer::Publish(EventType event_type, const EventHandler &callback, int delayInMilli) {
         const std::chrono::duration<int> delay(delayInMilli);
-        event_time t = std::chrono::system_clock::now();
+        EventTimeStamp t = STEADY_TIME_NOW;
         t.operator+=(delay);
-        schedule_->add(callback, t, event_type);
+        schedule_->AddEvent(callback, t, event_type);
     }
 
     ProposalTriplet PaxPlayer::GetAcceptedProposal() {

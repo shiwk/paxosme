@@ -11,21 +11,21 @@ namespace paxosme {
         std::push_heap(events_.begin(), events_.end());
     }
 
-    bool EventQueue::HasTimeout(Event &event) {
+    bool EventQueue::HasTimeout() {
         if (events_.empty())
             return false;
 
         auto front = events_.front();
-        auto when = event.when;
-        event_time now = std::chrono::system_clock::now();
-        if  (now < when)
+        auto when = front.when;
+
+        if  (STEADY_TIME_NOW < when)
             return false;
-        event = front;
         return true;
     }
 
-    void EventQueue::Pop() {
+    void EventQueue::PopOne(Event &e) {
         std::pop_heap(events_.begin(), events_.end());
+        e = events_.back();
         events_.pop_back();
     }
 }

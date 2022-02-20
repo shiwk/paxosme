@@ -70,8 +70,7 @@ namespace paxosme {
 
     void PaxLearner::SendLearnedValues(instance_id_t begin_instance_id, node_id_t receiver) {
         instance_id_t to_send = begin_instance_id;
-        uint64_t timeBegin = Time::NowSinceEpochInMS();
-
+        SteadyTime timeBegin = STEADY_TIME_NOW;
 
         if (receiver_ != receiver)
             return; // receiver not matched
@@ -83,8 +82,8 @@ namespace paxosme {
 
             std::unique_lock<std::mutex> lck(mutex_send_);
             while (last_send - ack_send_ < LEAD_FOLLOW_DIS) {
-                uint64_t timeNow = Time::NowSinceEpochInMS();
-                if (timeNow - timeBegin > SENDING_INTERNAL)
+                SteadyTime timeNow = STEADY_TIME_NOW;
+                if (Time::StopWatchMS(timeBegin, timeNow) > SENDING_INTERNAL_MS)
                     return; // sync too slow
 
                 cond_v_.wait_for(lck, Time::MS(100)); // timeout or ACK notification
@@ -170,9 +169,8 @@ namespace paxosme {
         std::unique_lock<std::mutex> lck(mutex_send_);
         if (job_status_ != LearnerSendingJobStatus::kSending || receiver_ != message.GetSender())
             return; // ignore if I am not sending or to other follower (maybe ack too late)
-        if (message.GetInstanceId() > ack_send_)
-        {
-            ack_send_ =message.GetInstanceId();
+        if (message.GetInstanceId() > ack_send_) {
+            ack_send_ = message.GetInstanceId();
             cond_v_.notify_one(); // tell sending job continue
         }
     }

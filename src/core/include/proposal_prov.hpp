@@ -20,7 +20,7 @@ namespace paxosme {
 
     private:
         instance_id_t instance_id_;
-        LogValue *log_value_;
+
     };
 }
 

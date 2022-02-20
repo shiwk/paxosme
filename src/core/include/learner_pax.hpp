@@ -15,7 +15,7 @@
 
 #define SHALL_LEARN_TIMEOUT_CONST 3000
 #define LEAD_FOLLOW_DIS 10
-#define SENDING_INTERNAL 5000
+#define SENDING_INTERNAL_MS 5000
 
 namespace paxosme {
     class PaxLearnerState {

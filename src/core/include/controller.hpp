@@ -6,7 +6,7 @@
 #define PAXOSME_CONTROLLER_HPP
 
 #include "messages_pax.hpp"
-#include "msg_queue.hpp"
+#include "msg_prov.hpp"
 #include "proposer_pax.hpp"
 #include "acceptor_pax.hpp"
 #include "learner_pax.hpp"
@@ -36,11 +36,12 @@ namespace paxosme {
 
         void NewInstance();
 
+        [[noreturn]] void* MainLoop();
+
     private:
         void PushSMByState(instance_id_t target_instance_id);
 
-    private:
-        MsgQueue msg_queue_;
+        Schedule schedule_;
         instance_id_t instance_id_;
         PaxProposer proposer_;
         PaxAcceptor acceptor_;
@@ -48,6 +49,7 @@ namespace paxosme {
         PaxConfig *pax_config_;
         ProposalProv *proposal_prov_;
         std::future <void*> prov_loop_;
+        MsgProv msgProv_;
         StateMachine *state_machine_;
     };
 }

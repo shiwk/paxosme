@@ -38,6 +38,7 @@ add_library(paxosmecore
         ${PROTO_HEADER}
         ${PROTO_SRC})
 
+target_link_libraries(paxosmecore util)
 target_link_libraries(paxosmecore sm)
 target_link_libraries(paxosmecore db)
 

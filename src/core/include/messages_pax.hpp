@@ -161,6 +161,7 @@ namespace paxosme {
             instance_id_ = instance_id;
         }
 
+        PaxMessage() = default;
         PaxMessage(node_id_t sender_id, MessageType message_type) : sender_id_(sender_id), message_type_(message_type) {}
 
 

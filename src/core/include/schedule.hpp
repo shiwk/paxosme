@@ -8,14 +8,16 @@
 #include <event_queue.hpp>
 #include <queue>
 #include <unordered_map>
+
 namespace paxosme{
     class Schedule{
     public:
-        void add(const event_callback&, const time_t&, EventType);
-        void add(const event_callback&, const timeval&, EventType);
-        void add(const event_callback&, const std::chrono::time_point<std::chrono::system_clock>&, EventType);
+        void AddEvent(const EventHandler &cb, const time_t &when, EventType event_type);
+        void AddEvent(const EventHandler &cb, const timeval &when, EventType event_type);
+        void AddEvent(const EventHandler &cb, const EventTimeStamp &when, EventType event_type);
 
-        [[noreturn]] void run();
+        bool Dispatch(Event &);
+        bool NextEventTime(EventTimeStamp &);
 
     private:
         std::unordered_map<EventType, EventId> eventTypeIdMap_;

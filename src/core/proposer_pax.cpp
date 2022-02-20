@@ -35,7 +35,7 @@ namespace paxosme {
         auto pax_message = GenerateMessage(MessageType::kPrepareBroadCast, proposalId);
         instance_id_t instanceId = pax_message.GetInstanceId();
         BroadCastMessage(pax_message);
-        event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, false); };
+        EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, false); };
         Publish(EventType::kPrepareTimeout, callback, PREPARE_TIMEOUT);
     }
 
@@ -86,7 +86,7 @@ namespace paxosme {
         } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
             // re-launch prepare
             instance_id_t instanceId = pax_reply_message.GetInstanceId();
-            event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, true); };
+            EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, true); };
             Publish(EventType::kPrepareTimeout, callback, PREPARE_TIMEOUT);
         }
     }
@@ -101,7 +101,7 @@ namespace paxosme {
         proposal_counter_.Reset(); // reset for propose stage counter before broadcast
         BroadCastMessage(pax_message);
         instance_id_t instanceId = pax_message.GetInstanceId();
-        event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, false); };
+        EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, false); };
         Publish(EventType::kProposeTimeout, callback, PROPOSE_TIMEOUT);
     }
 
@@ -141,7 +141,7 @@ namespace paxosme {
             BroadCastMessage(msg);
         } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
             instance_id_t instanceId = pax_reply_message.GetInstanceId();
-            event_callback callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, true); };
+            EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId, true); };
             Publish(EventType::kProposeTimeout, callback, PROPOSE_TIMEOUT);
         }
     }

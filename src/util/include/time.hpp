@@ -17,7 +17,8 @@ using SystemTime = std::chrono::system_clock::time_point;
 namespace paxosme {
     class Time {
     public:
-        static uint64_t StopWatchMS(const SteadyTime begin, const SteadyTime end);
+        static uint64_t StopWatchMS(SteadyTime begin, SteadyTime end);
+        static std::chrono::milliseconds DurationMS(SteadyTime begin, SteadyTime end);
         static std::chrono::milliseconds MS(uint64_t);
         static void MsSleep(const int iTimeMs);
     };

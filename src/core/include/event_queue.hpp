@@ -8,9 +8,10 @@
 
 #include <chrono>
 #include <vector>
+#include "time.hpp"
 
-using event_callback = std::function<void()>;
-using event_time = std::chrono::time_point<std::chrono::system_clock>;
+using EventHandler = std::function<void()>;
+using EventTimeStamp = SteadyTime;
 
 namespace paxosme {
 
@@ -26,13 +27,13 @@ namespace paxosme {
     struct Event {
         Event() : eventType(kNULL), eventId(0) {};
 
-        Event(event_callback cb, const event_time &time, EventType type, EventId event_id) : callback(std::move(cb)),
-                                                                                             when(time),
-                                                                                             eventType(type),
-                                                                                             eventId(event_id) {}
+        Event(EventHandler cb, const EventTimeStamp &time, EventType type, EventId event_id) : callback(std::move(cb)),
+                                                                                               when(time),
+                                                                                               eventType(type),
+                                                                                               eventId(event_id) {}
 
-        event_callback callback;
-        event_time when;
+        EventHandler callback;
+        EventTimeStamp when;
         EventType eventType;
         EventId eventId;
 
@@ -47,9 +48,11 @@ namespace paxosme {
     public:
         void Push(const Event &event);
 
-        bool HasTimeout(Event &);
+        bool HasTimeout();
 
-        void Pop();
+        void PopOne(Event &);
+
+        bool NextEvent(Event &event);
 
     private:
         // no lock as event queue guarantees sequential

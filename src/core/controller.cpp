@@ -5,10 +5,6 @@
 #include <controller.hpp>
 
 namespace paxosme {
-    static void *thread_func(paxosme::PaxController *p) {
-        p->FlushProv();
-    }
-
     PaxController::PaxController(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
                                  const Schedule *schedule)
             : pax_config_(const_cast<PaxConfig *>(config)),
@@ -54,7 +50,7 @@ namespace paxosme {
             instance_id_ = instanceInSM + 1;
         }
 
-        prov_loop_ = std::async(std::launch::async, thread_func, this);
+        prov_loop_ = std::async(std::launch::async, [this]{return MainLoop();});
         proposal_id_t proposalId = acceptor_.GetAcceptedProposalId();
 
         proposer_.Init(proposalId + 1, this);
@@ -62,13 +58,9 @@ namespace paxosme {
     }
 
     [[noreturn]] void PaxController::FlushProv() {
-        while (true) {
-            // todo I : peek up from message queue and handle message
-
-            LogValue log_value;
-            if (proposal_prov_->GetNewSubmit(instance_id_, log_value)) {
-                proposer_.ProposeNew(log_value);
-            }
+        LogValue log_value;
+        if (proposal_prov_->GetNewSubmit(instance_id_, log_value)) {
+            proposer_.ProposeNew(log_value);
         }
     }
 
@@ -148,5 +140,26 @@ namespace paxosme {
         acceptor_.NewInstance();
         proposer_.NewInstance();
         learner_.NewInstance();
+    }
+
+    [[noreturn]] void* PaxController::MainLoop() {
+        while (true) {
+
+            Event eventToHandle;
+            while (schedule_.Dispatch(eventToHandle))
+                eventToHandle();
+
+            EventTimeStamp nextEventTime;
+            PaxMessage *paxMessage;
+            if (schedule_.NextEventTime(nextEventTime)){
+                nextEventTime - STEADY_TIME_NOW;
+                if(msgProv_.Take(paxMessage, Time::DurationMS(nextEventTime, STEADY_TIME_NOW))) {
+                    // todo I: handle the message and delete it
+                }
+            }
+            else if(msgProv_.Take(paxMessage)) {
+                // todo I: handle the message and delete it
+            }
+        }
     }
 }
