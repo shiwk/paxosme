@@ -8,9 +8,12 @@
 namespace paxosme{
     class MsgQueue{
         void Push(PaxMessage pax_message);
-        PaxMessage Pop();
+        PaxMessage Pop(uint64_t);
         PaxMessage Peek();
+
+        // todo I: thread safe message queue
     };
 }
+
 
 #endif //PAXOSME_MSG_QUEUE_HPP

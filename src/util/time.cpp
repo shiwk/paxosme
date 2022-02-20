@@ -11,6 +11,11 @@ namespace paxosme {
         return now;
     }
 
+    uint64_t Time::StopWatchMS(const SteadyTime begin, const SteadyTime end) {
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        return duration.count();
+    }
+
     std::chrono::milliseconds Time::MS(uint64_t ms) {
         return std::chrono::milliseconds(ms);
     };
