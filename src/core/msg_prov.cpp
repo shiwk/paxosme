@@ -15,14 +15,16 @@ bool paxosme::MsgProv::Take(paxosme::PaxMessage *message, std::chrono::milliseco
     lock_.Lock();
     bool pred = lock_.WaitFor(waitTime, [&]() { return !queue_.empty(); });
 
-    // queue_.empty() is true
+
     if (pred) {
+        // queue_ is not empty
         message = queue_.front();
         queue_.pop();
         lock_.UnLock();
         return true;
     }
-    lock_.UnLock();
 
+    // queue_ is empty and timeout
+    lock_.UnLock();
     return false;
 }

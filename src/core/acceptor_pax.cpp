@@ -133,7 +133,7 @@ namespace paxosme {
             paxos_state.set_accepted_node_id(proposer);
             paxos_state.set_accepted_proposal_id(acceptor_state_.GetAcceptedProposalId());
             LogValue accepted_value = acceptor_state_.GetAcceptedValue();
-            paxos_state.set_accepted_value(accepted_value.GetValue());
+            paxos_state.set_accepted_value(accepted_value);
         }
 
         // an acceptor is supposed to remember this information even if it fails and then restarts.

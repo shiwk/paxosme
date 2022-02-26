@@ -59,7 +59,7 @@ namespace paxosme {
 
     [[noreturn]] void PaxController::FlushProv() {
         LogValue log_value;
-        if (proposal_prov_->GetNewSubmit(instance_id_, log_value)) {
+        if (proposal_prov_->Get(instance_id_, log_value)) {
             proposer_.ProposeNew(log_value);
         }
     }
@@ -150,9 +150,8 @@ namespace paxosme {
                 eventToHandle();
 
             EventTimeStamp nextEventTime;
-            PaxMessage *paxMessage;
+            PaxMessage *paxMessage = nullptr;
             if (schedule_.NextEventTime(nextEventTime)){
-                nextEventTime - STEADY_TIME_NOW;
                 if(msgProv_.Take(paxMessage, Time::DurationMS(nextEventTime, STEADY_TIME_NOW))) {
                     // todo I: handle the message and delete it
                 }

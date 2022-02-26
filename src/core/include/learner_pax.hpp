@@ -41,7 +41,7 @@ namespace paxosme {
         }
 
         void Reset() {
-            log_value_.Clear();
+            log_value_.clear();
             learned_ = false;
         }
     };

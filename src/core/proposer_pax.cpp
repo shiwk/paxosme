@@ -21,7 +21,7 @@ namespace paxosme {
      *  @param log_value
      */
     void PaxProposer::ProposeNew(LogValue &log_value) {
-        if (proposer_state_.GetLogValue().Empty()) {
+        if (proposer_state_.GetLogValue().empty()) {
             proposer_state_.SetLogValue(log_value);
         }
     }

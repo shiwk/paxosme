@@ -7,6 +7,7 @@
 
 #include <log_value.hpp>
 #include "common.hpp"
+#include "lock.hpp"
 
 namespace paxosme {
     class ProposalProv {
@@ -14,13 +15,13 @@ namespace paxosme {
     public:
         // todo I: cache for new proposing value and push the "NewValue" msg to message queue.
         // need waiting for the proposing value to be determined (success or fail)
-        void Submit(std::string &value);
+        void NewValue(std::string &value);
 
-        bool GetNewSubmit(instance_id_t instance_id, LogValue &);
+        bool Get(instance_id_t instance_id, LogValue &);
 
     private:
-        instance_id_t instance_id_;
-
+        LogValue logValue;
+        MyLock lock_;
     };
 }
 

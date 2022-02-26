@@ -159,7 +159,7 @@ namespace paxosme {
             paxos_state.set_instance_id(instance_id);
             paxos_state.set_accepted_proposal_id(proposal_id);
             paxos_state.set_accepted_node_id(proposer);
-            paxos_state.set_accepted_value(value.GetValue());
+            paxos_state.set_accepted_value(value);
 
             WriteState(paxos_state);
         }

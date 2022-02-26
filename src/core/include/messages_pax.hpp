@@ -170,7 +170,7 @@ namespace paxosme {
         }
 
         void SetProposedLogValue(const LogValue &log_value) {
-            proposed_log_value_ = log_value.GetValue();
+            proposed_log_value_ = log_value;
         }
 
         const LogValue &GetProposedLogValue() const {

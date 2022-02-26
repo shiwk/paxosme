@@ -69,7 +69,7 @@ namespace paxosme {
     void ProposerState::Reset() {
         highest_known_proposal_ = PROPOSAL_DUMMY;
         highest_proposal_provider_ = NODE_DUMMY;
-        log_value_.Clear();
+        log_value_.clear();
     }
 }
 
