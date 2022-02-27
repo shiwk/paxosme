@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "player_pax.hpp"
-#include "config_pax.hpp"
+#include "config.hpp"
 
 namespace paxosme {
     class AcceptorState {
@@ -164,6 +164,8 @@ namespace paxosme {
         bool IsProposalAccepted(proposal_id_t proposal_id, node_id_t node_id);
 
         void NewInstance() override;
+        void InstanceDone(instance_id_t instance_id, const LogValue &log_value) override;
+
     };
 
 

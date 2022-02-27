@@ -18,6 +18,9 @@ namespace paxosme {
     class PaxController {
     public:
         explicit PaxController(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
+
+        ~PaxController();
+
         void HandleMessage(const PaxMessage &message);
 
         void Init(); // start loop
@@ -32,23 +35,23 @@ namespace paxosme {
 
         node_id_t GetAcceptedNodeId();
 
-        [[noreturn]] void FlushProv();
+        void FlushProv();
 
-        void NewInstance();
 
-        [[noreturn]] void* MainLoop();
+        [[noreturn]] void *MainLoop();
 
     private:
         void PushSMByState(instance_id_t target_instance_id);
+        void NewInstance();
+        void InstanceDone();
 
         Schedule schedule_;
         instance_id_t instance_id_;
-        PaxProposer proposer_;
-        PaxAcceptor acceptor_;
-        PaxLearner learner_;
+        PaxProposer *proposer_;
+        PaxAcceptor *acceptor_;
+        PaxLearner *learner_;
         PaxConfig *pax_config_;
-        ProposalProv *proposal_prov_;
-        std::future <void*> prov_loop_;
+        std::future<void *> prov_loop_;
         MsgProv msgProv_;
         StateMachine *state_machine_;
     };

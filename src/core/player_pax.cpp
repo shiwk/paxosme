@@ -49,7 +49,7 @@ namespace paxosme {
         return paxos_state;
     }
 
-    void PaxPlayer::Publish(EventType event_type, const EventHandler &callback, int delayInMilli) {
+    void PaxPlayer::Publish(EventType event_type, const EventHandler &callback, millisec delayInMilli) {
         const std::chrono::duration<int> delay(delayInMilli);
         EventTimeStamp t = STEADY_TIME_NOW;
         t.operator+=(delay);

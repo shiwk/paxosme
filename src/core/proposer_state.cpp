@@ -49,7 +49,7 @@ namespace paxosme {
         return log_value_;
     }
 
-    void ProposerState::SetLogValue(LogValue &log_value) {
+    void ProposerState::SetLogValue(const LogValue &log_value) {
         log_value_ = log_value;
     }
 

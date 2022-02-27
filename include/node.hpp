@@ -7,22 +7,12 @@
 
 #include <string>
 #include <vector>
-#include "common.hpp"
+#include "config.hpp"
 
 namespace paxosme {
-    class NodeInfo {
-        node_id_t node_id_;
-        std::string ip_;
-        int port_;
-    };
-
-    class NodeList {
-        std::vector<NodeInfo *> node_list_;
-    };
-
-    class Node {
+    class PaxosmeMber {
     public:
-        virtual ~Node() {}
+        virtual ~PaxosmeMber() {}
 
         void Start();
 
@@ -31,9 +21,9 @@ namespace paxosme {
         node_id_t GetNodeId();
 
     private:
-        NodeInfo node_info_;
-        NodeList my_learners_;
-        NodeList all_nodes_;
+        Node node_info_;
+        Node my_learners_;
+        Node all_nodes_;
     };
 }
 

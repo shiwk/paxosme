@@ -12,6 +12,7 @@
 
 using SteadyTime = std::chrono::steady_clock::time_point;
 using SystemTime = std::chrono::system_clock::time_point;
+using millisec = uint64_t;
 
 
 namespace paxosme {
@@ -20,7 +21,7 @@ namespace paxosme {
         static uint64_t StopWatchMS(SteadyTime begin, SteadyTime end);
         static std::chrono::milliseconds DurationMS(SteadyTime begin, SteadyTime end);
         static std::chrono::milliseconds MS(uint64_t);
-        static void MsSleep(const int iTimeMs);
+        static void MsSleep(const millisec iTimeMs);
     };
 }
 #endif //PAXOSME_TIMER_H

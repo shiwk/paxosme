@@ -10,7 +10,8 @@
 
 #include <log_value.hpp>
 #include "player_pax.hpp"
-#include "config_pax.hpp"
+#include "config.hpp"
+#include "proposal_prov.hpp"
 
 namespace paxosme {
 
@@ -42,7 +43,7 @@ namespace paxosme {
 
         const LogValue &GetLogValue() const;
 
-        void SetLogValue(LogValue &log_value);
+        void SetLogValue(const LogValue &);
 
         bool TryUpdateHighestProposalId(proposal_id_t proposal_id, node_id_t);
 
@@ -73,6 +74,8 @@ namespace paxosme {
 
         void Reset();
 
+        bool SomeoneReject();
+
     private:
         PaxConfig *pax_config_;
         int32_t vote_count_;
@@ -87,7 +90,7 @@ namespace paxosme {
     public:
         explicit PaxProposer(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
 
-        void ProposeNew(LogValue &log_value);
+        void NewValue();
 
         void HandlePrepareReply(const PaxMessage &pax_reply_message);
 
@@ -95,20 +98,23 @@ namespace paxosme {
 
         void Init(proposal_id_t, const PaxController *);
 
+        void InstanceDone(instance_id_t instance_id, const LogValue &log_value) override;
         void NewInstance() override;
+
 
     private:
         PaxMessage GenerateMessage(MessageType, proposal_id_t);
 
-        void Prepare(bool newPrepare);
-
         void Propose();
+        void Accept();
 
-        void ProposerTimeoutCallback(instance_id_t instanceId, bool needNewPrepare);
+        void ProposerTimeoutCallback(instance_id_t instanceId);
+        void NewValueTimeoutCallback();
 
         ProposerStatus proposer_status_;
         ProposalCounter proposal_counter_;
         ProposerState proposer_state_;
+        ProposalProv *proposal_prov_;
 
 
         bool TryUpdateProposerStateWithPrepareReply(const PaxMessage &message);

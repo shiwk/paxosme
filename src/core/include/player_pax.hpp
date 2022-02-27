@@ -8,7 +8,7 @@
 
 #include <log_value.hpp>
 #include "messages_pax.hpp"
-#include "config_pax.hpp"
+#include "config.hpp"
 #include "storage_pax.hpp"
 #include "communicate_pax.hpp"
 #include "schedule.hpp"
@@ -18,15 +18,23 @@ namespace paxosme {
 
     class PaxController;
 
+    struct ProposalTriplet{
+        instance_id_t instance_id;
+        proposal_id_t proposal_id;
+        node_id_t node_id;
+    };
+
     class PaxPlayer {
     public:
         explicit PaxPlayer(const PaxConfig*, const PaxCommunicator*, const Storage *storage, const Schedule *schedule);
+        virtual ~PaxPlayer() = default;
         PaxosState ReadState(instance_id_t instance_id);
 
         void InitController(const PaxController*);
 
         instance_id_t GetInstanceId() const;
 
+        virtual void InstanceDone(instance_id_t instance_id, const LogValue &log_value) = 0;
         virtual void NewInstance() = 0;
 
     protected:
@@ -44,7 +52,7 @@ namespace paxosme {
 
         void WriteState(const paxosme::PaxosState &paxos_state);
 
-        void Publish(EventType event_type, const EventHandler &callback, int delayInMilli = 0);
+        void Publish(EventType event_type, const EventHandler &callback, millisec delayInMilli = 0);
 
         ProposalTriplet GetAcceptedProposal();
 

@@ -7,7 +7,7 @@
 
 #include <log_value.hpp>
 #include "player_pax.hpp"
-#include "config_pax.hpp"
+#include "config.hpp"
 #include <thread>
 #include <condition_variable>
 #include <time.hpp>
@@ -72,6 +72,7 @@ namespace paxosme {
         bool Learned() const;
 
         void NewInstance() override;
+        void InstanceDone(instance_id_t instance_id, const LogValue &log_value) override;
 
     public:
         // lead

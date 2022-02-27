@@ -19,7 +19,8 @@ namespace paxosme {
         kNULL = 0,
         kPrepareTimeout = 1,
         kProposeTimeout = 2,
-        kShallILearnTimeout = 3
+        kNewValueTimeout = 3,
+        kShallILearnTimeout = 4
     };
 
     using EventId = uint64_t;
