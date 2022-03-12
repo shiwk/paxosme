@@ -67,6 +67,10 @@ namespace paxosme {
     void PaxPlayer::InitController(const PaxController *controller) {
         controller_ = const_cast<PaxController *> (controller);
     }
+
+    void PaxPlayer::Withdraw(EventType event_type) {
+        schedule_->Remove(event_type);
+    }
 }
 
 

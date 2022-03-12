@@ -11,17 +11,24 @@
 
 namespace paxosme {
 
-    enum LogValueStatus {
+    enum NewValueStatus {
         kPending = 1,
         kProposing = 2,
         kTimeout = 3,
         kSuccess = 4
     };
 
-    struct PendingLogValue {
+    struct PendingNewValue {
         LogValue logValue;
         instance_id_t instanceId;
-        LogValueStatus logValueStatus;
+        NewValueStatus newValueStatus;
+    };
+
+    enum NewValueResult {
+        kValueNone = 1,
+        kValueTimeout = 2,
+        kValueAccepted = 3,
+        kValueLose = 4
     };
 
     class ProposalProv {
@@ -34,7 +41,7 @@ namespace paxosme {
         bool Get(LogValue &);
 
         bool FirstGet(LogValue &, instance_id_t); // proposer NewValue needs, providing instance id to record
-        bool Flush(const LogValue &, instance_id_t); // consensus reached or my proposing timeout
+        bool Flush(const LogValue &, instance_id_t, NewValueResult); // consensus reached or my proposing timeout
 
         millisec GetNewValueTimeout();
 
@@ -42,7 +49,7 @@ namespace paxosme {
     private:
         MyLock lock_;
         millisec timeout_ms_;
-        std::queue<PendingLogValue> queue_;
+        std::queue<PendingNewValue> queue_;
     };
 }
 

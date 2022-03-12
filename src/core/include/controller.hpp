@@ -6,7 +6,7 @@
 #define PAXOSME_CONTROLLER_HPP
 
 #include "messages_pax.hpp"
-#include "msg_prov.hpp"
+#include "queue.hpp"
 #include "proposer_pax.hpp"
 #include "acceptor_pax.hpp"
 #include "learner_pax.hpp"
@@ -35,8 +35,9 @@ namespace paxosme {
 
         node_id_t GetAcceptedNodeId();
 
-        void FlushProv();
+        void TryNewValue();
 
+        void AddMessage(PaxMessage &);
 
         [[noreturn]] void *MainLoop();
 
@@ -52,7 +53,7 @@ namespace paxosme {
         PaxLearner *learner_;
         PaxConfig *pax_config_;
         std::future<void *> prov_loop_;
-        MsgProv msgProv_;
+        MyQueue<PaxMessage*> msgProv_;
         StateMachine *state_machine_;
     };
 }

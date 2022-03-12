@@ -11,16 +11,17 @@
 #include "time.hpp"
 
 using EventHandler = std::function<void()>;
-using EventTimeStamp = SteadyTime;
+using EventTimeStamp = std::chrono::steady_clock::time_point;
 
 namespace paxosme {
 
     enum EventType {
         kNULL = 0,
-        kPrepareTimeout = 1,
-        kProposeTimeout = 2,
-        kNewValueTimeout = 3,
-        kShallILearnTimeout = 4
+        // timeout events
+        kProposeTO = 1,
+        kAcceptTO = 2,
+        kNewValueTO = 3,
+        kShallILearnTO = 4
     };
 
     using EventId = uint64_t;

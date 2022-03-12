@@ -13,7 +13,7 @@ namespace paxosme {
                              const Schedule *schedule)
             : PaxPlayer(config, communicator, storage, schedule),
               proposal_counter_(config) {
-        proposer_status_ = ProposerStatus::kNone;
+        status_ = ProposerStatus::kNone;
     }
 
     /**
@@ -31,7 +31,7 @@ namespace paxosme {
         if (proposer_state_.GetLogValue().empty()) {
             proposer_state_.SetLogValue(log_value);
         }
-        Publish(EventType::kNewValueTimeout, callback, proposal_prov_->GetNewValueTimeout());
+        Publish(EventType::kNewValueTO, callback, proposal_prov_->GetNewValueTimeout());
         Propose();
     }
 
@@ -39,7 +39,7 @@ namespace paxosme {
      * prepare the new value wrapped in message.
      */
     void PaxProposer::Propose() {
-        proposer_status_ = ProposerStatus::kPrepare;
+        status_ = ProposerStatus::kPropose;
 
         if (proposal_counter_.SomeoneReject())
             proposer_state_.NewProposalId();
@@ -49,8 +49,8 @@ namespace paxosme {
 
         auto pax_message = GenerateMessage(MessageType::kPrepareBroadCast, proposalId);
         instance_id_t instanceId = pax_message.GetInstanceId();
-        EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId); };
-        Publish(EventType::kPrepareTimeout, callback, PREPARE_TIMEOUT);
+        EventHandler callback = [this, instanceId] { ProposeTimeoutCallback(instanceId); };
+        Publish(EventType::kProposeTO, callback, PREPARE_TIMEOUT);
 
         BroadCastMessage(pax_message);
     }
@@ -59,7 +59,7 @@ namespace paxosme {
      * Callback if prepare not accepted before timout
      * @param instanceId
      */
-    void PaxProposer::ProposerTimeoutCallback(instance_id_t instanceId) {
+    void PaxProposer::ProposeTimeoutCallback(instance_id_t instanceId) {
         if (instanceId != GetInstanceId()) {
             return; // timeout id inconsistent with instance id
         }
@@ -74,7 +74,7 @@ namespace paxosme {
      */
     void PaxProposer::HandlePrepareReply(const PaxMessage &pax_reply_message) {
 
-        if (proposer_status_ != ProposerStatus::kPrepare)
+        if (status_ != ProposerStatus::kPropose)
             return; // incompatible proposer status
 
         if (pax_reply_message.GetProposer() != GetNodeId())
@@ -102,8 +102,8 @@ namespace paxosme {
         } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
             // re-launch prepare
             instance_id_t instanceId = pax_reply_message.GetInstanceId();
-            EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId); };
-            Publish(EventType::kPrepareTimeout, callback, PREPARE_TIMEOUT);
+            EventHandler callback = [this, instanceId] { ProposeTimeoutCallback(instanceId); };
+            Publish(EventType::kProposeTO, callback, PREPARE_TIMEOUT);
         }
     }
 
@@ -112,14 +112,14 @@ namespace paxosme {
      * Propose value once prepare finished.
      */
     void PaxProposer::Accept() {
-        proposer_status_ = ProposerStatus::kPropose;
+        status_ = ProposerStatus::kAccept;
         PaxMessage pax_message = GenerateMessage(MessageType::kProposeBroadCast, proposer_state_.GetMyProposalId());
 
         proposal_counter_.Reset(); // reset for propose stage counter before broadcast
         BroadCastMessage(pax_message);
         instance_id_t instanceId = pax_message.GetInstanceId();
-        EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId); };
-        Publish(EventType::kProposeTimeout, callback, PROPOSE_TIMEOUT);
+        EventHandler callback = [this, instanceId] { ProposeTimeoutCallback(instanceId); };
+        Publish(EventType::kAcceptTO, callback, PROPOSE_TIMEOUT);
     }
 
     /**
@@ -128,7 +128,7 @@ namespace paxosme {
      */
     void PaxProposer::HandleProposeReply(const PaxMessage &pax_reply_message) {
 
-        if (proposer_status_ != ProposerStatus::kPropose)
+        if (status_ != ProposerStatus::kAccept)
             return; // incompatible proposer status
 
         if (pax_reply_message.GetProposer() != GetNodeId())
@@ -148,7 +148,7 @@ namespace paxosme {
         }
 
         if (proposal_counter_.IsMajorityAccepted()) {
-            proposer_status_ = ProposerStatus::kMajorityAccepted;
+            status_ = ProposerStatus::kMajorityAccepted;
             PaxMessage msg(GetNodeId(), MessageType::kSenderPublishChosenValue);
             // no log_value in msg
             msg.SetInstanceId(pax_reply_message.GetInstanceId());
@@ -158,8 +158,8 @@ namespace paxosme {
             BroadCastMessage(msg);
         } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
             instance_id_t instanceId = pax_reply_message.GetInstanceId();
-            EventHandler callback = [this, instanceId] { ProposerTimeoutCallback(instanceId); };
-            Publish(EventType::kProposeTimeout, callback, PROPOSE_TIMEOUT);
+            EventHandler callback = [this, instanceId] { ProposeTimeoutCallback(instanceId); };
+            Publish(EventType::kAcceptTO, callback, PROPOSE_TIMEOUT);
         }
     }
 
@@ -185,10 +185,29 @@ namespace paxosme {
     void PaxProposer::NewInstance() {
         proposal_counter_.Reset();
         proposer_state_.Reset();
-        proposer_status_ = ProposerStatus::kNone;
+
+        status_ = ProposerStatus::kNone;
     }
 
     void PaxProposer::InstanceDone(instance_id_t instance_id, const LogValue &log_value) {
-        proposal_prov_->Flush(log_value, instance_id);
+        proposal_prov_->Flush(log_value, instance_id, kValueAccepted);
+        Withdraw(kProposeTO);
+        Withdraw(kAcceptTO);
+    }
+
+    void PaxProposer::NewValueTimeoutCallback() {
+        if (status_ != ProposerStatus::kPropose && status_ != ProposerStatus::kAccept){
+            // this should not happen
+            return ;
+        }
+
+        // exist proposing
+        Withdraw(kProposeTO);
+        Withdraw(kAcceptTO);
+
+        status_ = ProposerStatus::kNone;
+
+        // flush pending value
+        proposal_prov_->Flush("", GetInstanceId(), kValueTimeout);
     }
 }

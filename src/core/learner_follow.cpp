@@ -11,7 +11,7 @@ namespace paxosme {
 
     void PaxLearner::ShallLearn() {
         // re-launch message
-        Publish(EventType::kShallILearnTimeout, [this] { ShallLearn(); }, shall_Learn_delay_);
+        Publish(EventType::kShallILearnTO, [this] { ShallLearn(); }, shall_Learn_delay_);
 
         node_id_t node_id = GetNodeId();
         instance_id_t instance_id = GetInstanceId();
@@ -60,7 +60,7 @@ namespace paxosme {
 
     void PaxLearner::LearnFromOthers(const PaxMessage &pax_message) {
         // re-launch message
-        Publish(EventType::kShallILearnTimeout, [this] { ShallLearn(); }, shall_Learn_delay_);
+        Publish(EventType::kShallILearnTO, [this] { ShallLearn(); }, shall_Learn_delay_);
 
         if (pax_message.GetInstanceId() != GetInstanceId())
             return; // instance id not matched

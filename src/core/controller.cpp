@@ -4,10 +4,12 @@
 
 #include <controller.hpp>
 
+#define MSG_COUNT_LIMIT 1000
+
 namespace paxosme {
     PaxController::PaxController(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
                                  const Schedule *schedule)
-            : pax_config_(const_cast<PaxConfig *>(config)) {
+            : pax_config_(const_cast<PaxConfig *>(config)), msgProv_(MSG_COUNT_LIMIT) {
         proposer_ = new PaxProposer{config, communicator, storage, schedule};
         learner_ = new PaxLearner{config, communicator, storage, schedule};
         acceptor_ = new PaxAcceptor{config, communicator, storage, schedule};
@@ -57,7 +59,7 @@ namespace paxosme {
         learner_->Init(this);
     }
 
-    void PaxController::FlushProv() {
+    void PaxController::TryNewValue() {
         if (learner_->AnymoreToLearn()){
             // not catching up
             return;
@@ -153,13 +155,15 @@ namespace paxosme {
             PaxMessage *paxMessage = nullptr;
             if (schedule_.NextEventTime(nextEventTime)) {
                 if (msgProv_.Take(paxMessage, Time::DurationMS(nextEventTime, STEADY_TIME_NOW))) {
-                    // todo I: handle the message and delete it
+                    HandleMessage(*paxMessage);
+                    delete paxMessage;
                 }
             } else if (msgProv_.Take(paxMessage)) {
-                // todo I: handle the message and delete it
+                HandleMessage(*paxMessage);
+                delete paxMessage;
             }
 
-            FlushProv();
+            TryNewValue();
         }
     }
 
@@ -183,6 +187,11 @@ namespace paxosme {
         acceptor_->NewInstance();
         proposer_->NewInstance();
         learner_->NewInstance();
+    }
+
+    void PaxController::AddMessage(PaxMessage &pax_message) {
+        PaxMessage* message = &pax_message;
+        msgProv_.TryAdd(message);
     }
 
 }

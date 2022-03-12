@@ -17,8 +17,8 @@ namespace paxosme {
 
     enum class ProposerStatus : unsigned char {
         kNone = 0,
-        kPrepare = 1,
-        kPropose = 1 << 1,
+        kPropose = 1,
+        kAccept = 1 << 1,
         kMajorityAccepted = 1 << 2,
         kMajorityRejected = 1 << 3
     };
@@ -108,10 +108,10 @@ namespace paxosme {
         void Propose();
         void Accept();
 
-        void ProposerTimeoutCallback(instance_id_t instanceId);
+        void ProposeTimeoutCallback(instance_id_t instanceId);
         void NewValueTimeoutCallback();
 
-        ProposerStatus proposer_status_;
+        ProposerStatus status_;
         ProposalCounter proposal_counter_;
         ProposerState proposer_state_;
         ProposalProv *proposal_prov_;

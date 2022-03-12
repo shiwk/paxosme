@@ -12,7 +12,6 @@
 #include "common.hpp"
 
 namespace paxosme {
-    using LogValue = std::string;
 
     enum MessageType {
         kNone,

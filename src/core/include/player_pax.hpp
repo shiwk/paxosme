@@ -53,6 +53,7 @@ namespace paxosme {
         void WriteState(const paxosme::PaxosState &paxos_state);
 
         void Publish(EventType event_type, const EventHandler &callback, millisec delayInMilli = 0);
+        void Withdraw(EventType);
 
         ProposalTriplet GetAcceptedProposal();
 

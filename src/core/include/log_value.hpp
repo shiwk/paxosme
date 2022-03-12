@@ -8,6 +8,7 @@
 #include <utility>
 #include <iostream>
 namespace paxosme{
+    using LogValue = std::string;
 //    struct LogValue{
 //        LogValue() = default;
 //        explicit LogValue(std::string str) : value_(std::move(str)){}

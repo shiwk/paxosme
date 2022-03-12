@@ -23,7 +23,7 @@ namespace paxosme {
     void PaxLearner::Init(const PaxController *controller) {
         PaxPlayer::InitController(controller);
         learner_send_loop_ = std::async(std::launch::async, &PaxLearner::SendingLoop, this);
-        Publish(EventType::kShallILearnTimeout, [this] { ShallLearn(); }, shall_Learn_delay_);
+        Publish(EventType::kShallILearnTO, [this] { ShallLearn(); }, shall_Learn_delay_);
     }
 
     bool PaxLearner::HandleSenderPublish(const PaxMessage &pax_message) {
