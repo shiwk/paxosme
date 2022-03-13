@@ -36,7 +36,7 @@ namespace paxosme {
     }
 
     bool ProposerState::TryUpdateLogValue(proposal_id_t proposal_id, node_id_t node_id,
-                                          const paxosme::LogValue &log_value) {
+                                          const LogValue &log_value) {
         if (TryUpdateHighestProposalId(proposal_id, node_id)) {
             log_value_ = log_value;
             return true;

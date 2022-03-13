@@ -11,45 +11,59 @@
 template<class T>
 class MyQueue {
 public:
-    explicit MyQueue(size_t limit) : limit_(limit){}
+    explicit MyQueue(size_t limit) : limit_(limit) {}
 
     bool TryAdd(const T &t) {
-        lock_.Lock();
+//        lock_.Lock();
+        std::unique_lock<std::mutex> lock(mtx_);
         bool res = false;
         if (queue_.size() < limit_) {
             queue_.push(t);
             res = true;
-            lock_.Notify();
+            cv_.notify_one();
         }
-        lock_.UnLock();
+//        lock_.UnLock();
         return res;
     }
 
     // get and pop
     bool Take(T &t, std::chrono::milliseconds waitTime = std::chrono::milliseconds(1000)) {
-        lock_.Lock();
-        bool pred = lock_.WaitFor(waitTime, [&]() { return !queue_.empty(); });
-
+        std::unique_lock<std::mutex> lock(mtx_);
+        bool pred = cv_.wait_for(lock, waitTime, [&]() { return !queue_.empty(); });
 
         if (pred) {
             // queue_ is not empty
             t = queue_.front();
             queue_.pop();
-            lock_.UnLock();
             return true;
         }
 
         // queue_ is empty and timeout
-        lock_.UnLock();
         return false;
     }
 
     // pop
     void PopN(size_t);
 
+    size_t Size() {
+        std::unique_lock<std::mutex> lock(mtx_);
+        return queue_.size();
+    }
+
+    size_t Empty() {
+        std::unique_lock<std::mutex> lock(mtx_);
+        return queue_.empty();
+    }
+
+    T &Front() {
+        std::unique_lock<std::mutex> lock(mtx_);
+        return queue_.front();
+    }
+
 private:
     std::queue<T> queue_;
-    MyLock lock_;
+    std::mutex mtx_;
+    std::condition_variable cv_;
     size_t limit_;
 };
 

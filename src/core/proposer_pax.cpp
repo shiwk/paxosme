@@ -22,7 +22,7 @@ namespace paxosme {
      */
     void PaxProposer::NewValue() {
         LogValue log_value;
-        if (!proposal_prov_->FirstGet(log_value, GetInstanceId())) {
+        if (!proposal_prov_->Flush(log_value, GetInstanceId())) {
             // no more new value
             return;
         }
@@ -190,7 +190,7 @@ namespace paxosme {
     }
 
     void PaxProposer::InstanceDone(instance_id_t instance_id, const LogValue &log_value) {
-        proposal_prov_->Flush(log_value, instance_id, kValueAccepted);
+        proposal_prov_->WriteResult(log_value, instance_id, kValueAccepted);
         Withdraw(kProposeTO);
         Withdraw(kAcceptTO);
     }
@@ -208,6 +208,6 @@ namespace paxosme {
         status_ = ProposerStatus::kNone;
 
         // flush pending value
-        proposal_prov_->Flush("", GetInstanceId(), kValueTimeout);
+        proposal_prov_->WriteResult("", GetInstanceId(), kValueTimeout);
     }
 }

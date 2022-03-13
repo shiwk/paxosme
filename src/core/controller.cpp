@@ -4,12 +4,12 @@
 
 #include <controller.hpp>
 
-#define MSG_COUNT_LIMIT 1000
+#define HARDCODE_MSG_COUNT_LIMIT 1000
 
 namespace paxosme {
     PaxController::PaxController(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
                                  const Schedule *schedule)
-            : pax_config_(const_cast<PaxConfig *>(config)), msgProv_(MSG_COUNT_LIMIT) {
+            : pax_config_(const_cast<PaxConfig *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {
         proposer_ = new PaxProposer{config, communicator, storage, schedule};
         learner_ = new PaxLearner{config, communicator, storage, schedule};
         acceptor_ = new PaxAcceptor{config, communicator, storage, schedule};
