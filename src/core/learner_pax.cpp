@@ -35,7 +35,44 @@ namespace paxosme {
         LearnFromOthers(pax_message);
     }
 
-    bool PaxLearner::Learned() const{
+    bool PaxLearner::Learned() const {
         return learner_state_.Learned();
+    }
+
+    void PaxLearner::HandleMessage(const PaxMessage &message) {
+        switch (message.GetMessageType()) {
+            case kLEARNER_SENDER_PUBLISH_CHOSEN_VALUE: {
+                if (!HandleSenderPublish(message)) {
+                    // acceptor failed
+                    break;
+                }
+
+                if (!HandleSenderPublish(message)) {
+                    // learner failed
+                    break;
+                }
+            }
+            case kLEARNER_BROADCAST_CHOSEN :
+                HandleOthersPublish(message);
+                break;
+            case kLEARNER_SHALL_I_LEARN:
+                HandleShallILearn(message);
+                break;
+            case kLEARNER_CONFIRM_LEARN:
+                HandleConfirmLearn(message);
+                break;
+            case kLEARNER_SEND_VALUE:
+            case kLEARNER_VALUE_SYNC:
+                HandleOthersPublish(message);
+                break;
+            case kLEARNER_VALUE_ACK:
+                HandleValueAck(message);
+                break;
+            case kLEARNER_TELL_INSTANCE_ID:
+                HandleTellNewInstanceId(message);
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -92,23 +92,28 @@ namespace paxosme {
 
         void NewValue();
 
-        void HandlePrepareReply(const PaxMessage &pax_reply_message);
-
-        void HandleProposeReply(const PaxMessage &pax_reply_message);
-
         void Init(proposal_id_t, const PaxController *);
 
-        void InstanceDone(instance_id_t instance_id, const LogValue &log_value) override;
+        void InstanceDone(instance_id_t instance_id, const LogValue &log_value);
+
         void NewInstance() override;
+
+        void HandleMessage(const PaxMessage &) override;
 
 
     private:
         PaxMessage GenerateMessage(MessageType, proposal_id_t);
 
+        void HandleProposeAck(const PaxMessage &pax_reply_message);
+
+        void HandleAcceptAck(const PaxMessage &pax_reply_message);
+
         void Propose();
+
         void Accept();
 
         void ProposeTimeoutCallback(instance_id_t instanceId);
+
         void NewValueTimeoutCallback();
 
         ProposerStatus status_;

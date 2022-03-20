@@ -13,7 +13,7 @@ namespace paxosme {
     }
 
     void PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
-        PaxMessage message(GetNodeId(), MessageType::kTellInstanceId);
+        PaxMessage message(GetNodeId(), MessageType::kLEARNER_TELL_INSTANCE_ID);
         message.SetInstanceId(instance_id);
         message.SetLeaderInstanceId(GetInstanceId());
 
@@ -49,7 +49,7 @@ namespace paxosme {
     void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId, bool sync) {
         PaxosState paxosState = ReadState(instanceId);
 
-        PaxMessage pax_message(toNodeId, sync ? MessageType::kSendValue : MessageType::kValue_SYNC);
+        PaxMessage pax_message(toNodeId, sync ? MessageType::kLEARNER_SEND_VALUE : MessageType::kLEARNER_VALUE_SYNC);
         pax_message.SetInstanceId(instanceId);
         pax_message.SetLearnedValue(LogValue(paxosState.accepted_value()));
         pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
@@ -139,7 +139,7 @@ namespace paxosme {
     }
 
     void PaxLearner::TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue &log_value) {
-        PaxMessage message(GetNodeId(), MessageType::kBroadCastChosen);
+        PaxMessage message(GetNodeId(), MessageType::kLEARNER_BROADCAST_CHOSEN);
         message.SetInstanceId(GetInstanceId());
         message.SetProposalId(proposal_id);
         message.SetProposer(node_id);

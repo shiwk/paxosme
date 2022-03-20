@@ -14,7 +14,6 @@ public:
     explicit MyQueue(size_t limit) : limit_(limit) {}
 
     bool TryAdd(const T &t) {
-//        lock_.Lock();
         std::unique_lock<std::mutex> lock(mtx_);
         bool res = false;
         if (queue_.size() < limit_) {
@@ -22,7 +21,6 @@ public:
             res = true;
             cv_.notify_one();
         }
-//        lock_.UnLock();
         return res;
     }
 

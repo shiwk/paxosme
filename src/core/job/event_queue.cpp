@@ -23,9 +23,21 @@ namespace paxosme {
         return true;
     }
 
-    void EventQueue::PopOne(Event &e) {
+    bool EventQueue::PopOne(Event &e) {
+        if (events_.empty())
+            return false;
+
         std::pop_heap(events_.begin(), events_.end());
         e = events_.back();
         events_.pop_back();
+        return true;
+    }
+
+    bool EventQueue::Empty() {
+        return events_.empty();
+    }
+
+    Event &EventQueue::Next() {
+        return events_.front();
     }
 }

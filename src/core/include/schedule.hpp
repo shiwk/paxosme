@@ -9,8 +9,8 @@
 #include <queue>
 #include <unordered_map>
 
-namespace paxosme{
-    class Schedule{
+namespace paxosme {
+    class Schedule {
     public:
 //        void AddEvent(const EventHandler &cb, const time_t &when, EventType event_type);
 //        void AddEvent(const EventHandler &cb, const timeval &when, EventType event_type);
@@ -18,8 +18,8 @@ namespace paxosme{
 
         bool Dispatch(Event &);
 
-        // todo I: implementation
         bool NextEventTime(EventTimeStamp &);
+
         void Remove(EventType);
 
     private:

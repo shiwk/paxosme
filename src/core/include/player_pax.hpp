@@ -34,8 +34,8 @@ namespace paxosme {
 
         instance_id_t GetInstanceId() const;
 
-        virtual void InstanceDone(instance_id_t instance_id, const LogValue &log_value) = 0;
         virtual void NewInstance() = 0;
+        virtual void HandleMessage(const PaxMessage&) = 0;
 
     protected:
         PaxController *controller_;

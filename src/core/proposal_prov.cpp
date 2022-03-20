@@ -3,7 +3,7 @@
 //
 
 #include "proposal_prov.hpp"
-
+#include "controller.hpp"
 #define HARDCODE_VALUE_LIMIT 10
 
 namespace paxosme {
@@ -22,7 +22,10 @@ namespace paxosme {
             return kTOO_MANY_VALUES;
         }
 
-        // todo I: tell main loop "here is a NewValue msg", in case waits for network msg coming
+        // tell main loop "here is a NewValue msg", in case waits for network msg coming
+        PaxMessage message{0, kPLACEHOLDER_NEW_VALUE_COMMITTED};
+        paxController_->AddMessage(message);
+
         lock_.Wait([&]() { return finish_index_ == i; }); // waiting for result
 
         PendingNewValue front = queue_.Front();

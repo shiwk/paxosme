@@ -164,8 +164,8 @@ namespace paxosme {
         bool IsProposalAccepted(proposal_id_t proposal_id, node_id_t node_id);
 
         void NewInstance() override;
-        void InstanceDone(instance_id_t instance_id, const LogValue &log_value) override;
 
+        void HandleMessage(const PaxMessage&) override;
     };
 
 

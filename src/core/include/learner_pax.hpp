@@ -52,33 +52,19 @@ namespace paxosme {
         PaxLearner(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
 
     public:
-        // follow
-        void ShallLearn(); // request learn from others
+        void HandleMessage(const PaxMessage &) override;
 
-        void HandleTellNewInstanceId(const PaxMessage &);
-
-        void HandleConfirmLearn(const PaxMessage &);
-
-        const LogValue &GetLearnedValue();
-
-        bool AnymoreToLearn();
-
-        void Init(const PaxController *controller);
-
-        bool HandleSenderPublish(const PaxMessage &);
-
-        void HandleOthersPublish(const PaxMessage &pax_message);
+        void NewInstance() override;
 
         bool Learned() const;
 
-        void NewInstance() override;
-        void InstanceDone(instance_id_t instance_id, const LogValue &log_value) override;
+        void Init(const PaxController *controller);
 
-    public:
-        // lead
-        void HandleShallILearn(const PaxMessage &);
+        // follow
+        void ShallLearn(); // request learn from others
+        const LogValue &GetLearnedValue();
 
-        void HandleValueAck(const PaxMessage &);
+        bool AnymoreToLearn();
 
     private:
         void LearnFromSelf(const PaxMessage &);
@@ -86,7 +72,8 @@ namespace paxosme {
         PaxLearnerState learner_state_;
 
     private:
-        // follow
+
+        /// follow
         void TellInstanceId(instance_id_t, node_id_t); // tell others current instance_id
 
         instance_id_t highest_known_instance_id_;
@@ -102,7 +89,20 @@ namespace paxosme {
 
         void LearnFromOthers(const PaxMessage &);
 
-    private: // lead
+        bool HandleSenderPublish(const PaxMessage &);
+
+        void HandleOthersPublish(const PaxMessage &pax_message);
+
+        void HandleConfirmLearn(const PaxMessage &);
+
+        void HandleTellNewInstanceId(const PaxMessage &);
+
+
+        /// lead
+        void HandleShallILearn(const PaxMessage &);
+
+        void HandleValueAck(const PaxMessage &);
+
         enum LearnerSendingJobStatus {
             kStale,
             kPrepared,

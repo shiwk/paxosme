@@ -12,6 +12,7 @@
 #include "time.hpp"
 
 namespace paxosme {
+    class PaxController;
 
     enum NewValueStatus {
         kPending = 1,
@@ -58,6 +59,7 @@ namespace paxosme {
         index_t index_;
         index_t finish_index_;
         MyQueue<PendingNewValue> queue_;
+        PaxController *paxController_;
     };
 }
 

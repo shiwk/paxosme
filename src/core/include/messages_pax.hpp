@@ -14,26 +14,47 @@
 namespace paxosme {
 
     enum MessageType {
-        kNone,
+        kNone = 0,
+
         // for acceptor
-        kPrepareBroadCast,
-        kProposeBroadCast,
+        kACCEPTOR_PROPOSE_BROADCAST = 0x1 << 3,
+        kACCEPTOR_ACCEPT_BROADCAST,
 
         // for proposer
-        kPrepareReply,
-        kProposeReply,
+        kPROPOSER_PROPOSE_ACK = 0x11 << 3,
+        kPROPOSER_ACCEPT_ACK,
 
         // for learner
-        kSenderPublishChosenValue,
-        kShallILearn,
-        kConfirmLearn,
-        kSendValue,
-        kValue_SYNC,
-        kValue_ACK,
+        kLEARNER_SENDER_PUBLISH_CHOSEN_VALUE = 0x111 << 3,
+        kLEARNER_SHALL_I_LEARN,
+        kLEARNER_CONFIRM_LEARN,
+        kLEARNER_SEND_VALUE,
+        kLEARNER_VALUE_SYNC,
+        kLEARNER_VALUE_ACK,
+        kLEARNER_BROADCAST_CHOSEN,
+        kLEARNER_TELL_INSTANCE_ID,
 
-        kBroadCastChosen,
-        kTellInstanceId
+        // msg for placeholder
+        kPLACEHOLDER_NEW_VALUE_COMMITTED = 0x1111 << 3
     };
+
+
+    bool MessageForProposer(MessageType message_type) {
+        return message_type >> 4 == 0x1;
+    }
+
+    bool MessageForAcceptor(MessageType message_type) {
+        return message_type >> 3 == 0x1;
+    }
+
+    bool MessageForLearner(MessageType message_type) {
+        return message_type >> 5 == 0x1;
+    }
+
+    bool MessagePlaceHolder(MessageType message_type) {
+        return message_type >> 6 == 0x1;
+    }
+
 
     class Serializable {
     public:
@@ -42,12 +63,17 @@ namespace paxosme {
 
     class PaxMessage {
 
+
     private:
         LogValue proposed_log_value_;
         LogValue accepted_value_;
         LogValue learned_value_;
         LogValue chosen_value_;
     public:
+
+        PaxMessage(node_id_t sender_id, MessageType message_type) : sender_id_(sender_id),
+                                                                    message_type_(message_type) {}
+
         const LogValue &GetChosenValue() const {
             return chosen_value_;
         }
@@ -96,7 +122,6 @@ namespace paxosme {
             leader_instance_id_ = leaderInstanceId;
         }
 
-    public:
         bool IsRejected() const {
             return rejected_;
         }
@@ -160,9 +185,6 @@ namespace paxosme {
         void SetInstanceId(instance_id_t instance_id) {
             instance_id_ = instance_id;
         }
-
-        PaxMessage() = default;
-        PaxMessage(node_id_t sender_id, MessageType message_type) : sender_id_(sender_id), message_type_(message_type) {}
 
 
         instance_id_t GetInstanceId() const {

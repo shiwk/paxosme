@@ -60,7 +60,7 @@ namespace paxosme {
     }
 
     void PaxController::TryNewValue() {
-        if (learner_->AnymoreToLearn()){
+        if (learner_->AnymoreToLearn()) {
             // not catching up
             return;
         }
@@ -75,67 +75,24 @@ namespace paxosme {
 
     void PaxController::PushSMByState(instance_id_t target_instance_id) {
         instance_id_t instanceInSM = state_machine_->GetInstanceId();
-        for (int i = instanceInSM; i < target_instance_id; ++i) {
+        for (instance_id_t i = instanceInSM; i < target_instance_id; ++i) {
             PaxosState paxos_state = acceptor_->ReadState(i);
             state_machine_->Execute(i, paxos_state.accepted_value());
         }
     }
 
     void PaxController::HandleMessage(const PaxMessage &message) {
-        switch (message.GetMessageType()) {
-            // for proposer
-            case kPrepareReply: {
-                proposer_->HandlePrepareReply(message);
-                break;
-            }
-            case kProposeReply:
-                proposer_->HandleProposeReply(message);
-                break;
-
-                // for acceptor
-            case kPrepareBroadCast:
-                acceptor_->HandlePrepareRequest(message);
-                break;
-
-            case kProposeBroadCast:
-                acceptor_->HandleProposeRequest(message);
-                break;
-
-                //for learner
-            case kSenderPublishChosenValue: {
-                if (!acceptor_->HandleSenderPublish(message)) {
-                    // acceptor failed
-                    break;
-                }
-
-                if (!learner_->HandleSenderPublish(message)) {
-                    // learner failed
-                    break;
-                }
-            }
-            case kBroadCastChosen :
-                learner_->HandleOthersPublish(message);
-                break;
-            case kShallILearn:
-                learner_->HandleShallILearn(message);
-                break;
-            case kConfirmLearn:
-                learner_->HandleConfirmLearn(message);
-                break;
-            case kSendValue:
-            case kValue_SYNC:
-                learner_->HandleOthersPublish(message);
-                break;
-            case kValue_ACK:
-                learner_->HandleValueAck(message);
-                break;
-            case kTellInstanceId:
-                learner_->HandleTellNewInstanceId(message);
-                break;
-            default:
-                break;
+        MessageType messageType = message.GetMessageType();
+        if (MessagePlaceHolder(messageType)) {
+            // placeholder handle if necessary
+            return;
+        } else if (MessageForLearner(messageType)) {
+            learner_->HandleMessage(message);
+        } else if (MessageForProposer(messageType)) {
+            proposer_->HandleMessage(message);
+        } else if (MessageForAcceptor(messageType)) {
+            acceptor_->HandleMessage(message);
         }
-
 
         if (learner_->Learned()) {
             // todo II: state machine execute
@@ -154,11 +111,12 @@ namespace paxosme {
             EventTimeStamp nextEventTime;
             PaxMessage *paxMessage = nullptr;
             if (schedule_.NextEventTime(nextEventTime)) {
-                if (msgProv_.Take(paxMessage, Time::DurationMS(nextEventTime, STEADY_TIME_NOW))) {
+                if (msgProv_.Take(paxMessage, Time::DurationMS(STEADY_TIME_NOW, nextEventTime))) {
                     HandleMessage(*paxMessage);
                     delete paxMessage;
                 }
-            } else if (msgProv_.Take(paxMessage)) {
+            } else if (msgProv_.Take(paxMessage, Time::MS(500))) {
+                // waiting 500 ms by default
                 HandleMessage(*paxMessage);
                 delete paxMessage;
             }
@@ -190,7 +148,7 @@ namespace paxosme {
     }
 
     void PaxController::AddMessage(PaxMessage &pax_message) {
-        PaxMessage* message = &pax_message;
+        auto message = new PaxMessage(std::move(pax_message));
         msgProv_.TryAdd(message);
     }
 

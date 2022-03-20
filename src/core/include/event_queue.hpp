@@ -17,11 +17,13 @@ namespace paxosme {
 
     enum EventType {
         kNULL = 0,
+
         // timeout events
-        kProposeTO = 1,
-        kAcceptTO = 2,
-        kNewValueTO = 3,
-        kShallILearnTO = 4
+        kPROPOSE_TIMEOUT = 1,
+        kACCEPT_TIMEOUT = 2,
+        kNEW_VALUE_TIMEOUT = 3,
+
+        kSHALL_I_LEARN = 4
     };
 
     using EventId = uint64_t;
@@ -47,17 +49,20 @@ namespace paxosme {
     };
 
     class EventQueue {
+        // no lock as event queue guarantees sequential
+
     public:
+        bool Empty();
+
         void Push(const Event &event);
 
         bool HasTimeout();
 
-        void PopOne(Event &);
+        bool PopOne(Event &);
 
-        bool NextEvent(Event &event);
+        Event& Next();
 
     private:
-        // no lock as event queue guarantees sequential
         std::vector<Event> events_;
     };
 }

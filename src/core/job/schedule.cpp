@@ -2,7 +2,6 @@
 // Created by shiwk on 2021/3/27.
 //
 
-#include <queue>
 #include "event_queue.hpp"
 #include "schedule.hpp"
 
@@ -35,11 +34,34 @@ namespace paxosme {
         if (!eventQueue_.HasTimeout())
             return false;
 
-        eventQueue_.PopOne(event);
-        if (eventTypeIdMap_[event.eventType] != event.eventId)
-            // already replaced event
+        while (eventQueue_.PopOne(event)) {
+            if (eventTypeIdMap_[event.eventType] != event.eventId)
+                // already replaced event
+                continue;
+            return true;
+        }
+
+        // this should not happen as indeed some events are not out-of-date
+        return false;
+    }
+
+    bool Schedule::NextEventTime(EventTimeStamp &event_time_stamp) {
+        if (eventQueue_.Empty())
             return false;
 
+        Event e = eventQueue_.Next();
+        while (eventTypeIdMap_[e.eventType] != e.eventId) {
+            // already replaced event
+            eventQueue_.PopOne(e);
+            e = eventQueue_.Next();
+        }
+
+        event_time_stamp = e.when;
+
         return true;
+    }
+
+    void Schedule::Remove(EventType event_type) {
+        eventTypeIdMap_.erase(event_type);
     }
 }
