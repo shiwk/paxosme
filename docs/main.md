@@ -1,55 +1,91 @@
 # Paxosme 
 
-## Paxos Player & Main pipeline
+## Paxos Player & MA.in P.ipeline
 
 ### Players
 
 - `Proposer` 
-  - **Pi** denotes one proposer
-  - **P*** denotes all proposers
+  - **P.i** denotes one proposer
+  - **P.*** denotes all proposers
+
 
 - `Acceptor` 
-  - **Ai** denotes one acceptor
-  - **A*** denotes all acceptors
+  - **A.i** denotes one acceptor
+  - **A.*** denotes all acceptors
   
+
 - `Learner`
-  - `Following` **L.Fi** denotes following learner
-  - `Leading` **L.Li** denotes following learner
+  - **L.i** denotes one learner
+  - **L.*** denotes all learners
+  - **LF.i** denotes following learner
+  - **LF.*** denotes following learner
 
 
 ### Msg Types
 
-- `kACCEPTOR_PROPOSE_BROADCAST` 
+#### Event Messages
 
-  **Pi** --> **A***
+- `kMSG_PROPOSE_BROADCAST`
+
+  - Players
+    - **P.i** --> **A.***
+
+  - Timeout handle 
   
-  Timeout
+  - ACK
+    - kMSG_PROPOSE_ACK
+
+
+- `kMSG_ACCEPT_BROADCAST`
+
+  - Players
+    - **P.i** --> **A.***
+
+  - Requires
+    - Timeout handle
+    - ACK msg
+
+
+- `kMSG_PROPOSE_ACK`
+
+  - Players
+     - **A.i** --> **P.j**
+
+
+- `kMSG_ACCEPT_ACK`
   
-  ACK
+  - Players
+    - **A.i** --> **P.j**
 
 
-- `kACCEPTOR_ACCEPT_BROADCAST`
-
-  **Pi** --> **A***
-
-  Timeout
-
-  ACK
-
-- `kPROPOSER_PROPOSE_ACK`
-
-  **Ai** --> **Pi**
-
-- `kPROPOSER_ACCEPT_ACK`
-
-  **Ai** --> **Pi**
-
-- `kLEARNER_SENDER_PUBLISH_CHOSEN_VALUE`
-
-  **Pi** --> **Ai**
-
-  **Pi** --> **L.F**
-
+- `kMSG_VALUE_CHOSEN`
   
+  - Players
+    - **P.i** --> **L.i**
+  
+
+- `kMSG_VALUE_CHOSEN_BROADCAST`
+  
+  - Players
+      - **L.i** --> **L.***
+
+#### Schedule Messages
+
+- `kMSG_SHALL_I_LEARN`
+  
+  - Players
+    - **L.i** --> **L.***
+
+  - ACK
+    - `kMSG_TELL_INSTANCE_ID`
+
+
+- `kMSG_TELL_INSTANCE_ID`
+
+  - Players
+    - **L.i** --> **L.***
+
+  - ACK
+    - `kMSG_CONFIRM_LEARN`
 
 
