@@ -8,6 +8,7 @@
 #include <log_value.hpp>
 #include "player_pax.hpp"
 #include "config.hpp"
+#include "lock.hpp"
 #include <thread>
 #include <condition_variable>
 #include <time.hpp>
@@ -112,8 +113,9 @@ namespace paxosme {
         LearnerSendingJobStatus job_status_;
         node_id_t receiver_;
         instance_id_t begin_instance_id_;
-        std::mutex mutex_send_;
-        std::condition_variable_any cond_v_;
+//        std::mutex mutex_send_;
+//        std::condition_variable_any cond_v_;
+        MyLock lock_;
         bool is_sending_;
         instance_id_t ack_send_;
         std::future<void> learner_send_loop_;
@@ -126,13 +128,13 @@ namespace paxosme {
 
         void SendLearnedValues(instance_id_t begin_instance_id, node_id_t receiver);
 
-        void MakeReady(node_id_t receiver, instance_id_t i);
+        void MakeSenderReady(node_id_t receiver, instance_id_t follower_instance_id);
 
         void SendLearnedValue(instance_id_t, node_id_t, bool sync = false);
 
-        void TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue &value);
+        void TellOthers(proposal_id_t proposal_id, node_id_t proposer, const LogValue &log_value);
 
-        void Ack(node_id_t id);
+        void AckLearnValue(node_id_t node_id);
 
         static int shall_Learn_delay_;
     };

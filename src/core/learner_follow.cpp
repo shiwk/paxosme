@@ -11,12 +11,15 @@ namespace paxosme {
 
     void PaxLearner::ShallLearn() {
         // re-launch message
-        Publish(EventType::kSHALL_I_LEARN, [this] { ShallLearn(); }, shall_Learn_delay_);
+        Publish(EventType::kEVENT_SHALL_I_LEARN, [this] { ShallLearn(); }, shall_Learn_delay_);
+
+        std::unique_lock<std::mutex> lck(mutex_follow_);
+        is_learning_ = false;
 
         node_id_t node_id = GetNodeId();
         instance_id_t instance_id = GetInstanceId();
 
-        PaxMessage message(node_id, MessageType::kLEARNER_SHALL_I_LEARN);
+        PaxMessage message(node_id, MessageType::kMSG_SHALL_I_LEARN);
         message.SetInstanceId(instance_id);
         BroadCastMessage(message);
     }
@@ -50,7 +53,7 @@ namespace paxosme {
     void PaxLearner::ConfirmLearn(node_id_t node_id) {
         std::unique_lock<std::mutex> lck(mutex_follow_);
         is_learning_ = true;
-        PaxMessage pax_message(node_id, MessageType::kLEARNER_CONFIRM_LEARN);
+        PaxMessage pax_message(node_id, MessageType::kMSG_CONFIRM_LEARN);
         pax_message.SetInstanceId(GetInstanceId());
     }
 
@@ -60,20 +63,22 @@ namespace paxosme {
 
     void PaxLearner::LearnFromOthers(const PaxMessage &pax_message) {
         // re-launch message
-        Publish(EventType::kSHALL_I_LEARN, [this] { ShallLearn(); }, shall_Learn_delay_);
+        Publish(EventType::kEVENT_SHALL_I_LEARN, [this] { ShallLearn(); }, shall_Learn_delay_);
 
         if (pax_message.GetInstanceId() != GetInstanceId())
-            return; // instance id not matched
+            // instance id not matched
+            return;
 
         LearnNew(pax_message.GetChosenValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
                  pax_message.GetProposer(), true);
 
-        if (pax_message.GetMessageType() == MessageType::kLEARNER_VALUE_SYNC)
-            Ack(pax_message.GetSender());
+        if (pax_message.GetMessageType() == MessageType::kMSG_LEARNER_VALUE_SYNC)
+            // only syncing needs ack
+            AckLearnValue(pax_message.GetSender());
     }
 
-    void PaxLearner::Ack(node_id_t node_id) {
-        PaxMessage pax_message(GetNodeId(), MessageType::kLEARNER_VALUE_ACK);
+    void PaxLearner::AckLearnValue(node_id_t node_id) {
+        PaxMessage pax_message(GetNodeId(), MessageType::kMSG_LEARNER_VALUE_ACK);
         pax_message.SetInstanceId(GetInstanceId());
         SendMessage(pax_message, node_id);
     }

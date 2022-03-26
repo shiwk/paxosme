@@ -5,8 +5,8 @@
 #ifndef PAXOSME_PROPOSER_PAX_HPP
 #define PAXOSME_PROPOSER_PAX_HPP
 
-#define PREPARE_TIMEOUT_CONST 50
 #define PROPOSE_TIMEOUT_CONST 50
+#define ACCEPT_TIMEOUT_CONST 50
 
 #include <log_value.hpp>
 #include "player_pax.hpp"
@@ -124,8 +124,8 @@ namespace paxosme {
 
         bool TryUpdateProposerStateWithPrepareReply(const PaxMessage &message);
 
-        static int PREPARE_TIMEOUT;
         static int PROPOSE_TIMEOUT;
+        static int ACCEPT_TIMEOUT;
     };
 }
 #endif //PAXOSME_PROPOSER_PAX_HPP

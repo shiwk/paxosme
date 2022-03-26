@@ -28,11 +28,14 @@ namespace paxosme {
 
     bool PaxLearner::HandleSenderPublish(const PaxMessage &pax_message) {
         LearnFromSelf(pax_message);
+        // tell others
+        TellOthers(pax_message.GetProposalId(), GetNodeId(), pax_message.GetLearnedValue());
         return true;
     }
 
     void PaxLearner::HandleOthersPublish(const PaxMessage &pax_message) {
         LearnFromOthers(pax_message);
+        // todo I: tell followers
     }
 
     bool PaxLearner::Learned() const {
@@ -41,7 +44,7 @@ namespace paxosme {
 
     void PaxLearner::HandleMessage(const PaxMessage &message) {
         switch (message.GetMessageType()) {
-            case kLEARNER_SENDER_PUBLISH_CHOSEN_VALUE: {
+            case kMSG_VALUE_CHOSEN: {
                 if (!HandleSenderPublish(message)) {
                     // acceptor failed
                     break;
@@ -52,25 +55,31 @@ namespace paxosme {
                     break;
                 }
             }
-            case kLEARNER_BROADCAST_CHOSEN :
+            case kMSG_VALUE_CHOSEN_BROADCAST :
                 HandleOthersPublish(message);
                 break;
-            case kLEARNER_SHALL_I_LEARN:
+
+            case kMSG_SHALL_I_LEARN:
                 HandleShallILearn(message);
                 break;
-            case kLEARNER_CONFIRM_LEARN:
+
+            case kMSG_CONFIRM_LEARN:
                 HandleConfirmLearn(message);
                 break;
-            case kLEARNER_SEND_VALUE:
-            case kLEARNER_VALUE_SYNC:
+
+            case kMSG_LEARNER_SEND_VALUE:
+            case kMSG_LEARNER_VALUE_SYNC:
                 HandleOthersPublish(message);
                 break;
-            case kLEARNER_VALUE_ACK:
+
+            case kMSG_LEARNER_VALUE_ACK:
                 HandleValueAck(message);
                 break;
-            case kLEARNER_TELL_INSTANCE_ID:
+
+            case kMSG_TELL_INSTANCE_ID:
                 HandleTellNewInstanceId(message);
                 break;
+
             default:
                 break;
         }

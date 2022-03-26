@@ -19,11 +19,11 @@ namespace paxosme {
         kNULL = 0,
 
         // timeout events
-        kPROPOSE_TIMEOUT = 1,
-        kACCEPT_TIMEOUT = 2,
-        kNEW_VALUE_TIMEOUT = 3,
+        kEVENT_PROPOSE_TIMEOUT = 1,
+        kEVENT_ACCEPT_TIMEOUT = 2,
+        kEVENT_NEWVALUE_TIMEOUT = 3,
 
-        kSHALL_I_LEARN = 4
+        kEVENT_SHALL_I_LEARN = 4
     };
 
     using EventId = uint64_t;

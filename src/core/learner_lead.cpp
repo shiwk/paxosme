@@ -13,7 +13,7 @@ namespace paxosme {
     }
 
     void PaxLearner::TellInstanceId(const instance_id_t instance_id, const node_id_t node_id) {
-        PaxMessage message(GetNodeId(), MessageType::kLEARNER_TELL_INSTANCE_ID);
+        PaxMessage message(GetNodeId(), MessageType::kMSG_TELL_INSTANCE_ID);
         message.SetInstanceId(instance_id);
         message.SetLeaderInstanceId(GetInstanceId());
 
@@ -43,13 +43,14 @@ namespace paxosme {
     }
 
     void PaxLearner::HandleConfirmLearn(const PaxMessage &pax_message) {
-        MakeReady(pax_message.GetSender(), pax_message.GetInstanceId()); // make sending loop continue work
+        MakeSenderReady(pax_message.GetSender(), pax_message.GetInstanceId()); // make sending loop continue work
     }
 
     void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId, bool sync) {
         PaxosState paxosState = ReadState(instanceId);
 
-        PaxMessage pax_message(toNodeId, sync ? MessageType::kLEARNER_SEND_VALUE : MessageType::kLEARNER_VALUE_SYNC);
+        PaxMessage pax_message(toNodeId,
+                               sync ? MessageType::kMSG_LEARNER_SEND_VALUE : MessageType::kMSG_LEARNER_VALUE_SYNC);
         pax_message.SetInstanceId(instanceId);
         pax_message.SetLearnedValue(LogValue(paxosState.accepted_value()));
         pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
@@ -59,13 +60,16 @@ namespace paxosme {
     }
 
     void PaxLearner::WaitForReady() {
-        std::unique_lock<std::mutex> lck(mutex_send_);
+//        std::unique_lock<std::mutex> lck(mutex_send_);
 
-        if (job_status_ == LearnerSendingJobStatus::kPrepared)
-            job_status_ = LearnerSendingJobStatus::kSending;
-
-        cond_v_.wait(lck, [&]() { return job_status_ == LearnerSendingJobStatus::kPrepared; });
+//        if (job_status_ == LearnerSendingJobStatus::kPrepared) {
+//            job_status_ = LearnerSendingJobStatus::kSending;
+//            return;
+//        }
+        lock_.Lock();
+        lock_.Wait([&]() { return job_status_ == LearnerSendingJobStatus::kPrepared; });
         job_status_ = LearnerSendingJobStatus::kSending;
+        lock_.UnLock();
     }
 
     void PaxLearner::SendLearnedValues(instance_id_t begin_instance_id, node_id_t receiver) {
@@ -76,43 +80,53 @@ namespace paxosme {
             return; // receiver not matched
 
         while (to_send < GetInstanceId()) {
+
             SendLearnedValue(to_send, receiver);
             instance_id_t last_send = to_send;
             to_send++;
 
-            std::unique_lock<std::mutex> lck(mutex_send_);
-            while (last_send - ack_send_ < LEAD_FOLLOW_DIS) {
-                SteadyTime timeNow = STEADY_TIME_NOW;
-                if (Time::StopWatchMS(timeBegin, timeNow) > SENDING_INTERNAL_MS)
-                    return; // sync too slow
+//            if(last_send - ack_send_ < LEAD_FOLLOW_DIS) {
+//                std::unique_lock<std::mutex> lck(mutex_send_);
+//                cond_v_.wait_for(lck, Time::MS(100)); // timeout or ACK notification
+//            }
 
-                cond_v_.wait_for(lck, Time::MS(100)); // timeout or ACK notification
+//            std::unique_lock<std::mutex> lck(mutex_send_);
+            lock_.Lock();
+            while (last_send - ack_send_ > LEAD_FOLLOW_DIS) {
+                SteadyTime timeNow = STEADY_TIME_NOW;
+                if (Time::StopWatchMS(timeBegin, timeNow) > SENDING_INTERNAL_MS) {
+                    lock_.UnLock();
+                    return; // sync too slow
+                }
+                lock_.WaitFor(Time::MS(100)); // timeout or ACK notification
             }
 
-            // big gap between last_send and ack_send_
-            return;
+            lock_.UnLock();
         }
     }
 
     void PaxLearner::ClearSendingState() {
-        std::unique_lock<std::mutex> lck(mutex_send_);
-
+//        std::unique_lock<std::mutex> lck(mutex_send_);
+        lock_.Lock();
         job_status_ = LearnerSendingJobStatus::kStale;
-        begin_instance_id_ = -1;
-        receiver_ = -1;
-        ack_send_ = -1;
+        begin_instance_id_ = INSTANCE_DUMMY;
+        receiver_ = NODE_DUMMY;
+        ack_send_ = INSTANCE_DUMMY;
+        lock_.UnLock();
     }
 
-    void PaxLearner::MakeReady(node_id_t receiver, instance_id_t follower_instance_id) {
-        std::unique_lock<std::mutex> lck(mutex_send_);
-
-        if (job_status_ != LearnerSendingJobStatus::kStale)
+    void PaxLearner::MakeSenderReady(node_id_t receiver, instance_id_t follower_instance_id) {
+//        std::unique_lock<std::mutex> lck(mutex_send_);
+        lock_.Lock();
+        if (job_status_ != LearnerSendingJobStatus::kStale) {
+            lock_.UnLock();
             return; // don't change if already
-
+        }
         job_status_ = LearnerSendingJobStatus::kPrepared;
         receiver_ = receiver;
         begin_instance_id_ = follower_instance_id;
-        cond_v_.notify_one(); // tell sending loop continue
+        lock_.NotifyOne(); // tell sending loop continue
+        lock_.UnLock();
     }
 
 
@@ -134,15 +148,13 @@ namespace paxosme {
 
         // no need to persist since acceptor should have done
         LearnNew(log_value, pax_message.GetInstanceId(), proposal.proposal_id, node_id);
-
-        TellFollowers(proposal.proposal_id, node_id, log_value); // tell others
     }
 
-    void PaxLearner::TellFollowers(proposal_id_t proposal_id, node_id_t node_id, const LogValue &log_value) {
-        PaxMessage message(GetNodeId(), MessageType::kLEARNER_BROADCAST_CHOSEN);
+    void PaxLearner::TellOthers(proposal_id_t proposal_id, node_id_t proposer, const LogValue &log_value) {
+        PaxMessage message(GetNodeId(), MessageType::kMSG_VALUE_CHOSEN_BROADCAST);
         message.SetInstanceId(GetInstanceId());
         message.SetProposalId(proposal_id);
-        message.SetProposer(node_id);
+        message.SetProposer(proposer);
         message.SetChosenValue(log_value);
 
         BroadCastMessage(message);
@@ -166,12 +178,18 @@ namespace paxosme {
     }
 
     void PaxLearner::HandleValueAck(const PaxMessage &message) {
-        std::unique_lock<std::mutex> lck(mutex_send_);
-        if (job_status_ != LearnerSendingJobStatus::kSending || receiver_ != message.GetSender())
-            return; // ignore if I am not sending or to other follower (maybe ack too late)
+//        std::unique_lock<std::mutex> lck(mutex_send_);
+        lock_.Lock();
+        if (job_status_ != LearnerSendingJobStatus::kSending || receiver_ != message.GetSender()) {
+            lock_.UnLock();
+            return; // ignore if I am not sending or receiver already changed (maybe ack too late)
+        }
+
         if (message.GetInstanceId() > ack_send_) {
             ack_send_ = message.GetInstanceId();
-            cond_v_.notify_one(); // tell sending job continue
+            lock_.NotifyOne(); // tell sending job continue
         }
+
+        lock_.UnLock();
     }
 }

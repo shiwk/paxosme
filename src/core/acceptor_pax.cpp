@@ -60,7 +60,7 @@ namespace paxosme {
         }
 
         // reply
-        ReplyProposer(pax_reply_message, MessageType::kPROPOSER_PROPOSE_ACK);
+        ReplyProposer(pax_reply_message, MessageType::kMSG_PROPOSE_ACK);
     }
 
     void PaxAcceptor::HandleProposeRequest(const PaxMessage &message) {
@@ -92,7 +92,7 @@ namespace paxosme {
         }
 
         // reply
-        ReplyProposer(pax_reply_message, MessageType::kPROPOSER_ACCEPT_ACK);
+        ReplyProposer(pax_reply_message, MessageType::kMSG_ACCEPT_ACK);
     }
 
     void PaxAcceptor::ReplyProposer(const PaxAcceptorReplyMessage &reply, MessageType request_type) {
@@ -204,11 +204,11 @@ namespace paxosme {
 
     void PaxAcceptor::HandleMessage(const PaxMessage &message) {
         switch (message.GetMessageType()) {
-            case kACCEPTOR_PROPOSE_BROADCAST:
+            case kMSG_PROPOSE_BROADCAST:
                 HandlePrepareRequest(message);
                 break;
 
-            case kACCEPTOR_ACCEPT_BROADCAST:
+            case kMSG_ACCEPT_BROADCAST:
                 HandleProposeRequest(message);
                 break;
             default:

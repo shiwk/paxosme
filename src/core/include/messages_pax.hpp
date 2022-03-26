@@ -17,22 +17,22 @@ namespace paxosme {
         kNone = 0,
 
         // for acceptor
-        kACCEPTOR_PROPOSE_BROADCAST = 0x1 << 3,
-        kACCEPTOR_ACCEPT_BROADCAST,
+        kMSG_PROPOSE_BROADCAST = 0x1 << 3,
+        kMSG_ACCEPT_BROADCAST,
 
         // for proposer
-        kPROPOSER_PROPOSE_ACK = 0x11 << 3,
-        kPROPOSER_ACCEPT_ACK,
+        kMSG_PROPOSE_ACK = 0x11 << 3,
+        kMSG_ACCEPT_ACK,
 
         // for learner
-        kLEARNER_SENDER_PUBLISH_CHOSEN_VALUE = 0x111 << 3,
-        kLEARNER_SHALL_I_LEARN,
-        kLEARNER_CONFIRM_LEARN,
-        kLEARNER_SEND_VALUE,
-        kLEARNER_VALUE_SYNC,
-        kLEARNER_VALUE_ACK,
-        kLEARNER_BROADCAST_CHOSEN,
-        kLEARNER_TELL_INSTANCE_ID,
+        kMSG_VALUE_CHOSEN = 0x111 << 3,
+        kMSG_SHALL_I_LEARN,
+        kMSG_CONFIRM_LEARN,
+        kMSG_LEARNER_SEND_VALUE,
+        kMSG_LEARNER_VALUE_SYNC,
+        kMSG_LEARNER_VALUE_ACK,
+        kMSG_VALUE_CHOSEN_BROADCAST,
+        kMSG_TELL_INSTANCE_ID,
 
         // msg for placeholder
         kPLACEHOLDER_NEW_VALUE_COMMITTED = 0x1111 << 3
