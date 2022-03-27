@@ -100,5 +100,31 @@
 
 
 
+### Event Types
+
+#### Timeout Events
+
+- `kEVENT_PROPOSE_TIMEOUT`
+  
+  - Proposer
+  - Callback `Proposer.ProposeTimeoutCallback`
 
 
+- `kEVENT_ACCEPT_TIMEOUT`
+
+  - Proposer
+  - Callback `Proposer.ProposeTimeoutCallback`
+
+
+- `kEVENT_NEWVALUE_TIMEOUT`
+
+  - Proposer
+  - Callback `Proposer.NewValueTimeoutCallback`
+
+
+#### Schedule Events
+
+- `kEVENT_SHALL_I_LEARN`
+
+  - Learner
+  - Callback `Learner.ShallLearn`

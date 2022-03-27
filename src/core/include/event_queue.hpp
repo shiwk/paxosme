@@ -23,6 +23,7 @@ namespace paxosme {
         kEVENT_ACCEPT_TIMEOUT = 2,
         kEVENT_NEWVALUE_TIMEOUT = 3,
 
+        // schedule events
         kEVENT_SHALL_I_LEARN = 4
     };
 
