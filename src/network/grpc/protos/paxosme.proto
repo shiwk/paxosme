@@ -3,34 +3,34 @@ syntax = "proto3";
 package paxos;
 
 service Paxosme {
-    rpc Prepare (PrepareRequest) returns (PrepareReply) {
-    }
     rpc Propose (ProposeRequest) returns (ProposeReply) {
     }
-}
-
-message PrepareRequest {
-    int32 proposal_id = 1;
-    int32 instance_id = 2;
-    int32 proposer_id = 3;
-}
-
-message PrepareReply {
-    bool is_rejected = 1;
-    int32 replier_id = 2;
-    int32 promised_id = 3;
-    int32 received_id =4;
-    int32 instance_id =5;
-    string accepted_log_value = 6;
+    rpc Accept (AcceptRequest) returns (AcceptReply) {
+    }
 }
 
 message ProposeRequest {
-    int32 proposal_id = 1;
-    int32 instance_id = 2;
-    int32 proposer_id = 3;
-    string proposed_log_value = 5;
+    uint64 proposal_id = 1;
+    uint64 instance_id = 2;
+    uint64 proposer_id = 3;
 }
 
 message ProposeReply {
+    bool is_rejected = 1;
+    uint64 replier_id = 2;
+    uint64 promised_id = 3;
+    uint64 received_id =4;
+    uint64 instance_id =5;
+    string accepted_log_value = 6;
+}
+
+message AcceptRequest {
+    uint64 proposal_id = 1;
+    uint64 instance_id = 2;
+    uint64 proposer_id = 3;
+    string proposed_log_value = 5;
+}
+
+message AcceptReply {
     bool accepted = 1;
 }

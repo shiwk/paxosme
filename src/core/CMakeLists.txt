@@ -24,13 +24,13 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/
 INCLUDE(FindProtobuf)
 FIND_PACKAGE(Protobuf REQUIRED)
 message(STATUS "_PROTOBUF_PROTOC: ${_PROTOBUF_PROTOC}")
-INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
+#INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
 PROTOBUF_GENERATE_CPP(PROTO_SRC PROTO_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/proto/state.proto)
 
 
 # Include generated *.pb.h files
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+#include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_library(paxosmecore
         ${HEADERS}
@@ -43,3 +43,4 @@ target_link_libraries(paxosmecore sm)
 target_link_libraries(paxosmecore db)
 
 target_include_directories(paxosmecore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}" ${PROTOBUF_INCLUDE_DIR})
+target_include_directories(paxosmecore PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)

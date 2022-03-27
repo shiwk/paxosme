@@ -10,9 +10,9 @@
 #include "config.hpp"
 
 namespace paxosme {
-    class PaxosmeMber {
+    class Node {
     public:
-        virtual ~PaxosmeMber() {}
+        virtual ~Node() {}
 
         void Start();
 
@@ -21,9 +21,7 @@ namespace paxosme {
         node_id_t GetNodeId();
 
     private:
-        Node node_info_;
-        Node my_learners_;
-        Node all_nodes_;
+        Peer peer_;
     };
 }
 

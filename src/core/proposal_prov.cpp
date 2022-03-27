@@ -70,7 +70,7 @@ namespace paxosme {
         if (queue_.Empty()) {
             // there is no local NewValue
             lock_.UnLock();
-            return true;
+            return false;
         }
 
         PendingNewValue pendingNewValue = queue_.Front();
@@ -78,7 +78,7 @@ namespace paxosme {
         if (pendingNewValue.instanceId == 0) {
             // the local NewValue still not flushed
             lock_.UnLock();
-            return true;
+            return false;
         }
 
         if (result != kValueAccepted) {

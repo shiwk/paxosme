@@ -35,7 +35,7 @@ namespace paxosme {
 
     void PaxLearner::HandleOthersPublish(const PaxMessage &pax_message) {
         LearnFromOthers(pax_message);
-        // todo I: tell followers
+        // todo II: tell followers
     }
 
     bool PaxLearner::Learned() const {
@@ -44,17 +44,8 @@ namespace paxosme {
 
     void PaxLearner::HandleMessage(const PaxMessage &message) {
         switch (message.GetMessageType()) {
-            case kMSG_VALUE_CHOSEN: {
-                if (!HandleSenderPublish(message)) {
-                    // acceptor failed
-                    break;
-                }
-
-                if (!HandleSenderPublish(message)) {
-                    // learner failed
-                    break;
-                }
-            }
+            case kMSG_VALUE_CHOSEN:
+                HandleSenderPublish(message);
 
             case kMSG_LEARNER_SEND_VALUE:
             case kMSG_VALUE_CHOSEN_BROADCAST :

@@ -7,12 +7,14 @@
 
 #include <controller.hpp>
 #include <node.hpp>
+#include "communicator.hpp"
 
-namespace paxosme {
-    class PaxosNode : public Node{
-    private:
-        PaxController pax_controller_;
-    };
-}
+
+class PaxosNode : public paxosme::Node{
+private:
+//    paxosme::PaxController pax_controller_;
+//    paxosme::Communicator communicatior_;
+};
+
 
 #endif //PAXOSME_PAXOS_NODE_HPP

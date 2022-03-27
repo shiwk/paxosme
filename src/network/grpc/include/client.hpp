@@ -45,9 +45,9 @@ namespace paxosme {
         explicit GrpcClient(const std::shared_ptr<ChannelInterface> &channel)
                 : stub_(Paxosme::NewStub(channel)) {}
 
-        bool Prepare(const PaxMessage &pax_message);
-
         bool Propose(const PaxMessage &pax_message);
+
+        bool Accept(const PaxMessage &pax_message);
 
     private:
         std::unique_ptr<Paxosme::Stub> stub_;

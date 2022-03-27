@@ -5,7 +5,8 @@
 #ifndef PAXOSME_NETWORK_HPP
 #define PAXOSME_NETWORK_HPP
 
-#include <communicator.hpp>
+#include "communicate_pax.hpp"
+#include <vector>
 
 namespace paxosme {
     struct NetworkConfig {
@@ -15,17 +16,12 @@ namespace paxosme {
 
     class Network {
     public:
-        Network(Communicator *communicator) : communicator_(communicator) {};
-
-        void start();
+        void Init();
+        PaxCommunicator* GetCommunicator();
 
     private:
-        Communicator *communicator_;
+        PaxCommunicator *communicator_;
     };
-
-    void Network::start() {
-
-    }
 
 }
 #endif //PAXOSME_NETWORK_HPP

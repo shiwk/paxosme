@@ -19,11 +19,11 @@ namespace paxosme {
     class PaxosmeImpl final : public Paxosme::Service {
     public:
 
-        grpc::Status Prepare(grpc::ServerContext *context, const paxos::PrepareRequest *request,
-                             paxos::PrepareReply *response) override;
-
         grpc::Status Propose(grpc::ServerContext *context, const paxos::ProposeRequest *request,
                              paxos::ProposeReply *response) override;
+
+        grpc::Status Accept(grpc::ServerContext *context, const paxos::AcceptRequest *request,
+                             paxos::AcceptReply *response) override;
 
     private:
 

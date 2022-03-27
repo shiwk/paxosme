@@ -6,32 +6,32 @@
 #include <client.hpp>
 
 namespace paxosme {
-    bool GrpcClient::Prepare(const PaxMessage &pax_message) {
-        paxos::PrepareRequest prepare_request;
-        prepare_request.set_instance_id(pax_message.GetInstanceId());
-        prepare_request.set_proposal_id(pax_message.GetProposalId());
-        prepare_request.set_proposer_id(pax_message.GetProposer());
+    bool GrpcClient::Propose(const PaxMessage &pax_message) {
+        paxos::ProposeRequest proposeRequest;
+        proposeRequest.set_instance_id(pax_message.GetInstanceId());
+        proposeRequest.set_proposal_id(pax_message.GetProposalId());
+        proposeRequest.set_proposer_id(pax_message.GetProposer());
 
         auto async_request = [&](::grpc::ClientContext *c,
                                  ::grpc::CompletionQueue *cq) {
-            return stub_->PrepareAsyncPrepare(c, prepare_request, cq);
+            return stub_->PrepareAsyncPropose(c, proposeRequest, cq);
         };
-        AsyncCall<paxos::PrepareReply>(async_request);
+        AsyncCall<paxos::ProposeReply>(async_request);
         return true;
     }
 
-    bool GrpcClient::Propose(const PaxMessage &pax_message) {
-        paxos::ProposeRequest propose_request;
-        propose_request.set_proposer_id(pax_message.GetProposer());
-        propose_request.set_proposal_id(pax_message.GetProposalId());
-        propose_request.set_instance_id(pax_message.GetInstanceId());
-        propose_request.set_proposed_log_value(pax_message.GetProposedLogValue());
+    bool GrpcClient::Accept(const PaxMessage &pax_message) {
+        paxos::AcceptRequest acceptRequest;
+        acceptRequest.set_proposer_id(pax_message.GetProposer());
+        acceptRequest.set_proposal_id(pax_message.GetProposalId());
+        acceptRequest.set_instance_id(pax_message.GetInstanceId());
+        acceptRequest.set_proposed_log_value(pax_message.GetProposedLogValue());
 
         auto async_request = [&](::grpc::ClientContext *c,
                                 ::grpc::CompletionQueue *cq) {
-            return stub_->PrepareAsyncPropose(c, propose_request, cq);
+            return stub_->PrepareAsyncAccept(c, acceptRequest, cq);
         };
-        AsyncCall<paxos::ProposeReply>(async_request);
+        AsyncCall<paxos::AcceptReply>(async_request);
         return false;
     }
 }

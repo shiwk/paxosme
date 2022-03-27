@@ -10,18 +10,29 @@
 namespace paxosme {
 
     int Communicator::Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) {
-        if(clientTable_.find(node_id) == clientTable_.end())
+        if (clientTable_.find(node_id) == clientTable_.end())
             return -1;
-        bool request = clientTable_[node_id]->Prepare(pax_message);
-        return request ? 0 : -1;
+
+
+        if (pax_message.GetMessageType() == kMSG_PROPOSE_BROADCAST) {
+            bool request = clientTable_[node_id]->Propose(pax_message);
+            return request ? 0 : -1;
+        }
+        else if (pax_message.GetMessageType() == kMSG_ACCEPT_BROADCAST){
+            bool request = clientTable_[node_id]->Accept(pax_message);
+            return request ? 0 : -1;
+        }
+
+        return -1;
+
     }
 
-    int Communicator::Receive(const paxosme::PaxMessage &pax_message) {
-        return 0;
-    }
+//    int Communicator::Receive(const paxosme::PaxMessage &pax_message) {
+//        return 0;
+//    }
 
     Communicator::Communicator(std::vector<node_id_t> &nodes) {
-        for (node_id_t node:nodes) {
+        for (node_id_t node: nodes) {
             auto host = ParseNodeId(node);
             auto client = NewClient(host);
             clientTable_[node] = client;
@@ -38,6 +49,10 @@ namespace paxosme {
     std::shared_ptr<GrpcClient> Communicator::NewClient(std::string &host) {
         return std::shared_ptr<GrpcClient>(
                 new GrpcClient(grpc::CreateChannel(host, grpc::InsecureChannelCredentials())));
+    }
+
+    int Communicator::Broadcast(const PaxMessage &pax_message) {
+        return 0;
     }
 
 }

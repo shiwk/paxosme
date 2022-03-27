@@ -17,14 +17,14 @@ namespace paxosme {
     }
 
     grpc::Status
-    PaxosmeImpl::Prepare(grpc::ServerContext *context, const paxos::PrepareRequest *request,
-                         paxos::PrepareReply *response) {
-        return Service::Prepare(context, request, response);
-    }
-
-    grpc::Status
     PaxosmeImpl::Propose(grpc::ServerContext *context, const paxos::ProposeRequest *request,
                          paxos::ProposeReply *response) {
         return Service::Propose(context, request, response);
+    }
+
+    grpc::Status
+    PaxosmeImpl::Accept(grpc::ServerContext *context, const paxos::AcceptRequest *request,
+                         paxos::AcceptReply *response) {
+        return Service::Accept(context, request, response);
     }
 }

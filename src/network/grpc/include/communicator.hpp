@@ -17,11 +17,12 @@ namespace paxosme {
 
         int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) override;
 
-        int Receive(const paxosme::PaxMessage &pax_message) override;
+        int Broadcast(const PaxMessage &pax_message)  override;
 
     private:
         std::string ParseNodeId(node_id_t);
         std::shared_ptr<GrpcClient> NewClient(std::string &);
+//        int
         std::unordered_map<node_id_t, std::shared_ptr<GrpcClient>> clientTable_;
     };
 }

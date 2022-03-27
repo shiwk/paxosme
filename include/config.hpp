@@ -4,12 +4,14 @@
 
 #ifndef PAXOSME_CONFIG_HPP
 #define PAXOSME_CONFIG_HPP
+
 #include <cmath>
 #include <vector>
+#include <set>
 
 namespace paxosme {
 
-    struct Node{
+    struct Peer {
         node_id_t node_id;
         std::string ip;
         int port;
@@ -18,9 +20,9 @@ namespace paxosme {
     class PaxConfig {
     private:
         node_id_t node_id_;
-        int32_t node_count_;
         double majority_threshold_;
-        std::vector<Node> members_;
+        std::vector<Peer> peers_;
+        std::set<node_id_t> members;
 
     public:
         double GetMajorityThreshold() const {
@@ -35,19 +37,17 @@ namespace paxosme {
             return node_id_;
         }
 
-        int32_t GetNodeCount() const {
-            return node_count_;
+        size_t GetNodeCount() const {
+            return peers_.size();
         }
 
-        void SetNodeCount(int32_t node_count) {
-            node_count_ = node_count;
+        size_t GetMajorityCount() const {
+            return ceil(majority_threshold_ * (double)GetNodeCount());
         }
 
-        int32_t GetMajorityCount() const {
-            return ceil(majority_threshold_ * node_count_);
+        bool ProposingAuthority() {
+            return members.find(node_id_) != members.end();
         }
-
-        bool ProposingAuthority(); //todo I: check authority before node proposing
     };
 }
 

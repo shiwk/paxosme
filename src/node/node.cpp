@@ -2,8 +2,10 @@
 // Created by shiwk on 2020/7/25.
 //
 
-#include "paxos_node.hpp"
+#include "network.hpp"
 
-namespace paxosme {
-
-}
+//int main(int argc, char ** argv) {
+//    paxosme::Network network;
+//    network.Init();
+//    auto communicator = network.GetCommunicator();
+//}
