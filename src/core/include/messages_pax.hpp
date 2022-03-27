@@ -30,7 +30,7 @@ namespace paxosme {
         kMSG_CONFIRM_LEARN,
         kMSG_LEARNER_SEND_VALUE,
         kMSG_LEARNER_VALUE_SYNC,
-        kMSG_LEARNER_VALUE_ACK,
+        kMSG_SYNC_VALUE_ACK,
         kMSG_VALUE_CHOSEN_BROADCAST,
         kMSG_TELL_INSTANCE_ID,
 

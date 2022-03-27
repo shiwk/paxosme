@@ -23,7 +23,7 @@ namespace paxosme {
     void PaxLearner::Init(const PaxController *controller) {
         PaxPlayer::InitController(controller);
         learner_send_loop_ = std::async(std::launch::async, &PaxLearner::SendingLoop, this);
-        Publish(EventType::kShallILearnTO, [this] { ShallLearn(); }, shall_Learn_delay_);
+        Publish(EventType::kEVENT_SHALL_I_LEARN, [this] { ShallLearn(); }, shall_Learn_delay_);
     }
 
     bool PaxLearner::HandleSenderPublish(const PaxMessage &pax_message) {
@@ -55,6 +55,8 @@ namespace paxosme {
                     break;
                 }
             }
+
+            case kMSG_LEARNER_SEND_VALUE:
             case kMSG_VALUE_CHOSEN_BROADCAST :
                 HandleOthersPublish(message);
                 break;
@@ -67,12 +69,11 @@ namespace paxosme {
                 HandleConfirmLearn(message);
                 break;
 
-            case kMSG_LEARNER_SEND_VALUE:
             case kMSG_LEARNER_VALUE_SYNC:
-                HandleOthersPublish(message);
+                HandleSyncValue(message);
                 break;
 
-            case kMSG_LEARNER_VALUE_ACK:
+            case kMSG_SYNC_VALUE_ACK:
                 HandleValueAck(message);
                 break;
 

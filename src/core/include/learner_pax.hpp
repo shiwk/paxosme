@@ -93,6 +93,7 @@ namespace paxosme {
         bool HandleSenderPublish(const PaxMessage &);
 
         void HandleOthersPublish(const PaxMessage &pax_message);
+        void HandleSyncValue(const PaxMessage &pax_message);
 
         void HandleConfirmLearn(const PaxMessage &);
 
@@ -130,7 +131,7 @@ namespace paxosme {
 
         void MakeSenderReady(node_id_t receiver, instance_id_t follower_instance_id);
 
-        void SendLearnedValue(instance_id_t, node_id_t, bool sync = false);
+        void SendLearnedValue(instance_id_t, node_id_t, bool sync);
 
         void TellOthers(proposal_id_t proposal_id, node_id_t proposer, const LogValue &log_value);
 

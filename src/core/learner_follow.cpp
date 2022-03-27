@@ -50,6 +50,12 @@ namespace paxosme {
             ConfirmLearn(pax_message.GetSender());
     }
 
+    void PaxLearner::HandleSyncValue(const PaxMessage &pax_message) {
+        LearnFromOthers(pax_message);
+        // only syncing needs ack
+        AckLearnValue(pax_message.GetSender());
+    }
+
     void PaxLearner::ConfirmLearn(node_id_t node_id) {
         std::unique_lock<std::mutex> lck(mutex_follow_);
         is_learning_ = true;
@@ -71,14 +77,10 @@ namespace paxosme {
 
         LearnNew(pax_message.GetChosenValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
                  pax_message.GetProposer(), true);
-
-        if (pax_message.GetMessageType() == MessageType::kMSG_LEARNER_VALUE_SYNC)
-            // only syncing needs ack
-            AckLearnValue(pax_message.GetSender());
     }
 
     void PaxLearner::AckLearnValue(node_id_t node_id) {
-        PaxMessage pax_message(GetNodeId(), MessageType::kMSG_LEARNER_VALUE_ACK);
+        PaxMessage pax_message(GetNodeId(), MessageType::kMSG_SYNC_VALUE_ACK);
         pax_message.SetInstanceId(GetInstanceId());
         SendMessage(pax_message, node_id);
     }

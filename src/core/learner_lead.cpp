@@ -38,7 +38,7 @@ namespace paxosme {
 
         if (pax_message.GetInstanceId() + 1 == GetInstanceId()) {
             //  learner is just following me, and in this case return the value directly.
-            SendLearnedValue(pax_message.GetInstanceId(), pax_message.GetSender());
+            SendLearnedValue(pax_message.GetInstanceId(), pax_message.GetSender(), false);
         }
     }
 
@@ -50,7 +50,7 @@ namespace paxosme {
         PaxosState paxosState = ReadState(instanceId);
 
         PaxMessage pax_message(toNodeId,
-                               sync ? MessageType::kMSG_LEARNER_SEND_VALUE : MessageType::kMSG_LEARNER_VALUE_SYNC);
+                               sync ? MessageType::kMSG_LEARNER_VALUE_SYNC : MessageType::kMSG_LEARNER_SEND_VALUE);
         pax_message.SetInstanceId(instanceId);
         pax_message.SetLearnedValue(LogValue(paxosState.accepted_value()));
         pax_message.SetAcceptedId(paxosState.accepted_proposal_id());
@@ -81,7 +81,7 @@ namespace paxosme {
 
         while (to_send < GetInstanceId()) {
 
-            SendLearnedValue(to_send, receiver);
+            SendLearnedValue(to_send, receiver, true);
             instance_id_t last_send = to_send;
             to_send++;
 
