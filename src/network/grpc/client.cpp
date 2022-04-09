@@ -16,7 +16,14 @@ namespace paxosme {
                                  ::grpc::CompletionQueue *cq) {
             return stub_->PrepareAsyncPropose(c, proposeRequest, cq);
         };
-        AsyncCall<paxos::ProposeReply>(async_request);
+
+        paxos::ProposeReply proposeReply;
+        bool res = AsyncCall<paxos::ProposeReply>(async_request, proposeReply);
+
+        if (!res)
+            return false;
+
+        // todo I: handle message
         return true;
     }
 
@@ -27,11 +34,46 @@ namespace paxosme {
         acceptRequest.set_instance_id(pax_message.GetInstanceId());
         acceptRequest.set_proposed_log_value(pax_message.GetProposedLogValue());
 
-        auto async_request = [&](::grpc::ClientContext *c,
-                                ::grpc::CompletionQueue *cq) {
+        auto prepareRequestFunc = [&](::grpc::ClientContext *c,
+                                      ::grpc::CompletionQueue *cq) {
             return stub_->PrepareAsyncAccept(c, acceptRequest, cq);
         };
-        AsyncCall<paxos::AcceptReply>(async_request);
-        return false;
+        ;
+
+        paxos::AcceptReply acceptReply;
+        bool res = AsyncCall<paxos::AcceptReply>(prepareRequestFunc, acceptReply);
+        if (!res)
+            return false;
+        // todo I: handle message
+        return true;
+    }
+
+    bool GrpcClient::ProposeAck(const PaxMessage &pax_message) {
+        paxos::ProposeAckRequest proposeAckRequest;
+        proposeAckRequest.set_replier_id(pax_message.GetSender());
+        proposeAckRequest.set_is_rejected(pax_message.IsRejected());
+        proposeAckRequest.set_instance_id(pax_message.GetInstanceId());
+
+
+        if (pax_message.IsRejected()) {
+            proposeAckRequest.set_promised_id(pax_message.GetPromisedId());
+            proposeAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
+        }
+
+        if (!pax_message.GetAcceptedValue().empty())
+            proposeAckRequest.set_accepted_log_value(pax_message.GetAcceptedValue());
+
+        auto async_request = [&](::grpc::ClientContext *c, ::grpc::CompletionQueue *cq) {
+                return stub_->PrepareAsyncProposeAck(c, proposeAckRequest, cq);
+        };
+
+        paxos::ProposeAckReply proposeAckReply;
+        bool res = AsyncCall<paxos::ProposeAckReply>(async_request, proposeAckReply);
+
+        if (!res)
+            return false;
+
+        // todo I: handle message
+        return true;
     }
 }

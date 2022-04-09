@@ -22,6 +22,10 @@ namespace paxosme {
             bool request = clientTable_[node_id]->Accept(pax_message);
             return request ? 0 : -1;
         }
+        else if(pax_message.GetMessageType() == kMSG_ACCEPT_ACK){
+            bool request = clientTable_[node_id]->Accept(pax_message);
+            return request ? 0 : -1;
+        }
 
         return -1;
 

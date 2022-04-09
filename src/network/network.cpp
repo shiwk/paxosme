@@ -7,3 +7,7 @@
 void paxosme::Network::Init() {
     //todo I: too much
 }
+
+paxosme::PaxCommunicator *paxosme::Network::GetCommunicator() {
+    return communicator_;
+}

@@ -5,6 +5,8 @@ package paxos;
 service Paxosme {
     rpc Propose (ProposeRequest) returns (ProposeReply) {
     }
+    rpc ProposeAck(ProposeAckRequest) returns (ProposeAckReply){
+    }
     rpc Accept (AcceptRequest) returns (AcceptReply) {
     }
 }
@@ -16,13 +18,21 @@ message ProposeRequest {
 }
 
 message ProposeReply {
+}
+
+message ProposeAckRequest {
     bool is_rejected = 1;
     uint64 replier_id = 2;
     uint64 promised_id = 3;
-    uint64 received_id =4;
-    uint64 instance_id =5;
-    string accepted_log_value = 6;
+//    uint64 received_id =4;
+    uint64 instance_id =4;
+    string accepted_log_value = 5;
+    uint64 promised_node_id = 6;
 }
+
+message ProposeAckReply{
+}
+
 
 message AcceptRequest {
     uint64 proposal_id = 1;
