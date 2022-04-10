@@ -76,8 +76,8 @@ namespace paxosme {
     void PaxController::PushSMByState(instance_id_t target_instance_id) {
         instance_id_t instanceInSM = state_machine_->GetInstanceId();
         for (instance_id_t i = instanceInSM; i < target_instance_id; ++i) {
-            PaxosState paxos_state = acceptor_->ReadState(i);
-            state_machine_->Execute(i, paxos_state.accepted_value());
+            PaxosStorageState paxos_state = acceptor_->ReadState(i);
+            state_machine_->Execute(i, paxos_state.acceptedValue);
         }
     }
 

@@ -9,14 +9,25 @@
 #include <string>
 #include <database.hpp>
 #include <messages_pax.hpp>
-#include <state.pb.h>
+
 
 namespace paxosme{
+    struct PaxosStorageState{
+        instance_id_t instanceId;
+        proposal_id_t proposalId;
+        node_id_t proposer;
+        proposal_id_t acceptedProposalId;
+        node_id_t acceptedNodeId;
+        LogValue acceptedValue;
+        node_id_t promisedNodeId;
+        proposal_id_t promisedProposalId;
+    };
+
     class Storage {
     public:
-        int Write(instance_id_t instance_id, const PaxosState & value);
+        int Write(instance_id_t instance_id, const PaxosStorageState & value);
 
-        int Read(instance_id_t instance_id, PaxosState & value);
+        int Read(instance_id_t instance_id, PaxosStorageState & value);
     private:
         Database * db;
     };

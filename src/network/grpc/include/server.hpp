@@ -6,6 +6,7 @@
 #define PAXOSME_SERVER_HPP
 
 #include "paxosme.grpc.pb.h"
+#include "controller.hpp"
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server.h>
 
@@ -16,19 +17,6 @@ using grpc::Server;
 class NetworkConfig;
 
 namespace paxosme {
-    class PaxosmeGrpcImpl final : public Paxosme::Service {
-    public:
-
-        grpc::Status Propose(grpc::ServerContext *context, const paxos::ProposeRequest *request,
-                             paxos::ProposeReply *response) override;
-
-        grpc::Status Accept(grpc::ServerContext *context, const paxos::AcceptRequest *request,
-                            paxos::AcceptReply *response) override;
-
-    private:
-
-    };
-
     class ServerImpl {
     public:
         void Start(std::string &listening);
@@ -39,6 +27,7 @@ namespace paxosme {
         std::unique_ptr<Server> server_;
         paxos::Paxosme::AsyncService asyncService_;
         std::unique_ptr<grpc::ServerCompletionQueue> cq_;
+        PaxController *paxController_;
 
         void HandleRpcs();
     };
@@ -58,11 +47,7 @@ namespace paxosme {
     protected:
         BaseCallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq) : service_(service),
                                                                                                cq_(cq),
-                                                                                               status_(CREATE) {}
-
-        virtual void InitRequestState() = 0;
-
-        virtual void Handle() = 0;
+                                                                                               status_(CREATE){}
 
         // The means of communication with the gRPC runtime for an asynchronous
         // server.
@@ -94,28 +79,27 @@ namespace paxosme {
         // Take in the "service" instance (in this case representing an asynchronous
         // server) and the completion queue "cq" used for asynchronous communication
         // with the gRPC runtime.
-        CallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq) : BaseCallData(service, cq),
-                                                                                           responder_(&ctx_) {
+        CallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq, PaxController *controller)
+                : BaseCallData(service, cq), responder_(&ctx_), controller_(controller) {
             // Invoke the serving logic right away.
             Proceed();
         }
 
 
-    protected:
-        void InitRequestState() override;
-
-        void Handle() override;
-
     private:
+        void InitRequestState();
 
+        void HandleRequest(TReply &reply);
+
+//        PaxController *paxController_;
         // What we get from the client.
         TRequest request_;
         // What we send back to the client.
-        TReply reply_;
+//        TReply reply_;
 
         // The means to get back to the client.
         grpc::ServerAsyncResponseWriter<TReply> responder_;
-
+        PaxController *controller_;
         void CreateStatusFunc() override {
             // Make this instance progress to the PROCESS state.
             status_ = PROCESS;
@@ -134,19 +118,20 @@ namespace paxosme {
             // Spawn a new CallData instance to serve new clients while we process
             // the one for this CallData. The instance will deallocate itself as
             // part of its FINISH state.
-            new CallData<TRequest, TReply>(service_, cq_);
+            new CallData<TRequest, TReply>(service_, cq_, controller_);
 
             // The actual processing.
 //                std::string prefix("Hello ");
 //                reply_.set_message( prefix + request_.name());
 
-            Handle();
+            TReply reply;
+            HandleRequest(reply);
 
             // And we are done! Let the gRPC runtime know we've finished, using the
             // memory address of this instance as the uniquely identifying tag for
             // the event.
             status_ = FINISH;
-            responder_.Finish(reply_, grpc::Status::OK, this);
+            responder_.Finish(reply, grpc::Status::OK, this);
         }
 
 

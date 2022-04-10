@@ -24,7 +24,7 @@ namespace paxosme {
             return false;
 
         // todo I: handle message
-        return true;
+        return proposeReply.ack();
     }
 
     bool GrpcClient::Accept(const PaxMessage &pax_message) {

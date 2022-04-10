@@ -28,7 +28,7 @@ namespace paxosme {
     public:
         explicit PaxPlayer(const PaxConfig*, const PaxCommunicator*, const Storage *storage, const Schedule *schedule);
         virtual ~PaxPlayer() = default;
-        PaxosState ReadState(instance_id_t instance_id);
+        PaxosStorageState ReadState(instance_id_t instance_id);
 
         void InitController(const PaxController*);
 
@@ -50,7 +50,7 @@ namespace paxosme {
 
         void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
-        void WriteState(const paxosme::PaxosState &paxos_state);
+        void WriteState(const paxosme::PaxosStorageState &paxos_state);
 
         void Publish(EventType event_type, const EventHandler &callback, millisec delayInMilli = 0);
         void Withdraw(EventType);

@@ -39,12 +39,12 @@ namespace paxosme {
         controller_->HandleMessage(message);
     }
 
-    void PaxPlayer::WriteState(const PaxosState &paxos_state) {
-        storage_->Write(paxos_state.instance_id(), paxos_state);
+    void PaxPlayer::WriteState(const PaxosStorageState &paxos_state) {
+        storage_->Write(paxos_state.instanceId, paxos_state);
     }
 
-    PaxosState PaxPlayer::ReadState(instance_id_t instance_id) {
-        PaxosState paxos_state;
+    PaxosStorageState PaxPlayer::ReadState(instance_id_t instance_id) {
+        PaxosStorageState paxos_state;
         storage_->Read(instance_id, paxos_state);
         return paxos_state;
     }

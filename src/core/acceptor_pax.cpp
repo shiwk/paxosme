@@ -120,20 +120,20 @@ namespace paxosme {
     }
 
     void PaxAcceptor::UpdatePromised(node_id_t proposer, proposal_id_t proposal_id) {
-        PaxosState paxos_state;
+        PaxosStorageState paxos_state;
 
         acceptor_state_.SetPromisedProposal(proposal_id, proposer);
 
-        paxos_state.set_instance_id(GetInstanceId());
-        paxos_state.set_promised_node_id(proposer);
-        paxos_state.set_promised_proposal_id(proposal_id);
-        paxos_state.set_proposer_id(proposer);
+        paxos_state.instanceId = GetInstanceId();
+        paxos_state.promisedNodeId = proposer;
+        paxos_state.promisedProposalId = proposal_id;
+        paxos_state.proposer = proposer;
 
         if (acceptor_state_.GetAcceptedProposalId()) {
-            paxos_state.set_accepted_node_id(proposer);
-            paxos_state.set_accepted_proposal_id(acceptor_state_.GetAcceptedProposalId());
+            paxos_state.acceptedNodeId = proposer;
+            paxos_state.acceptedProposalId = acceptor_state_.GetAcceptedProposalId();
             LogValue accepted_value = acceptor_state_.GetAcceptedValue();
-            paxos_state.set_accepted_value(accepted_value);
+            paxos_state.acceptedValue = accepted_value;
         }
 
         // an acceptor is supposed to remember this information even if it fails and then restarts.
@@ -154,9 +154,9 @@ namespace paxosme {
 
     instance_id_t PaxAcceptor::Init(const PaxController *controller) {
         PaxPlayer::InitController(controller);
-        PaxosState paxos_state = ReadState(-1);
+        PaxosStorageState paxos_state = ReadState(-1);
         acceptor_state_.Init(paxos_state);
-        return paxos_state.instance_id();
+        return paxos_state.instanceId;
     }
 
     bool PaxAcceptor::HandleSenderPublish(const PaxMessage &pax_message) {
@@ -173,11 +173,11 @@ namespace paxosme {
         return true;
     }
 
-    void AcceptorState::Init(const PaxosState &state) {
-        LogValue log_value{state.accepted_value()};
+    void AcceptorState::Init(const PaxosStorageState &state) {
+        LogValue log_value{state.acceptedValue};
         SetAcceptedValue(log_value);
-        SetAcceptedProposal(state.accepted_proposal_id(), state.accepted_node_id());
-        SetPromisedProposal(state.promised_proposal_id(), state.promised_node_id());
+        SetAcceptedProposal(state.acceptedProposalId, state.acceptedNodeId);
+        SetPromisedProposal(state.promisedProposalId, state.promisedNodeId);
 //        SetInstanceId(state.instance_id());
     }
 

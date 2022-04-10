@@ -15,22 +15,27 @@ message ProposeRequest {
     uint64 proposal_id = 1;
     uint64 instance_id = 2;
     uint64 proposer_id = 3;
+    uint64 sender_id = 4;
 }
 
 message ProposeReply {
+    bool ack = 1;
+    uint64 sender_id = 2;
 }
 
 message ProposeAckRequest {
     bool is_rejected = 1;
     uint64 replier_id = 2;
     uint64 promised_id = 3;
-//    uint64 received_id =4;
     uint64 instance_id =4;
     string accepted_log_value = 5;
     uint64 promised_node_id = 6;
+    uint64 sender_id = 7;
 }
 
 message ProposeAckReply{
+    bool ack = 1;
+    uint64 sender_id = 2;
 }
 
 
@@ -39,8 +44,10 @@ message AcceptRequest {
     uint64 instance_id = 2;
     uint64 proposer_id = 3;
     string proposed_log_value = 5;
+    uint64 sender_id = 6;
 }
 
 message AcceptReply {
-    bool accepted = 1;
+    bool ack = 1;
+    uint64 sender_id = 2;
 }
