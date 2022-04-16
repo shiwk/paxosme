@@ -46,14 +46,13 @@ namespace paxosme {
         explicit GrpcClient(const std::shared_ptr<ChannelInterface> &channel)
                 : stub_(Paxosme::NewStub(channel)) {}
 
-        bool Propose(const PaxMessage &pax_message);
-
-        bool Accept(const PaxMessage &pax_message);
-
-        bool ProposeAck(const PaxMessage &pax_message);
-
     private:
         std::unique_ptr<Paxosme::Stub> stub_;
+
+        template<class TRequest, class TResponse>
+        std::unique_ptr<::grpc::ClientAsyncResponseReader<TResponse>> PrepareRequest(::grpc::ClientContext *c,::grpc::CompletionQueue *cq, TRequest &request);
+
+
 //        Paxosme::Stub stub_;
 
 //        template<class Request, class Response>
@@ -90,19 +89,22 @@ namespace paxosme {
 //            delete call;
 //            return res;
 //        }
-
+    public:
         // code reference https://github.com/grpc/grpc/blob/master/examples/cpp/helloworld/greeter_async_client2.cc
-        template<class Response>
-        bool AsyncCall(RequestCall<Response> async_request, Response &r) {
+        template<class TRequest, class TResponse>
+        bool AsyncCall(TRequest request, TResponse &r) {
+
+//            RequestCall<TResponse> async_request = MakePrepareRequest<TRequest, TResponse>(request,kPROPOSE);
+
             // Call object to store rpc data
-            auto *call = new AsyncClientCall<Response>;
+            auto *call = new AsyncClientCall<TResponse>;
 
             // stub_->PrepareAsyncSayHello() creates an RPC object, returning
             // an instance to store in "call" but does not actually start the RPC
             // Because we are using the asynchronous API, we need to hold on to
             // the "call" instance in order to get updates on the ongoing RPC.
             ::grpc::CompletionQueue cq;
-            call->response_reader = async_request(&call->context, &cq);
+            call->response_reader = PrepareRequest<TRequest, TResponse>(&call->context, &cq, request);
 //            call->response_reader = async_request();
             // StartCall initiates the RPC call
             call->response_reader->StartCall();
@@ -113,12 +115,12 @@ namespace paxosme {
 
             call->response_reader->Finish(&call->reply, &call->status, (void *) 1);
 
-            void* got_tag;
+            void *got_tag;
             bool ret = false;
 
             bool next = cq.Next(&got_tag, &ret);
             GPR_ASSERT(next);
-            GPR_ASSERT(ret && got_tag == (void*)1);
+            GPR_ASSERT(ret && got_tag == (void *) 1);
 
             if (call->status.ok()) {
                 r = call->reply;

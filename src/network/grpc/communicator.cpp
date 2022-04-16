@@ -10,30 +10,40 @@
 namespace paxosme {
 
     int Communicator::Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) {
-        if (clientTable_.find(node_id) == clientTable_.end())
-            return -1;
 
+        switch (pax_message.GetMessageType()) {
+            case kMSG_PROPOSE_ACK: {
+                paxos::ProposeAckRequest proposeAckRequest;
+                proposeAckRequest.set_is_rejected(pax_message.IsRejected());
+                proposeAckRequest.set_instance_id(pax_message.GetInstanceId());
+                proposeAckRequest.set_promised_id(pax_message.GetPromisedId());
+                proposeAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
+                proposeAckRequest.set_accepted_log_value(pax_message.GetAcceptedValue());
 
-        if (pax_message.GetMessageType() == kMSG_PROPOSE_BROADCAST) {
-            bool request = clientTable_[node_id]->Propose(pax_message);
-            return request ? 0 : -1;
+                paxos::ProposeAckReply proposeAckReply;
+                return Send(node_id, proposeAckRequest, proposeAckReply);
+            }
+            case kMSG_ACCEPT_ACK: {
+                paxos::AcceptAckRequest acceptAckRequest;
+                acceptAckRequest.set_instance_id(pax_message.GetInstanceId());
+                acceptAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
+                acceptAckRequest.set_promised_id(pax_message.GetPromisedId());
+                acceptAckRequest.set_accepted_id(pax_message.GetAcceptedId());
+                acceptAckRequest.set_accepted_value(pax_message.GetAcceptedValue());
+                acceptAckRequest.set_rejected(pax_message.IsRejected());
+
+                paxos::AcceptAckReply acceptAckReply;
+                return Send(node_id, acceptAckRequest, acceptAckReply);
+            }
+                //todo I: more cases
+            default:
+                break;
         }
-        else if (pax_message.GetMessageType() == kMSG_ACCEPT_BROADCAST){
-            bool request = clientTable_[node_id]->Accept(pax_message);
-            return request ? 0 : -1;
-        }
-        else if(pax_message.GetMessageType() == kMSG_ACCEPT_ACK){
-            bool request = clientTable_[node_id]->Accept(pax_message);
-            return request ? 0 : -1;
-        }
+
 
         return -1;
 
     }
-
-//    int Communicator::Receive(const paxosme::PaxMessage &pax_message) {
-//        return 0;
-//    }
 
     Communicator::Communicator(std::vector<node_id_t> &nodes) {
         for (node_id_t node: nodes) {
@@ -56,7 +66,35 @@ namespace paxosme {
     }
 
     int Communicator::Broadcast(const PaxMessage &pax_message) {
-        return 0;
-    }
+        switch (pax_message.GetMessageType()) {
+            case kMSG_PROPOSE_BROADCAST: {
+                paxos::ProposeRequest proposeRequest;
+                proposeRequest.set_instance_id(pax_message.GetInstanceId());
+                proposeRequest.set_proposal_id(pax_message.GetProposalId());
+                proposeRequest.set_proposer_id(pax_message.GetProposer());
 
+                Broadcast<paxos::ProposeRequest, paxos::ProposeReply>(proposeRequest);
+                break;
+            }
+
+            case kMSG_ACCEPT_BROADCAST: {
+                paxos::AcceptRequest acceptRequest;
+                acceptRequest.set_proposer_id(pax_message.GetProposer());
+                acceptRequest.set_proposal_id(pax_message.GetProposalId());
+                acceptRequest.set_instance_id(pax_message.GetInstanceId());
+                acceptRequest.set_proposed_log_value(pax_message.GetProposedLogValue());
+
+                paxos::AcceptReply acceptReply;
+                Broadcast<paxos::AcceptRequest, paxos::AcceptReply>(acceptRequest);
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        return 1;
+
+        //todo I: more cases
+    }
 }

@@ -28,7 +28,9 @@ namespace paxosme {
     void ServerImpl::HandleRpcs() {
         // Spawn a new CallData instance to serve new clients.
         new CallData<paxos::ProposeRequest, paxos::ProposeReply>(&asyncService_, cq_.get(), paxController_);
-        // todo I: more call data
+        new CallData<paxos::ProposeAckRequest, paxos::ProposeAckReply>(&asyncService_, cq_.get(), paxController_);
+        new CallData<paxos::AcceptRequest, paxos::AcceptReply>(&asyncService_, cq_.get(), paxController_);
+        // todo I: check more call data
         void *tag;  // uniquely identifies a request.
         bool ok;
         while (true) {
@@ -41,21 +43,5 @@ namespace paxosme {
             GPR_ASSERT(ok);
             static_cast<BaseCallData *>(tag)->Proceed();
         }
-    }
-
-    template<>
-    void CallData<paxos::ProposeRequest, paxos::ProposeReply>::InitRequestState() {
-        service_->RequestPropose(&ctx_, &request_, &responder_, cq_, cq_, this);
-    }
-
-    template<>
-    void CallData<paxos::ProposeRequest, paxos::ProposeReply> :: HandleRequest(paxos::ProposeReply &reply){
-        // generate message
-        PaxMessage paxMessage(request_.proposer_id(), kMSG_PROPOSE_BROADCAST);
-        paxMessage.SetProposalId(request_.proposal_id());
-        controller_->AddMessage(paxMessage);
-
-        // set reply
-        reply.set_ack(true);
     }
 }
