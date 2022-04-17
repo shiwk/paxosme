@@ -16,7 +16,7 @@ namespace paxosme {
                 paxos::ProposeAckRequest proposeAckRequest;
                 proposeAckRequest.set_is_rejected(pax_message.IsRejected());
                 proposeAckRequest.set_instance_id(pax_message.GetInstanceId());
-                proposeAckRequest.set_promised_id(pax_message.GetPromisedId());
+                proposeAckRequest.set_promised_proposal_id(pax_message.GetPromisedProposalId());
                 proposeAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
                 proposeAckRequest.set_accepted_log_value(pax_message.GetAcceptedValue());
 
@@ -27,7 +27,7 @@ namespace paxosme {
                 paxos::AcceptAckRequest acceptAckRequest;
                 acceptAckRequest.set_instance_id(pax_message.GetInstanceId());
                 acceptAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
-                acceptAckRequest.set_promised_id(pax_message.GetPromisedId());
+                acceptAckRequest.set_promised_proposal_id(pax_message.GetPromisedProposalId());
                 acceptAckRequest.set_accepted_id(pax_message.GetAcceptedId());
                 acceptAckRequest.set_accepted_value(pax_message.GetAcceptedValue());
                 acceptAckRequest.set_rejected(pax_message.IsRejected());
@@ -35,7 +35,8 @@ namespace paxosme {
                 paxos::AcceptAckReply acceptAckReply;
                 return Send(node_id, acceptAckRequest, acceptAckReply);
             }
-                //todo I: more cases
+
+            //todo I: more cases
             default:
                 break;
         }
@@ -71,7 +72,7 @@ namespace paxosme {
                 paxos::ProposeRequest proposeRequest;
                 proposeRequest.set_instance_id(pax_message.GetInstanceId());
                 proposeRequest.set_proposal_id(pax_message.GetProposalId());
-                proposeRequest.set_proposer_id(pax_message.GetProposer());
+                proposeRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
 
                 Broadcast<paxos::ProposeRequest, paxos::ProposeReply>(proposeRequest);
                 break;
@@ -79,7 +80,7 @@ namespace paxosme {
 
             case kMSG_ACCEPT_BROADCAST: {
                 paxos::AcceptRequest acceptRequest;
-                acceptRequest.set_proposer_id(pax_message.GetProposer());
+                acceptRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
                 acceptRequest.set_proposal_id(pax_message.GetProposalId());
                 acceptRequest.set_instance_id(pax_message.GetInstanceId());
                 acceptRequest.set_proposed_log_value(pax_message.GetProposedLogValue());

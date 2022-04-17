@@ -11,13 +11,15 @@
 namespace paxosme {
     class NetworkConfig;
 
-    class Communicator  {
+    class Communicator : public PaxCommunicator {
     public:
         explicit Communicator(std::vector<node_id_t> &);
 
-        int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) ;
+        int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) override;
 
-        int Broadcast(const PaxMessage &pax_message) ;
+        int Broadcast(const PaxMessage &pax_message) override;
+
+//        ~Communicator() override;
 
     private:
 

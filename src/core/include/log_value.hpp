@@ -35,5 +35,6 @@ namespace paxosme{
 //        }
 //
 //    };
+
 }
 #endif //PAXOSME_LOG_VALUE_HPP

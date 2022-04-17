@@ -133,7 +133,7 @@ namespace paxosme {
     void PaxLearner::LearnFromSelf(const PaxMessage &pax_message) {
         if (pax_message.GetInstanceId() != GetInstanceId())
             return; // instance id not matched
-        if (pax_message.GetProposer() != GetNodeId())
+        if (pax_message.GetProposingNodeId() != GetNodeId())
             return; // proposer not matched
 
         auto proposal = GetAcceptedProposal();

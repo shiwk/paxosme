@@ -106,7 +106,7 @@ namespace paxosme {
 
         void HandleProposeAck(const PaxMessage &pax_reply_message);
 
-        void HandleAcceptAck(const PaxMessage &pax_reply_message);
+        void HandleAcceptAck(const PaxMessage &message);
 
         void Propose();
 

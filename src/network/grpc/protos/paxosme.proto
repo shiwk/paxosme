@@ -16,7 +16,7 @@ service Paxosme {
 message ProposeRequest {
   uint64 proposal_id = 1;
   uint64 instance_id = 2;
-  uint64 proposer_id = 3;
+  uint64 proposing_node_id = 3;
   uint64 sender_id = 4;
 }
 
@@ -28,7 +28,7 @@ message ProposeReply {
 message ProposeAckRequest {
   bool is_rejected = 1;
   //    uint64 replier_id = 2;
-  uint64 promised_id = 3;
+  uint64 promised_proposal_id = 3;
   uint64 instance_id = 4;
   string accepted_log_value = 5;
   uint64 promised_node_id = 6;
@@ -46,7 +46,7 @@ message ProposeAckReply{
 message AcceptRequest {
   uint64 proposal_id = 1;
   uint64 instance_id = 2;
-  uint64 proposer_id = 3;
+  uint64 proposing_node_id = 3;
   string proposed_log_value = 5;
   uint64 sender_id = 6;
 }
@@ -59,12 +59,16 @@ message AcceptReply {
 message AcceptAckRequest{
   uint64 instance_id = 1;
   uint64 promised_node_id = 2;
-  uint64 promised_id = 3;
+  uint64 promised_proposal_id = 3;
   uint64 accepted_id = 4;
   string accepted_value = 5;
   bool rejected = 6;
+  uint64 sender_id = 7;
+  uint64 proposal_id =8;
+  uint64 proposing_node_id = 9;
 }
 
 message AcceptAckReply{
-
+  bool ack = 1;
+  uint64 sender_id = 2;
 }

@@ -102,7 +102,7 @@ namespace paxosme {
             return accepted_id_;
         }
 
-        proposal_id_t GetPromisedId() const {
+        proposal_id_t GetPromisedProposalId() const {
             return promised_id_;
         }
 
@@ -126,7 +126,7 @@ namespace paxosme {
             accepted_value_ = accepted_value;
         }
 
-        void SetPromisedId(proposal_id_t promised_id) {
+        void SetPromisedProposalId(proposal_id_t promised_id) {
             promised_id_ = promised_id;
         }
 
@@ -139,9 +139,9 @@ namespace paxosme {
         AcceptorState acceptor_state_;
     public:
         PaxAcceptor(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
-        void HandlePrepareRequest(const PaxMessage &message);
+        void HandlePropose(const PaxMessage &message);
 
-        void HandleProposeRequest(const PaxMessage &message);
+        void HandleAccept(const PaxMessage &message);
 
         void ReplyProposer(const PaxAcceptorReplyMessage &reply, MessageType request_type);
 

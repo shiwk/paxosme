@@ -7,6 +7,23 @@
 #define HARDCODE_MSG_COUNT_LIMIT 1000
 
 namespace paxosme {
+
+    inline bool MessageForProposer(MessageType message_type) {
+        return message_type >> 4 == 0x1;
+    }
+
+    static inline bool MessageForAcceptor(MessageType message_type) {
+        return message_type >> 3 == 0x1;
+    }
+
+    static inline bool MessageForLearner(MessageType message_type) {
+        return message_type >> 5 == 0x1;
+    }
+
+    static inline bool MessagePlaceHolder(MessageType message_type) {
+        return message_type >> 6 == 0x1;
+    }
+
     PaxController::PaxController(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
                                  const Schedule *schedule)
             : pax_config_(const_cast<PaxConfig *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {

@@ -10,13 +10,13 @@
 
 namespace paxosme {
     struct NetworkConfig {
-        std::string listening;
-        std::vector<std::string> peers;
+        int listening;
+        std::vector<node_id_t> peers;
     };
 
     class Network {
     public:
-        void Init();
+        void Init(NetworkConfig);
         PaxCommunicator* GetCommunicator();
 
     private:

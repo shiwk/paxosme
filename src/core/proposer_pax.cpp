@@ -77,9 +77,10 @@ namespace paxosme {
         if (status_ != ProposerStatus::kPropose)
             return; // incompatible proposer status
 
-        if (pax_reply_message.GetProposer() != GetNodeId())
+        if (pax_reply_message.GetProposingNodeId() != GetNodeId())
             // reply not for me
             return;
+
         if (pax_reply_message.GetProposalId() != proposer_state_.GetMyProposalId())
             return; // something goes wrong!
 
@@ -91,7 +92,7 @@ namespace paxosme {
 
         } else {
             // reject and record proposal id promised by the replier
-            proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
+            proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedProposalId(),
                                                        pax_reply_message.GetPromisedNodeId());
             proposal_counter_.AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
         }
@@ -124,26 +125,26 @@ namespace paxosme {
 
     /**
      *
-     * @param pax_reply_message
+     * @param message
      */
-    void PaxProposer::HandleAcceptAck(const PaxMessage &pax_reply_message) {
+    void PaxProposer::HandleAcceptAck(const PaxMessage &message) {
 
         if (status_ != ProposerStatus::kAccept)
             return; // incompatible proposer status
 
-        if (pax_reply_message.GetProposer() != GetNodeId())
+        if (message.GetProposingNodeId() != GetNodeId())
             // reply not for me
             return;
-        if (pax_reply_message.GetProposalId() != proposer_state_.GetMyProposalId())
+        if (message.GetProposalId() != proposer_state_.GetMyProposalId())
             return; // something goes wrong!
 
-        if (!pax_reply_message.IsRejected()) {
+        if (!message.IsRejected()) {
             // count for approval
             proposal_counter_.AddAccept(proposer_state_.GetMyProposalId(), GetNodeId());
         } else {
             // reject and record proposal id promised by the replier
-            proposer_state_.TryUpdateHighestProposalId(pax_reply_message.GetPromisedId(),
-                                                       pax_reply_message.GetPromisedNodeId());
+            proposer_state_.TryUpdateHighestProposalId(message.GetPromisedProposalId(),
+                                                       message.GetPromisedNodeId());
             proposal_counter_.AddRejection(proposer_state_.GetMyProposalId(), GetNodeId());
         }
 
@@ -151,20 +152,20 @@ namespace paxosme {
             status_ = ProposerStatus::kMajorityAccepted;
             PaxMessage msg(GetNodeId(), MessageType::kMSG_VALUE_CHOSEN);
             // no log_value in msg
-            msg.SetInstanceId(pax_reply_message.GetInstanceId());
-            msg.SetProposalId(pax_reply_message.GetProposalId());
+            msg.SetInstanceId(message.GetInstanceId());
+            msg.SetProposalId(message.GetProposalId());
 
             ProcessChosenValue(msg);
 //            BroadCastMessage(msg);
         } else if (proposal_counter_.IsMajorityRejected() || !proposal_counter_.IsStillPending()) {
-            instance_id_t instanceId = pax_reply_message.GetInstanceId();
+            instance_id_t instanceId = message.GetInstanceId();
             EventHandler callback = [this, instanceId] { ProposeTimeoutCallback(instanceId); };
             Publish(EventType::kEVENT_ACCEPT_TIMEOUT, callback, ACCEPT_TIMEOUT);
         }
     }
 
     bool PaxProposer::TryUpdateProposerStateWithPrepareReply(const PaxMessage &message) {
-        return proposer_state_.TryUpdateLogValue(message.GetProposalId(), message.GetProposer(),
+        return proposer_state_.TryUpdateLogValue(message.GetProposalId(), message.GetProposingNodeId(),
                                                  message.GetAcceptedValue());
     }
 
@@ -213,7 +214,9 @@ namespace paxosme {
 
     void PaxProposer::HandleMessage(const PaxMessage &message) {
         switch (message.GetMessageType()) {
-            // for proposer
+
+            // todo I: check instance and handle the case if the instance not matched
+
             case kMSG_PROPOSE_ACK: {
                 HandleProposeAck(message);
                 break;

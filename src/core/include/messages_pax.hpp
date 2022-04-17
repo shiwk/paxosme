@@ -38,31 +38,11 @@ namespace paxosme {
         kPLACEHOLDER_NEW_VALUE_COMMITTED = 0x1111 << 3
     };
 
-
-    bool MessageForProposer(MessageType message_type) {
-        return message_type >> 4 == 0x1;
-    }
-
-    bool MessageForAcceptor(MessageType message_type) {
-        return message_type >> 3 == 0x1;
-    }
-
-    bool MessageForLearner(MessageType message_type) {
-        return message_type >> 5 == 0x1;
-    }
-
-    bool MessagePlaceHolder(MessageType message_type) {
-        return message_type >> 6 == 0x1;
-    }
-
-
-    class Serializable {
-    public:
-        virtual std::string &Serialize() const = 0;
-    };
+//    bool MessageForProposer(MessageType message_type) {
+//        return message_type >> 4 == 0x1;
+//    }
 
     class PaxMessage {
-
 
     private:
         LogValue proposed_log_value_;
@@ -71,8 +51,8 @@ namespace paxosme {
         LogValue chosen_value_;
     public:
 
-        PaxMessage(node_id_t sender_id, MessageType message_type) : sender_id_(sender_id),
-                                                                    message_type_(message_type) {}
+        PaxMessage(node_id_t sender_id, MessageType message_type) : senderId_(sender_id),
+                                                                    messageType_(message_type) {}
 
         const LogValue &GetChosenValue() const {
             return chosen_value_;
@@ -91,35 +71,34 @@ namespace paxosme {
         }
 
     private:
-        proposal_id_t promised_id_{};
-        node_id_t promised_node_id_{};
-        instance_id_t instance_id_{};
-        instance_id_t confirmed_instance_id_{};
-        proposal_id_t proposal_id_{};
-        node_id_t proposer_{};
-        node_id_t following_node_id_{};
-        MessageType message_type_;
-        proposal_id_t accepted_id_{};
-        instance_id_t leader_instance_id_{};
-        node_id_t sender_id_{};
+        proposal_id_t promisedProposalId_{};
+        node_id_t promisedNodeId_{};
+        instance_id_t instanceId_{};
+        proposal_id_t proposalId_{};
+        node_id_t proposingNodeId_{};
+        node_id_t followingNodeId_{};
+        MessageType messageType_;
+        proposal_id_t acceptedProposalId_{};
+        instance_id_t leaderInstanceId_{};
+        node_id_t senderId_{};
 
         bool rejected_{};
 
     public:
         node_id_t GetSender() const {
-            return sender_id_;
+            return senderId_;
         }
 
         void SetSender(node_id_t sender_id) {
-            sender_id_ = sender_id;
+            senderId_ = sender_id;
         }
 
         instance_id_t GetLeaderInstanceId() const {
-            return leader_instance_id_;
+            return leaderInstanceId_;
         }
 
         void SetLeaderInstanceId(instance_id_t leaderInstanceId) {
-            leader_instance_id_ = leaderInstanceId;
+            leaderInstanceId_ = leaderInstanceId;
         }
 
         bool IsRejected() const {
@@ -131,15 +110,15 @@ namespace paxosme {
         }
 
         void SetProposer(node_id_t proposer) {
-            proposer_ = proposer;
+            proposingNodeId_ = proposer;
         }
 
         proposal_id_t GetAcceptedId() const {
-            return accepted_id_;
+            return acceptedProposalId_;
         }
 
         void SetAcceptedId(proposal_id_t accepted_id) {
-            accepted_id_ = accepted_id;
+            acceptedProposalId_ = accepted_id;
         }
 
         const LogValue &GetAcceptedValue() const {
@@ -150,45 +129,45 @@ namespace paxosme {
             accepted_value_ = accepted_value;
         }
 
-        proposal_id_t GetPromisedId() const {
-            return promised_id_;
+        proposal_id_t GetPromisedProposalId() const {
+            return promisedProposalId_;
         }
 
-        void SetPromisedId(proposal_id_t promised_id) {
-            promised_id_ = promised_id;
+        void SetPromisedProposalId(proposal_id_t promised_id) {
+            promisedProposalId_ = promised_id;
         }
 
         node_id_t GetPromisedNodeId() const {
-            return promised_node_id_;
+            return promisedNodeId_;
         }
 
         void SetPromisedNodeId(node_id_t promised_node_id) {
-            promised_node_id_ = promised_node_id;
+            promisedNodeId_ = promised_node_id;
         }
 
         MessageType GetMessageType() const {
-            return message_type_;
+            return messageType_;
         }
 
         void SetMessageType(MessageType message_type) {
-            message_type_ = message_type;
+            messageType_ = message_type;
         }
 
         node_id_t GetFollowingNodeId() const {
-            return following_node_id_;
+            return followingNodeId_;
         }
 
         void SetFollowingNodeId(node_id_t following_node_id) {
-            following_node_id_ = following_node_id;
+            followingNodeId_ = following_node_id;
         }
 
         void SetInstanceId(instance_id_t instance_id) {
-            instance_id_ = instance_id;
+            instanceId_ = instance_id;
         }
 
 
         instance_id_t GetInstanceId() const {
-            return instance_id_;
+            return instanceId_;
         }
 
         void SetProposedLogValue(const LogValue &log_value) {
@@ -200,15 +179,15 @@ namespace paxosme {
         }
 
         proposal_id_t GetProposalId() const {
-            return proposal_id_;
+            return proposalId_;
         }
 
         void SetProposalId(proposal_id_t proposal_id) {
-            proposal_id_ = proposal_id;
+            proposalId_ = proposal_id;
         }
 
-        node_id_t GetProposer() const {
-            return proposer_;
+        node_id_t GetProposingNodeId() const {
+            return proposingNodeId_;
         }
     };
 }

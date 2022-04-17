@@ -15,7 +15,7 @@ namespace paxosme {
      * Acceptor processing when received prepare request
      * @param message
      */
-    void PaxAcceptor::HandlePrepareRequest(const PaxMessage &message) {
+    void PaxAcceptor::HandlePropose(const PaxMessage &message) {
 
         /**
          * "An acceptor can accept a proposal numbered n iff
@@ -23,10 +23,10 @@ namespace paxosme {
          */
 
         PaxAcceptorReplyMessage pax_reply_message{};
-        pax_reply_message.SetProposerId(message.GetProposer());
+        proposal_id_t proposer = message.GetProposingNodeId();
+        pax_reply_message.SetProposerId(proposer);
 
         proposal_id_t proposal_id = message.GetProposalId();
-        proposal_id_t proposer = message.GetProposer();
 
 
         if (IsHigherThanPromised(proposer, proposal_id)) {
@@ -55,7 +55,7 @@ namespace paxosme {
             proposal_id_t promised_id = acceptor_state_.GetPromisedProposal();
             node_id_t promised_node_id = acceptor_state_.GetPromisedProposer();
 
-            pax_reply_message.SetPromisedId(promised_id);
+            pax_reply_message.SetPromisedProposalId(promised_id);
             pax_reply_message.SetPromisedNodeId(promised_node_id);
         }
 
@@ -63,12 +63,12 @@ namespace paxosme {
         ReplyProposer(pax_reply_message, MessageType::kMSG_PROPOSE_ACK);
     }
 
-    void PaxAcceptor::HandleProposeRequest(const PaxMessage &message) {
+    void PaxAcceptor::HandleAccept(const PaxMessage &message) {
         PaxAcceptorReplyMessage pax_reply_message{};
-        pax_reply_message.SetProposerId(message.GetProposer());
+        pax_reply_message.SetProposerId(message.GetProposingNodeId());
 
         proposal_id_t proposal_id = message.GetProposalId();
-        proposal_id_t proposer = message.GetProposer();
+        proposal_id_t proposer = message.GetProposingNodeId();
 
         if (IsHigherThanPromised(proposer, proposal_id)) {
 
@@ -86,9 +86,11 @@ namespace paxosme {
 
             UpdatePromised(proposer, proposal_id);
 
+            pax_reply_message.SetIsRejected(false);
+
         } else {
             pax_reply_message.SetIsRejected(true);
-            pax_reply_message.SetPromisedId(acceptor_state_.GetPromisedProposal());
+            pax_reply_message.SetPromisedProposalId(acceptor_state_.GetPromisedProposal());
         }
 
         // reply
@@ -99,7 +101,7 @@ namespace paxosme {
         PaxMessage pax_message(GetNodeId(), request_type);
         pax_message.SetInstanceId(reply.GetInstanceId());
         pax_message.SetPromisedNodeId(reply.GetPromisedNodeId());
-        pax_message.SetPromisedId(reply.GetPromisedId());
+        pax_message.SetPromisedProposalId(reply.GetPromisedProposalId());
         pax_message.SetAcceptedId(reply.GetAcceptedId());
         pax_message.SetAcceptedValue(reply.GetAcceptedValue());
         pax_message.SetRejected(reply.IsRejected());
@@ -165,7 +167,7 @@ namespace paxosme {
             return false;
         }
 
-        if (IsProposalAccepted(pax_message.GetProposalId(), pax_message.GetProposer())) {
+        if (IsProposalAccepted(pax_message.GetProposalId(), pax_message.GetProposingNodeId())) {
             // log info: not accepted yet. [abnormal case]
             return false;
         }
@@ -204,12 +206,15 @@ namespace paxosme {
 
     void PaxAcceptor::HandleMessage(const PaxMessage &message) {
         switch (message.GetMessageType()) {
+
+            // todo I: check instance and handle the case if the instance not matched
+
             case kMSG_PROPOSE_BROADCAST:
-                HandlePrepareRequest(message);
+                HandlePropose(message);
                 break;
 
             case kMSG_ACCEPT_BROADCAST:
-                HandleProposeRequest(message);
+                HandleAccept(message);
                 break;
             default:
                 break;

@@ -76,7 +76,7 @@ namespace paxosme {
             return;
 
         LearnNew(pax_message.GetChosenValue(), pax_message.GetInstanceId(), pax_message.GetProposalId(),
-                 pax_message.GetProposer(), true);
+                 pax_message.GetProposingNodeId(), true);
     }
 
     void PaxLearner::AckLearnValue(node_id_t node_id) {
