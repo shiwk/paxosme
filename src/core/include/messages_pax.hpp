@@ -109,7 +109,7 @@ namespace paxosme {
             rejected_ = rejected;
         }
 
-        void SetProposer(node_id_t proposer) {
+        void SetProposingNodeId(node_id_t proposer) {
             proposingNodeId_ = proposer;
         }
 

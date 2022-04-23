@@ -54,7 +54,7 @@ namespace paxosme {
         pax_message.SetInstanceId(instanceId);
         pax_message.SetLearnedValue(LogValue(paxosState.acceptedValue));
         pax_message.SetAcceptedId(paxosState.acceptedProposalId);
-        pax_message.SetProposer(paxosState.proposer);
+        pax_message.SetProposingNodeId(paxosState.proposer);
 
         SendMessage(pax_message, toNodeId);
     }
@@ -154,7 +154,7 @@ namespace paxosme {
         PaxMessage message(GetNodeId(), MessageType::kMSG_VALUE_CHOSEN_BROADCAST);
         message.SetInstanceId(GetInstanceId());
         message.SetProposalId(proposal_id);
-        message.SetProposer(proposer);
+        message.SetProposingNodeId(proposer);
         message.SetChosenValue(log_value);
 
         BroadCastMessage(message);

@@ -172,8 +172,8 @@ namespace paxosme {
     PaxMessage PaxProposer::GenerateMessage(MessageType message_type, proposal_id_t proposal_id) {
         PaxMessage message(GetNodeId(), message_type);
         message.SetInstanceId(GetInstanceId());
-        message.SetProposer(GetNodeId());
-        message.SetProposer(proposal_id);
+        message.SetProposingNodeId(GetNodeId());
+        message.SetProposingNodeId(proposal_id);
         message.SetProposedLogValue(proposer_state_.GetLogValue());
         return message;
     }

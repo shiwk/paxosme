@@ -11,6 +11,8 @@ service Paxosme {
   }
   rpc AcceptAck (AcceptAckRequest) returns (AcceptAckReply) {
   }
+  rpc NewValueChosen(NewValueChosenRequest) returns (NewValueChosenReply) {
+  }
 }
 
 message ProposeRequest {
@@ -69,6 +71,19 @@ message AcceptAckRequest{
 }
 
 message AcceptAckReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message NewValueChosenRequest{
+  uint64 instance_id = 1;
+  string chosen_value = 2;
+  uint64 proposal_id = 3;
+  uint64 proposing_node_id =4;
+  uint64 sender_id = 5;
+}
+
+message NewValueChosenReply{
   bool ack = 1;
   uint64 sender_id = 2;
 }

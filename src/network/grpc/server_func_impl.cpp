@@ -17,7 +17,7 @@ namespace paxosme {
         // generate message
         PaxMessage paxMessage(request_.sender_id(), kMSG_PROPOSE_BROADCAST);
         paxMessage.SetInstanceId(request_.instance_id());
-        paxMessage.SetProposer(request_.proposing_node_id());
+        paxMessage.SetProposingNodeId(request_.proposing_node_id());
         paxMessage.SetProposalId(request_.proposal_id());
 
         controller_->AddMessage(paxMessage);
@@ -39,7 +39,7 @@ namespace paxosme {
         PaxMessage paxMessage(request_.sender_id(), kMSG_PROPOSE_ACK);
 
         paxMessage.SetInstanceId(request_.instance_id());
-        paxMessage.SetProposer(request_.reply_to());
+        paxMessage.SetProposingNodeId(request_.reply_to());
         paxMessage.SetProposalId(request_.proposal_id());
         paxMessage.SetRejected(request_.is_rejected());
         paxMessage.SetPromisedProposalId(request_.promised_proposal_id());
@@ -63,7 +63,7 @@ namespace paxosme {
         PaxMessage paxMessage(request_.sender_id(), kMSG_ACCEPT_BROADCAST);
 
         paxMessage.SetInstanceId(request_.instance_id());
-        paxMessage.SetProposer(request_.proposing_node_id());
+        paxMessage.SetProposingNodeId(request_.proposing_node_id());
         paxMessage.SetProposalId(request_.proposal_id());
         paxMessage.SetProposedLogValue(request_.proposed_log_value());
 
@@ -85,10 +85,28 @@ namespace paxosme {
 
         paxMessage.SetInstanceId(request_.instance_id());
         paxMessage.SetProposalId(request_.proposal_id());
-        paxMessage.SetProposer(request_.proposing_node_id());
+        paxMessage.SetProposingNodeId(request_.proposing_node_id());
         paxMessage.SetRejected(request_.rejected());
         paxMessage.SetPromisedNodeId(request_.promised_node_id());
         paxMessage.SetPromisedProposalId(request_.promised_proposal_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
+
+    template<>
+    void CallData<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>::InitRequestState() {
+        service_->RequestNewValueChosen(&ctx_, &request_, &responder_, cq_,cq_,this);
+    }
+
+    template<>
+    void CallData<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>::HandleRequest(paxos::NewValueChosenReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_VALUE_CHOSEN_BROADCAST);
+
+        paxMessage.SetInstanceId(request_.instance_id());
+        paxMessage.SetChosenValue(request_.chosen_value());
+        paxMessage.SetProposalId(request_.proposal_id());
+        paxMessage.SetProposingNodeId(request_.proposing_node_id());
 
         controller_->AddMessage(paxMessage);
         reply.set_ack(true);

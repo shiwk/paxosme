@@ -14,6 +14,7 @@ namespace paxosme {
         switch (pax_message.GetMessageType()) {
             case kMSG_PROPOSE_ACK: {
                 paxos::ProposeAckRequest proposeAckRequest;
+                proposeAckRequest.set_sender_id(pax_message.GetSender());
                 proposeAckRequest.set_is_rejected(pax_message.IsRejected());
                 proposeAckRequest.set_instance_id(pax_message.GetInstanceId());
                 proposeAckRequest.set_promised_proposal_id(pax_message.GetPromisedProposalId());
@@ -25,6 +26,7 @@ namespace paxosme {
             }
             case kMSG_ACCEPT_ACK: {
                 paxos::AcceptAckRequest acceptAckRequest;
+                acceptAckRequest.set_sender_id(pax_message.GetSender());
                 acceptAckRequest.set_instance_id(pax_message.GetInstanceId());
                 acceptAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
                 acceptAckRequest.set_promised_proposal_id(pax_message.GetPromisedProposalId());
@@ -70,6 +72,7 @@ namespace paxosme {
         switch (pax_message.GetMessageType()) {
             case kMSG_PROPOSE_BROADCAST: {
                 paxos::ProposeRequest proposeRequest;
+                proposeRequest.set_sender_id(pax_message.GetSender());
                 proposeRequest.set_instance_id(pax_message.GetInstanceId());
                 proposeRequest.set_proposal_id(pax_message.GetProposalId());
                 proposeRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
@@ -80,6 +83,7 @@ namespace paxosme {
 
             case kMSG_ACCEPT_BROADCAST: {
                 paxos::AcceptRequest acceptRequest;
+                acceptRequest.set_sender_id(pax_message.GetSender());
                 acceptRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
                 acceptRequest.set_proposal_id(pax_message.GetProposalId());
                 acceptRequest.set_instance_id(pax_message.GetInstanceId());
@@ -87,6 +91,18 @@ namespace paxosme {
 
                 paxos::AcceptReply acceptReply;
                 Broadcast<paxos::AcceptRequest, paxos::AcceptReply>(acceptRequest);
+                break;
+            }
+
+            case kMSG_VALUE_CHOSEN_BROADCAST: {
+                paxos::NewValueChosenRequest newValueChosenRequest;
+                newValueChosenRequest.set_sender_id(pax_message.GetSender());
+                newValueChosenRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
+                newValueChosenRequest.set_instance_id(pax_message.GetInstanceId());
+                newValueChosenRequest.set_chosen_value(pax_message.GetChosenValue());
+                newValueChosenRequest.set_proposal_id(pax_message.GetProposalId());
+
+                Broadcast<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>(newValueChosenRequest);
                 break;
             }
 
