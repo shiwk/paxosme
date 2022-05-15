@@ -43,4 +43,47 @@ namespace paxosme {
         return stub_->PrepareAsyncNewValueChosen(c, request, cq);
     }
 
+    template<>
+    ResponseReader<paxos::ShallILearnReply>
+    GrpcClient::PrepareRequest(::grpc::ClientContext *c, ::grpc::CompletionQueue *cq,
+                               paxos::ShallILearnRequest &request) {
+        return stub_->PrepareAsyncShallILearn(c, request, cq);
+    }
+
+    template<>
+    ResponseReader<paxos::LearnerValueSyncReply>
+    GrpcClient::PrepareRequest(::grpc::ClientContext *c, ::grpc::CompletionQueue *cq,
+                               paxos::LearnerValueSyncRequest &request) {
+        return stub_->PrepareAsyncLearnerValueSync(c, request, cq);
+    }
+
+    template<>
+    ResponseReader<paxos::AckSyncValueReply>
+    GrpcClient::PrepareRequest(grpc::ClientContext *c, grpc::CompletionQueue *cq, paxos::AckSyncValueRequest &request) {
+        return stub_->PrepareAsyncAckSyncValue(c, request, cq);
+    }
+
+    template<>
+    ResponseReader<paxos::LearnerValueSendReply> GrpcClient::PrepareRequest(::grpc::ClientContext
+                                                                            *c, ::grpc::CompletionQueue *cq,
+                                                                            paxos::LearnerValueSendRequest &request) {
+        return stub_->PrepareAsyncLearnerValueSend(c, request, cq);
+    }
+
+    template<>
+    ResponseReader<paxos::TellInstanceIdReply> GrpcClient::PrepareRequest(::grpc::ClientContext
+                                                                          *c,
+                                                                          ::grpc::CompletionQueue *cq,
+                                                                          paxos::TellInstanceIdRequest &request) {
+        return stub_->PrepareAsyncTellInstanceId(c, request, cq);
+    }
+
+    template<>
+    ResponseReader<paxos::ConfirmLearnReply> GrpcClient::PrepareRequest(::grpc::ClientContext
+                                                                        *c,
+                                                                        ::grpc::CompletionQueue *cq,
+                                                                        paxos::ConfirmLearnRequest
+                                                                        &request) {
+        return stub_->PrepareAsyncConfirmLearn(c, request, cq);
+    }
 }

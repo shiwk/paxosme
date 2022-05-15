@@ -1,3 +1,4 @@
+
 # Paxosme 
 
 ## Paxos Player & Main Pipeline
@@ -75,7 +76,7 @@
   - Players **L.i** --> **L.j**
 
 
-- `kMSG_LEARNER_SEND_VALUE`
+- `kMSG_LEARNER_VALUE_SEND`
   
   - Players **L.i** --> **L.j**
 
@@ -96,7 +97,7 @@
   
   - Players **L.i** --> **L.***
 
-  - ACK `kMSG_LEARNER_SEND_VALUE` `kMSG_TELL_INSTANCE_ID`
+  - ACK `kMSG_LEARNER_VALUE_SEND` `kMSG_TELL_INSTANCE_ID`
 
 
 

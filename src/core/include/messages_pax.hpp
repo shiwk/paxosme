@@ -28,7 +28,7 @@ namespace paxosme {
         kMSG_VALUE_CHOSEN = 0x111 << 3,
         kMSG_SHALL_I_LEARN,
         kMSG_CONFIRM_LEARN,
-        kMSG_LEARNER_SEND_VALUE,
+        kMSG_LEARNER_VALUE_SEND,
         kMSG_LEARNER_VALUE_SYNC,
         kMSG_SYNC_VALUE_ACK,
         kMSG_VALUE_CHOSEN_BROADCAST,
@@ -49,6 +49,20 @@ namespace paxosme {
         LogValue accepted_value_;
         LogValue learned_value_;
         LogValue chosen_value_;
+
+    private:
+        proposal_id_t promisedProposalId_{};
+        node_id_t promisedNodeId_{};
+        instance_id_t instanceId_{};
+        proposal_id_t proposalId_{};
+        node_id_t proposingNodeId_{};
+        node_id_t followingNodeId_{};
+        MessageType messageType_;
+        proposal_id_t acceptedProposalId_{};
+        instance_id_t leaderInstanceId_{};
+        node_id_t senderId_{};
+
+        bool rejected_{};
     public:
 
         PaxMessage(node_id_t sender_id, MessageType message_type) : senderId_(sender_id),
@@ -70,21 +84,6 @@ namespace paxosme {
             learned_value_ = learnedValue;
         }
 
-    private:
-        proposal_id_t promisedProposalId_{};
-        node_id_t promisedNodeId_{};
-        instance_id_t instanceId_{};
-        proposal_id_t proposalId_{};
-        node_id_t proposingNodeId_{};
-        node_id_t followingNodeId_{};
-        MessageType messageType_;
-        proposal_id_t acceptedProposalId_{};
-        instance_id_t leaderInstanceId_{};
-        node_id_t senderId_{};
-
-        bool rejected_{};
-
-    public:
         node_id_t GetSender() const {
             return senderId_;
         }
@@ -113,11 +112,11 @@ namespace paxosme {
             proposingNodeId_ = proposer;
         }
 
-        proposal_id_t GetAcceptedId() const {
+        proposal_id_t GetAcceptedProposal() const {
             return acceptedProposalId_;
         }
 
-        void SetAcceptedId(proposal_id_t accepted_id) {
+        void SetAcceptedProposal(proposal_id_t accepted_id) {
             acceptedProposalId_ = accepted_id;
         }
 

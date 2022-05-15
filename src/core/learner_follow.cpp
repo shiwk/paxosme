@@ -40,7 +40,7 @@ namespace paxosme {
         }
 
         if (pax_message.GetLeaderInstanceId() < GetInstanceId()) {
-            // ignore because it does not lead on me
+            // ignore because it does not lead over me
             return;
         }
         // todo II : compare checkpoint and sync checkpoint if needed

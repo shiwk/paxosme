@@ -102,7 +102,7 @@ namespace paxosme {
         pax_message.SetInstanceId(reply.GetInstanceId());
         pax_message.SetPromisedNodeId(reply.GetPromisedNodeId());
         pax_message.SetPromisedProposalId(reply.GetPromisedProposalId());
-        pax_message.SetAcceptedId(reply.GetAcceptedId());
+        pax_message.SetAcceptedProposal(reply.GetAcceptedId());
         pax_message.SetAcceptedValue(reply.GetAcceptedValue());
         pax_message.SetRejected(reply.IsRejected());
 

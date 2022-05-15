@@ -21,8 +21,7 @@ namespace paxosme {
                 proposeAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
                 proposeAckRequest.set_accepted_log_value(pax_message.GetAcceptedValue());
 
-                paxos::ProposeAckReply proposeAckReply;
-                return Send(node_id, proposeAckRequest, proposeAckReply);
+                return Send<paxos::ProposeAckRequest, paxos::ProposeAckReply>(node_id, proposeAckRequest);
             }
             case kMSG_ACCEPT_ACK: {
                 paxos::AcceptAckRequest acceptAckRequest;
@@ -30,15 +29,64 @@ namespace paxosme {
                 acceptAckRequest.set_instance_id(pax_message.GetInstanceId());
                 acceptAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
                 acceptAckRequest.set_promised_proposal_id(pax_message.GetPromisedProposalId());
-                acceptAckRequest.set_accepted_id(pax_message.GetAcceptedId());
+                acceptAckRequest.set_accepted_id(pax_message.GetAcceptedProposal());
                 acceptAckRequest.set_accepted_value(pax_message.GetAcceptedValue());
                 acceptAckRequest.set_rejected(pax_message.IsRejected());
 
-                paxos::AcceptAckReply acceptAckReply;
-                return Send(node_id, acceptAckRequest, acceptAckReply);
+                return Send<paxos::AcceptAckRequest, paxos::AcceptAckReply>(node_id, acceptAckRequest);
             }
 
-            //todo I: more cases
+            case kMSG_LEARNER_VALUE_SYNC: {
+                paxos::LearnerValueSyncRequest learnerValueSyncRequest;
+                learnerValueSyncRequest.set_instance_id(pax_message.GetInstanceId());
+                learnerValueSyncRequest.set_sender_id(pax_message.GetSender());
+                learnerValueSyncRequest.set_value(pax_message.GetChosenValue());
+                learnerValueSyncRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
+                learnerValueSyncRequest.set_proposal_id(pax_message.GetProposalId());
+
+                return Send<paxos::LearnerValueSyncRequest, paxos::LearnerValueSyncReply>(node_id,
+                                                                                          learnerValueSyncRequest);
+            }
+
+            case kMSG_LEARNER_VALUE_SEND: {
+                paxos::LearnerValueSendRequest learnerValueSendRequest;
+                learnerValueSendRequest.set_instance_id(pax_message.GetInstanceId());
+                learnerValueSendRequest.set_sender_id(pax_message.GetSender());
+                learnerValueSendRequest.set_value(pax_message.GetChosenValue());
+                learnerValueSendRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
+                learnerValueSendRequest.set_proposal_id(pax_message.GetProposalId());
+
+                return Send<paxos::LearnerValueSendRequest, paxos::LearnerValueSendReply>(node_id,
+                                                                                          learnerValueSendRequest);
+            }
+
+            case kMSG_SYNC_VALUE_ACK : {
+                paxos::AckSyncValueRequest ackSyncValueRequest;
+                ackSyncValueRequest.set_instance_id(pax_message.GetInstanceId());
+                ackSyncValueRequest.set_sender_id(pax_message.GetSender());
+
+                return Send<paxos::AckSyncValueRequest, paxos::AckSyncValueReply>(node_id, ackSyncValueRequest);
+            };
+
+            case kMSG_TELL_INSTANCE_ID: {
+                paxos::TellInstanceIdRequest tellInstanceIdRequest;
+                tellInstanceIdRequest.set_follower_instance_id(pax_message.GetInstanceId());
+                tellInstanceIdRequest.set_leader_instance_id(pax_message.GetLeaderInstanceId());
+                tellInstanceIdRequest.set_sender_id(pax_message.GetSender());
+
+                return Send<paxos::TellInstanceIdRequest, paxos::TellInstanceIdReply>(node_id, tellInstanceIdRequest);
+            }
+
+            case kMSG_CONFIRM_LEARN:{
+                paxos::ConfirmLearnRequest confirmLearnRequest;
+                confirmLearnRequest.set_instance_id(pax_message.GetInstanceId());
+                confirmLearnRequest.set_sender_id(pax_message.GetSender());
+
+                return Send<paxos::ConfirmLearnRequest, paxos::ConfirmLearnReply>(node_id, confirmLearnRequest);
+            }
+
+
+                //todo I: more cases
             default:
                 break;
         }
@@ -106,6 +154,14 @@ namespace paxosme {
                 break;
             }
 
+            case kMSG_SHALL_I_LEARN: {
+                paxos::ShallILearnRequest shallILearnRequest;
+                shallILearnRequest.set_sender_id(pax_message.GetSender());
+                shallILearnRequest.set_instance_id(pax_message.GetInstanceId());
+
+                Broadcast<paxos::ShallILearnRequest, paxos::ShallILearnReply>(shallILearnRequest);
+                break;
+            }
             default:
                 break;
         }

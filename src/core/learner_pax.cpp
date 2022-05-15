@@ -47,7 +47,7 @@ namespace paxosme {
             case kMSG_VALUE_CHOSEN:
                 HandleSenderPublish(message);
 
-            case kMSG_LEARNER_SEND_VALUE:
+            case kMSG_LEARNER_VALUE_SEND:
             case kMSG_VALUE_CHOSEN_BROADCAST :
                 HandleOthersPublish(message);
                 break;

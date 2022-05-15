@@ -32,7 +32,7 @@ namespace paxosme {
                 pax_message.GetInstanceId() + 1 != GetInstanceId()// or learner is not catching me
                 ) {
 
-            TellInstanceId(GetInstanceId(), pax_message.GetSender());
+            TellInstanceId(pax_message.GetInstanceId(), pax_message.GetSender());
             return;
         }
 
@@ -50,10 +50,10 @@ namespace paxosme {
         PaxosStorageState paxosState = ReadState(instanceId);
 
         PaxMessage pax_message(toNodeId,
-                               sync ? MessageType::kMSG_LEARNER_VALUE_SYNC : MessageType::kMSG_LEARNER_SEND_VALUE);
+                               sync ? MessageType::kMSG_LEARNER_VALUE_SYNC : MessageType::kMSG_LEARNER_VALUE_SEND);
         pax_message.SetInstanceId(instanceId);
-        pax_message.SetLearnedValue(LogValue(paxosState.acceptedValue));
-        pax_message.SetAcceptedId(paxosState.acceptedProposalId);
+        pax_message.SetChosenValue(LogValue(paxosState.acceptedValue));
+        pax_message.SetProposalId(paxosState.proposalId);
         pax_message.SetProposingNodeId(paxosState.proposer);
 
         SendMessage(pax_message, toNodeId);

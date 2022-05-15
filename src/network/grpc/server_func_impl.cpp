@@ -111,4 +111,67 @@ namespace paxosme {
         controller_->AddMessage(paxMessage);
         reply.set_ack(true);
     }
+
+    template<>
+    void CallData<paxos::ShallILearnRequest, paxos::ShallILearnReply>::HandleRequest(paxos::ShallILearnReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_SHALL_I_LEARN);
+        paxMessage.SetInstanceId(request_.instance_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
+
+    template<>
+    void CallData<paxos::LearnerValueSyncRequest, paxos::LearnerValueSyncReply>::HandleRequest(paxos::LearnerValueSyncReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_LEARNER_VALUE_SYNC);
+        paxMessage.SetInstanceId(request_.instance_id());
+        paxMessage.SetChosenValue(request_.value());
+        paxMessage.SetProposalId(request_.proposal_id());
+        paxMessage.SetProposingNodeId(request_.proposing_node_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
+
+    template<>
+    void CallData<paxos::LearnerValueSendRequest, paxos::LearnerValueSendReply>::HandleRequest(
+            paxos::LearnerValueSendReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_LEARNER_VALUE_SEND);
+
+        paxMessage.SetInstanceId(request_.instance_id());
+        paxMessage.SetChosenValue(request_.value());
+        paxMessage.SetProposalId(request_.proposal_id());
+        paxMessage.SetProposingNodeId(request_.proposing_node_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
+
+    template<>
+    void CallData<paxos::AckSyncValueRequest, paxos::AckSyncValueReply>::HandleRequest(paxos::AckSyncValueReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_SYNC_VALUE_ACK);
+        paxMessage.SetInstanceId(request_.instance_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
+
+    template<>
+    void CallData<paxos::TellInstanceIdRequest, paxos::TellInstanceIdReply>::HandleRequest(paxos::TellInstanceIdReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_TELL_INSTANCE_ID);
+        paxMessage.SetInstanceId(request_.follower_instance_id());
+        paxMessage.SetLeaderInstanceId(request_.leader_instance_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
+
+    template<>
+    void CallData<paxos::ConfirmLearnRequest, paxos::ConfirmLearnReply>::HandleRequest(paxos::ConfirmLearnReply &reply) {
+        PaxMessage paxMessage(request_.sender_id(), kMSG_TELL_INSTANCE_ID);
+        paxMessage.SetInstanceId(request_.instance_id());
+
+        controller_->AddMessage(paxMessage);
+        reply.set_ack(true);
+    }
 }

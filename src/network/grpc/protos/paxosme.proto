@@ -3,16 +3,17 @@ syntax = "proto3";
 package paxos;
 
 service Paxosme {
-  rpc Propose (ProposeRequest) returns (ProposeReply) {
-  }
-  rpc ProposeAck(ProposeAckRequest) returns (ProposeAckReply){
-  }
-  rpc Accept (AcceptRequest) returns (AcceptReply) {
-  }
-  rpc AcceptAck (AcceptAckRequest) returns (AcceptAckReply) {
-  }
-  rpc NewValueChosen(NewValueChosenRequest) returns (NewValueChosenReply) {
-  }
+  rpc Propose (ProposeRequest) returns (ProposeReply) {}
+  rpc ProposeAck(ProposeAckRequest) returns (ProposeAckReply){}
+  rpc Accept (AcceptRequest) returns (AcceptReply) {}
+  rpc AcceptAck (AcceptAckRequest) returns (AcceptAckReply) {}
+  rpc NewValueChosen(NewValueChosenRequest) returns (NewValueChosenReply) {}
+  rpc ShallILearn(ShallILearnRequest) returns (ShallILearnReply) {}
+  rpc LearnerValueSync(LearnerValueSyncRequest) returns (LearnerValueSyncReply){}
+  rpc LearnerValueSend(LearnerValueSendRequest) returns (LearnerValueSendReply){}
+  rpc AckSyncValue(AckSyncValueRequest) returns (AckSyncValueReply) {}
+  rpc TellInstanceId (TellInstanceIdRequest) returns (TellInstanceIdReply){}
+  rpc ConfirmLearn (ConfirmLearnRequest) returns (ConfirmLearnReply){}
 }
 
 message ProposeRequest {
@@ -43,7 +44,6 @@ message ProposeAckReply{
   bool ack = 1;
   uint64 sender_id = 2;
 }
-
 
 message AcceptRequest {
   uint64 proposal_id = 1;
@@ -84,6 +84,73 @@ message NewValueChosenRequest{
 }
 
 message NewValueChosenReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message ShallILearnRequest{
+  uint64 instance_id = 1;
+  uint64 sender_id = 2;
+}
+
+message ShallILearnReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message LearnerValueSyncRequest{
+  uint64 instance_id = 1;
+  string value =2;
+  uint64 proposal_id = 3;
+  uint64 proposing_node_id = 4;
+  uint64 sender_id = 5;
+}
+
+message LearnerValueSyncReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message AckSyncValueRequest{
+  uint64 instance_id = 1;
+  uint64 sender_id = 2;
+}
+
+message AckSyncValueReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message LearnerValueSendRequest{
+  uint64 instance_id = 1;
+  string value =2;
+  uint64 proposal_id = 3;
+  uint64 proposing_node_id = 4;
+  uint64 sender_id = 5;
+}
+
+message LearnerValueSendReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message TellInstanceIdRequest{
+  uint64 follower_instance_id = 1;
+  uint64 leader_instance_id = 2;
+  uint64 sender_id = 3;
+}
+
+message TellInstanceIdReply{
+  bool ack = 1;
+  uint64 sender_id = 2;
+}
+
+message ConfirmLearnRequest{
+  uint64 instance_id = 1;
+  uint64 sender_id = 2;
+}
+
+message ConfirmLearnReply{
   bool ack = 1;
   uint64 sender_id = 2;
 }
