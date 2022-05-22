@@ -6,9 +6,8 @@
 
 namespace paxosme {
 
-    PaxAcceptor::PaxAcceptor(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
-                             const Schedule *schedule)
-            : PaxPlayer(config, communicator, storage, schedule), acceptor_state_(config) {
+    PaxAcceptor::PaxAcceptor(const ConfigInfo *config, const PaxCommunicator *communicator, const PaxStorage *storage)
+            : PaxPlayer(config, communicator, storage), acceptor_state_(config) {
     }
 
     /**

@@ -11,12 +11,12 @@
 namespace paxosme {
     class NetworkConfig;
 
-    class Communicator : public PaxCommunicator {
+    class GrpcComm : public PaxCommunicator {
     public:
-        explicit Communicator(std::vector<node_id_t> &);
+        explicit GrpcComm(std::vector<node_id_t> &);
 
         int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) override;
-
+//
         int Broadcast(const PaxMessage &pax_message) override;
 
 //        ~Communicator() override;
@@ -37,7 +37,7 @@ namespace paxosme {
     };
 
     template<class TRequest, class TResponse>
-    void Communicator::Broadcast(TRequest &request) {
+    void GrpcComm::Broadcast(TRequest &request) {
         for (const auto &kv: clientTable_) {
             node_id_t nodeId = kv.first;
             auto client = kv.second;
@@ -47,7 +47,7 @@ namespace paxosme {
     }
 
     template<class TRequest, class TResponse>
-    bool Communicator::Send(node_id_t node_id, TRequest &request) {
+    bool GrpcComm::Send(node_id_t node_id, TRequest &request) {
         if (clientTable_.find(node_id) == clientTable_.end())
             return false;
 

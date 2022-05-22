@@ -17,17 +17,17 @@
 namespace paxosme {
     class PaxController {
     public:
-        explicit PaxController(const PaxConfig *, const PaxCommunicator *, const Storage *, const Schedule *);
+        explicit PaxController(const ConfigInfo *);
 
         ~PaxController();
 
         void HandleMessage(const PaxMessage &message);
 
-        void Init(); // start loop
+        void Init(PaxCommunicator*, PaxStorage*); // start loop
 
         instance_id_t GetInstanceId() const;
 
-        bool IsAccepted(const instance_id_t i);
+        bool IsAccepted(instance_id_t i);
 
         const LogValue &GetAcceptedValue();
 
@@ -51,7 +51,7 @@ namespace paxosme {
         PaxProposer *proposer_;
         PaxAcceptor *acceptor_;
         PaxLearner *learner_;
-        PaxConfig *pax_config_;
+        ConfigInfo *pax_config_;
         std::future<void *> prov_loop_;
         MyQueue<PaxMessage*> msgProv_;
         StateMachine *state_machine_;

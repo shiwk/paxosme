@@ -6,13 +6,12 @@
 #include <controller.hpp>
 
 namespace paxosme {
-    PaxPlayer::PaxPlayer(const PaxConfig *config, const PaxCommunicator *communicator,
-                         const Storage *storage,
-                         const Schedule *schedule)
-            : config_(const_cast<PaxConfig *>(config)),
+    PaxPlayer::PaxPlayer(const ConfigInfo *config, const PaxCommunicator *communicator,
+                         const PaxStorage *storage)
+            : config_(const_cast<ConfigInfo *>(config)),
               communicator_(const_cast<PaxCommunicator *>(communicator)),
-              storage_(const_cast<Storage *>(storage)),
-              schedule_(const_cast<Schedule *>(schedule)) {
+              storage_(const_cast<PaxStorage *>(storage)),
+              schedule_(Schedule::OneInstance()) {
     }
 
     instance_id_t PaxPlayer::GetInstanceId() const {

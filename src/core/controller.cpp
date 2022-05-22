@@ -24,12 +24,9 @@ namespace paxosme {
         return message_type >> 6 == 0x1;
     }
 
-    PaxController::PaxController(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
-                                 const Schedule *schedule)
-            : pax_config_(const_cast<PaxConfig *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {
-        proposer_ = new PaxProposer{config, communicator, storage, schedule};
-        learner_ = new PaxLearner{config, communicator, storage, schedule};
-        acceptor_ = new PaxAcceptor{config, communicator, storage, schedule};
+    PaxController::PaxController(const ConfigInfo *config)
+            : pax_config_(const_cast<ConfigInfo *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {
+
     }
 
     instance_id_t PaxController::GetInstanceId() const {
@@ -54,7 +51,11 @@ namespace paxosme {
         return {GetInstanceId(), proposalId, nodeId};
     }
 
-    void PaxController::Init() {
+    void PaxController::Init(PaxCommunicator *communicator, PaxStorage *storage) {
+        proposer_ = new PaxProposer{pax_config_, communicator, storage};
+        learner_ = new PaxLearner{pax_config_, communicator, storage};
+        acceptor_ = new PaxAcceptor{pax_config_, communicator, storage};
+
         instance_id_t instanceInState = acceptor_->Init(this);
         instance_id_t instanceInSM = state_machine_->GetInstanceId();
 
@@ -168,5 +169,4 @@ namespace paxosme {
         auto message = new PaxMessage(std::move(pax_message));
         msgProv_.TryAdd(message);
     }
-
 }

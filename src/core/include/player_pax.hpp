@@ -26,7 +26,7 @@ namespace paxosme {
 
     class PaxPlayer {
     public:
-        explicit PaxPlayer(const PaxConfig*, const PaxCommunicator*, const Storage *storage, const Schedule *schedule);
+        explicit PaxPlayer(const ConfigInfo*, const PaxCommunicator*, const PaxStorage *storage);
         virtual ~PaxPlayer() = default;
         PaxosStorageState ReadState(instance_id_t instance_id);
 
@@ -52,7 +52,7 @@ namespace paxosme {
 
         void WriteState(const paxosme::PaxosStorageState &paxos_state);
 
-        void Publish(EventType event_type, const EventHandler &callback, millisec delayInMilli = 0);
+        void Publish(EventType event_type, const EventHandler &callback, millisec = 0);
         void Withdraw(EventType);
 
         ProposalTriplet GetAcceptedProposal();
@@ -61,9 +61,9 @@ namespace paxosme {
 
     private:
         PaxCommunicator *communicator_;
-        Storage *storage_;
+        PaxStorage *storage_;
         Schedule *schedule_;
-        PaxConfig *config_;
+        ConfigInfo *config_;
     };
 }
 #endif //PAXOSME_PLAYER_PAX_HPP

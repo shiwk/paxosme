@@ -40,6 +40,11 @@ namespace paxosme {
 
         void Remove(EventType);
 
+        static Schedule* OneInstance() {
+            static Schedule schedule;
+            return &schedule;
+        }
+
     private:
         MyUnorderedMap<EventType, EventId> eventTypeIdMap_;
         EventQueue eventQueue_;

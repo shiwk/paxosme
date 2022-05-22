@@ -23,7 +23,7 @@ namespace paxosme{
         proposal_id_t promisedProposalId;
     };
 
-    class Storage {
+    class PaxStorage {
     public:
         int Write(instance_id_t instance_id, const PaxosStorageState & value);
 

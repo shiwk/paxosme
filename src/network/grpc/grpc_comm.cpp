@@ -5,11 +5,11 @@
 #include <grpcpp/create_channel.h>
 #include <ares.h>
 #include <libc.h>
-#include <communicator.hpp>
+#include "grpc_comm.hpp"
 
 namespace paxosme {
 
-    int Communicator::Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) {
+    int GrpcComm::Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) {
 
         switch (pax_message.GetMessageType()) {
             case kMSG_PROPOSE_ACK: {
@@ -96,7 +96,7 @@ namespace paxosme {
 
     }
 
-    Communicator::Communicator(std::vector<node_id_t> &nodes) {
+    GrpcComm::GrpcComm(std::vector<node_id_t> &nodes) {
         for (node_id_t node: nodes) {
             auto host = ParseNodeId(node);
             auto client = NewClient(host);
@@ -104,19 +104,19 @@ namespace paxosme {
         }
     }
 
-    std::string Communicator::ParseNodeId(node_id_t node_id) {
+    std::string GrpcComm::ParseNodeId(node_id_t node_id) {
         std::string port = std::to_string(node_id & (0xffff)); // 2 bytes for port
         in_addr addr{(uint32_t) node_id >> 2};
         auto tar = std::string(inet_ntoa(addr)).append(port);
         return tar;
     }
 
-    std::shared_ptr<GrpcClient> Communicator::NewClient(std::string &host) {
+    std::shared_ptr<GrpcClient> GrpcComm::NewClient(std::string &host) {
         return std::shared_ptr<GrpcClient>(
                 new GrpcClient(grpc::CreateChannel(host, grpc::InsecureChannelCredentials())));
     }
 
-    int Communicator::Broadcast(const PaxMessage &pax_message) {
+    int GrpcComm::Broadcast(const PaxMessage &pax_message) {
         switch (pax_message.GetMessageType()) {
             case kMSG_PROPOSE_BROADCAST: {
                 paxos::ProposeRequest proposeRequest;

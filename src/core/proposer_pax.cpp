@@ -9,9 +9,8 @@ namespace paxosme {
     int PaxProposer::PROPOSE_TIMEOUT = PROPOSE_TIMEOUT_CONST;
     int PaxProposer::ACCEPT_TIMEOUT = ACCEPT_TIMEOUT_CONST;
 
-    PaxProposer::PaxProposer(const PaxConfig *config, const PaxCommunicator *communicator, const Storage *storage,
-                             const Schedule *schedule)
-            : PaxPlayer(config, communicator, storage, schedule),
+    PaxProposer::PaxProposer(const ConfigInfo *config, const PaxCommunicator *communicator, const PaxStorage *storage)
+            : PaxPlayer(config, communicator, storage),
               proposal_counter_(config) {
         status_ = ProposerStatus::kNone;
     }

@@ -6,7 +6,7 @@
 #include <proposer_pax.hpp>
 namespace paxosme {
 
-    ProposalCounter::ProposalCounter(const PaxConfig * config): pax_config_(const_cast<PaxConfig *>(config)), vote_count_(0){}
+    ProposalCounter::ProposalCounter(const ConfigInfo * config): pax_config_(const_cast<ConfigInfo *>(config)), vote_count_(0){}
 
     bool ProposalCounter::IsMajorityAccepted() {
         return approvals_.size() >= pax_config_->GetMajorityCount();

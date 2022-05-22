@@ -12,16 +12,11 @@
 namespace paxosme {
     class Node {
     public:
-        virtual ~Node() {}
-
-        void Start();
-
-        void Propose(const LogValue &log_value, instance_id_t &instance_id);
-
-        node_id_t GetNodeId();
-
-    private:
-        Peer peer_;
+        virtual ~Node() = 0;
+        virtual void Launch() = 0;
+        virtual void Quit() = 0;
+        virtual void Propose(const LogValue &log_value)= 0;
+        virtual node_id_t GetNodeId() = 0;
     };
 }
 

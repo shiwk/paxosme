@@ -8,21 +8,16 @@
 #include <cmath>
 #include <vector>
 #include <set>
+#include "common.hpp"
 
 namespace paxosme {
 
-    struct Peer {
-        node_id_t node_id;
-        std::string ip;
-        int port;
-    };
-
-    class PaxConfig {
+    class ConfigInfo {
     private:
         node_id_t node_id_;
         double majority_threshold_;
-        std::vector<Peer> peers_;
-        std::set<node_id_t> members;
+        size_t node_count_;
+        std::set<node_id_t> members; // todo II: members (and some key variables) to be persisted
 
     public:
         double GetMajorityThreshold() const {
@@ -38,9 +33,10 @@ namespace paxosme {
         }
 
         size_t GetNodeCount() const {
-            return peers_.size();
+            return node_count_;
         }
 
+        // todo II: members (and some key variables) to be persisted
         size_t GetMajorityCount() const {
             return ceil(majority_threshold_ * (double)GetNodeCount());
         }

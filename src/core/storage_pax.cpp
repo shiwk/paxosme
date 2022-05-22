@@ -7,10 +7,10 @@
 
 //todo I:implement
 
-int paxosme::Storage::Write(instance_id_t instance_id, const paxosme::PaxosStorageState &value) {
+int paxosme::PaxStorage::Write(instance_id_t instance_id, const paxosme::PaxosStorageState &value) {
     return 0;
 }
 
-int paxosme::Storage::Read(instance_id_t instance_id, paxosme::PaxosStorageState &value) {
+int paxosme::PaxStorage::Read(instance_id_t instance_id, paxosme::PaxosStorageState &value) {
     return 0;
 }
