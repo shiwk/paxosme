@@ -19,19 +19,29 @@ namespace paxosme {
         std::vector<Peer> peers;
     };
 
-    class Communicator;
+    class Comm{};
+    template<class M>
+    class Communicator : public Comm{
+    public:
+        int Send(node_id_t node_id, const M &message) ;
+        int Broadcast(const M &message);
+    };
 
     class Network {
     public:
 
+        static Network *New();
+
+        static void Delete(Network *);
+
 //        Network(PeerList *);
-        virtual ~Network() =default;
+        virtual ~Network() = default;
 
-        virtual void Init() =0;
+        void Init();
 
-        virtual void Join(paxosme::Node *) = 0;
-        virtual void Quit(paxosme::Node *) =0 ;
-        virtual Communicator* GetCommunicator() = 0;
+        void Join(paxosme::Node *);
+
+        void Quit(paxosme::Node *);
     };
 }
 

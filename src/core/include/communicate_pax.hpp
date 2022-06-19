@@ -6,13 +6,18 @@
 #define PAXOSME_COMMUNICATE__PAXHPP
 
 #include "messages_pax.hpp"
+#include "network.hpp"
 
 namespace paxosme {
     class PaxCommunicator {
     public:
-        virtual int Send(node_id_t node_id, const PaxMessage &pax_message) = 0;
-        virtual int Broadcast(const PaxMessage &pax_message) = 0;
-//        virtual ~PaxCommunicator() = 0;
+        PaxCommunicator(Communicator<PaxMessage> *);
+        int Send(node_id_t node_id, const PaxMessage &pax_message);
+
+        int Broadcast(const PaxMessage &pax_message);
+
+    private:
+        Communicator<PaxMessage> *communicator_;
     };
 }
 #endif //PAXOSME_COMMUNICATE__PAXHPP

@@ -51,10 +51,11 @@ namespace paxosme {
         return {GetInstanceId(), proposalId, nodeId};
     }
 
-    void PaxController::Init(PaxCommunicator *communicator, PaxStorage *storage) {
-        proposer_ = new PaxProposer{pax_config_, communicator, storage};
-        learner_ = new PaxLearner{pax_config_, communicator, storage};
-        acceptor_ = new PaxAcceptor{pax_config_, communicator, storage};
+    void PaxController::Init(Comm *comm, PaxStorage *storage) {
+        communicator_ = new PaxCommunicator((Communicator<PaxMessage>*)comm);
+        proposer_ = new PaxProposer{pax_config_, communicator_, storage};
+        learner_ = new PaxLearner{pax_config_, communicator_, storage};
+        acceptor_ = new PaxAcceptor{pax_config_, communicator_, storage};
 
         instance_id_t instanceInState = acceptor_->Init(this);
         instance_id_t instanceInSM = state_machine_->GetInstanceId();

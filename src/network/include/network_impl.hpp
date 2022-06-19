@@ -10,19 +10,6 @@
 
 
 namespace paxosme {
-    class NetworkImpl : public Network {
-    public:
-
-        Communicator *GetCommunicator() override;
-        void Init() override;
-        void Join(paxosme::Node *node) override;
-
-        void Quit(paxosme::Node *node) override;
-
-        ~NetworkImpl() override;
-
-    private:
-        Communicator *communicator;
-    };
+    class NetworkImpl : public Network {};
 }
 #endif //PAXOSME_NETWORK_IMPL_HPP

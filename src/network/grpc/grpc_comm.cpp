@@ -9,8 +9,9 @@
 
 namespace paxosme {
 
-    int GrpcComm::Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) {
-
+    template<>
+    int Communicator<PaxMessage>::Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) {
+        auto *impl = (GrpcComm *) this;
         switch (pax_message.GetMessageType()) {
             case kMSG_PROPOSE_ACK: {
                 paxos::ProposeAckRequest proposeAckRequest;
@@ -21,7 +22,7 @@ namespace paxosme {
                 proposeAckRequest.set_promised_node_id(pax_message.GetPromisedNodeId());
                 proposeAckRequest.set_accepted_log_value(pax_message.GetAcceptedValue());
 
-                return Send<paxos::ProposeAckRequest, paxos::ProposeAckReply>(node_id, proposeAckRequest);
+                return impl->Send<paxos::ProposeAckRequest, paxos::ProposeAckReply>(node_id, proposeAckRequest);
             }
             case kMSG_ACCEPT_ACK: {
                 paxos::AcceptAckRequest acceptAckRequest;
@@ -33,7 +34,7 @@ namespace paxosme {
                 acceptAckRequest.set_accepted_value(pax_message.GetAcceptedValue());
                 acceptAckRequest.set_rejected(pax_message.IsRejected());
 
-                return Send<paxos::AcceptAckRequest, paxos::AcceptAckReply>(node_id, acceptAckRequest);
+                return impl->Send<paxos::AcceptAckRequest, paxos::AcceptAckReply>(node_id, acceptAckRequest);
             }
 
             case kMSG_LEARNER_VALUE_SYNC: {
@@ -44,8 +45,8 @@ namespace paxosme {
                 learnerValueSyncRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
                 learnerValueSyncRequest.set_proposal_id(pax_message.GetProposalId());
 
-                return Send<paxos::LearnerValueSyncRequest, paxos::LearnerValueSyncReply>(node_id,
-                                                                                          learnerValueSyncRequest);
+                return impl->Send<paxos::LearnerValueSyncRequest, paxos::LearnerValueSyncReply>(node_id,
+                                                                                                learnerValueSyncRequest);
             }
 
             case kMSG_LEARNER_VALUE_SEND: {
@@ -56,8 +57,8 @@ namespace paxosme {
                 learnerValueSendRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
                 learnerValueSendRequest.set_proposal_id(pax_message.GetProposalId());
 
-                return Send<paxos::LearnerValueSendRequest, paxos::LearnerValueSendReply>(node_id,
-                                                                                          learnerValueSendRequest);
+                return impl->Send<paxos::LearnerValueSendRequest, paxos::LearnerValueSendReply>(node_id,
+                                                                                                learnerValueSendRequest);
             }
 
             case kMSG_SYNC_VALUE_ACK : {
@@ -65,7 +66,7 @@ namespace paxosme {
                 ackSyncValueRequest.set_instance_id(pax_message.GetInstanceId());
                 ackSyncValueRequest.set_sender_id(pax_message.GetSender());
 
-                return Send<paxos::AckSyncValueRequest, paxos::AckSyncValueReply>(node_id, ackSyncValueRequest);
+                return impl->Send<paxos::AckSyncValueRequest, paxos::AckSyncValueReply>(node_id, ackSyncValueRequest);
             };
 
             case kMSG_TELL_INSTANCE_ID: {
@@ -74,15 +75,16 @@ namespace paxosme {
                 tellInstanceIdRequest.set_leader_instance_id(pax_message.GetLeaderInstanceId());
                 tellInstanceIdRequest.set_sender_id(pax_message.GetSender());
 
-                return Send<paxos::TellInstanceIdRequest, paxos::TellInstanceIdReply>(node_id, tellInstanceIdRequest);
+                return impl->Send<paxos::TellInstanceIdRequest, paxos::TellInstanceIdReply>(node_id,
+                                                                                            tellInstanceIdRequest);
             }
 
-            case kMSG_CONFIRM_LEARN:{
+            case kMSG_CONFIRM_LEARN: {
                 paxos::ConfirmLearnRequest confirmLearnRequest;
                 confirmLearnRequest.set_instance_id(pax_message.GetInstanceId());
                 confirmLearnRequest.set_sender_id(pax_message.GetSender());
 
-                return Send<paxos::ConfirmLearnRequest, paxos::ConfirmLearnReply>(node_id, confirmLearnRequest);
+                return impl->Send<paxos::ConfirmLearnRequest, paxos::ConfirmLearnReply>(node_id, confirmLearnRequest);
             }
 
 
@@ -116,7 +118,10 @@ namespace paxosme {
                 new GrpcClient(grpc::CreateChannel(host, grpc::InsecureChannelCredentials())));
     }
 
-    int GrpcComm::Broadcast(const PaxMessage &pax_message) {
+    template<>
+    int Communicator<PaxMessage>::Broadcast(const PaxMessage &pax_message) {
+        auto *impl = (GrpcComm *) this;
+
         switch (pax_message.GetMessageType()) {
             case kMSG_PROPOSE_BROADCAST: {
                 paxos::ProposeRequest proposeRequest;
@@ -125,7 +130,7 @@ namespace paxosme {
                 proposeRequest.set_proposal_id(pax_message.GetProposalId());
                 proposeRequest.set_proposing_node_id(pax_message.GetProposingNodeId());
 
-                Broadcast<paxos::ProposeRequest, paxos::ProposeReply>(proposeRequest);
+                impl->Broadcast<paxos::ProposeRequest, paxos::ProposeReply>(proposeRequest);
                 break;
             }
 
@@ -138,7 +143,7 @@ namespace paxosme {
                 acceptRequest.set_proposed_log_value(pax_message.GetProposedLogValue());
 
                 paxos::AcceptReply acceptReply;
-                Broadcast<paxos::AcceptRequest, paxos::AcceptReply>(acceptRequest);
+                impl->Broadcast<paxos::AcceptRequest, paxos::AcceptReply>(acceptRequest);
                 break;
             }
 
@@ -150,7 +155,7 @@ namespace paxosme {
                 newValueChosenRequest.set_chosen_value(pax_message.GetChosenValue());
                 newValueChosenRequest.set_proposal_id(pax_message.GetProposalId());
 
-                Broadcast<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>(newValueChosenRequest);
+                impl->Broadcast<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>(newValueChosenRequest);
                 break;
             }
 
@@ -159,7 +164,7 @@ namespace paxosme {
                 shallILearnRequest.set_sender_id(pax_message.GetSender());
                 shallILearnRequest.set_instance_id(pax_message.GetInstanceId());
 
-                Broadcast<paxos::ShallILearnRequest, paxos::ShallILearnReply>(shallILearnRequest);
+                impl->Broadcast<paxos::ShallILearnRequest, paxos::ShallILearnReply>(shallILearnRequest);
                 break;
             }
             default:

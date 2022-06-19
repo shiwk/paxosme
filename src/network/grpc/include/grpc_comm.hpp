@@ -7,20 +7,13 @@
 
 #include <communicate_pax.hpp>
 #include <client.hpp>
+#include "network.hpp"
 
 namespace paxosme {
-    class NetworkConfig;
 
-    class GrpcComm : public PaxCommunicator {
+class GrpcComm : public Communicator<PaxMessage> {
     public:
         explicit GrpcComm(std::vector<node_id_t> &);
-
-        int Send(node_id_t node_id, const paxosme::PaxMessage &pax_message) override;
-//
-        int Broadcast(const PaxMessage &pax_message) override;
-
-//        ~Communicator() override;
-
     private:
 
         static std::string ParseNodeId(node_id_t);
@@ -34,6 +27,8 @@ namespace paxosme {
 
         template<class TRequest, class TResponse>
         void Broadcast(TRequest &);
+
+        friend class Communicator<PaxMessage>;
     };
 
     template<class TRequest, class TResponse>

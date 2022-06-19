@@ -23,7 +23,7 @@ namespace paxosme {
 
         void HandleMessage(const PaxMessage &message);
 
-        void Init(PaxCommunicator*, PaxStorage*); // start loop
+        void Init(Comm*, PaxStorage*); // start loop
 
         instance_id_t GetInstanceId() const;
 
@@ -55,6 +55,7 @@ namespace paxosme {
         std::future<void *> prov_loop_;
         MyQueue<PaxMessage*> msgProv_;
         StateMachine *state_machine_;
+        PaxCommunicator *communicator_;
     };
 }
 

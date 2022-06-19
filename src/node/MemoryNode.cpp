@@ -11,6 +11,6 @@ namespace paxosme {
     }
 
     void MemoryNode::Launch() {
-        pax_controller_->Init(reinterpret_cast<PaxCommunicator *>(network_->GetCommunicator()), nullptr);
+        pax_controller_->Init(new Communicator<PaxMessage>, nullptr);
     }
 }
