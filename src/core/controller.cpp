@@ -53,6 +53,7 @@ namespace paxosme {
 
     void PaxController::Init(Comm *comm, PaxStorage *storage) {
         communicator_ = new PaxCommunicator((Communicator<PaxMessage>*)comm);
+
         proposer_ = new PaxProposer{pax_config_, communicator_, storage};
         learner_ = new PaxLearner{pax_config_, communicator_, storage};
         acceptor_ = new PaxAcceptor{pax_config_, communicator_, storage};

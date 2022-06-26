@@ -54,4 +54,8 @@ namespace paxosme {
         promises_.clear();
         vote_count_ = 0;
     }
+
+    bool ProposalCounter::SomeoneReject() {
+        return !rejections_.empty();
+    }
 }

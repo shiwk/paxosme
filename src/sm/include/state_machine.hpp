@@ -5,8 +5,8 @@
 #ifndef PAXOSME_STATE_MACHINE_HPP
 #define PAXOSME_STATE_MACHINE_HPP
 
-#include <messages_pax.hpp>
 
+//todo II: sm
 class StateMachine {
 public:
 

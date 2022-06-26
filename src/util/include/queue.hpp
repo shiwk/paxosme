@@ -41,7 +41,12 @@ public:
     }
 
     // pop
-    void PopN(size_t);
+    void PopN(size_t t) {
+        std::unique_lock<std::mutex> lock(mtx_);
+        size_t i =0;
+        while (i++ < t)
+            queue_.pop();
+    }
 
     size_t Size() {
         std::unique_lock<std::mutex> lock(mtx_);

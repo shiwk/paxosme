@@ -11,7 +11,8 @@
 namespace paxosme {
     class PaxCommunicator {
     public:
-        PaxCommunicator(Communicator<PaxMessage> *);
+        PaxCommunicator(Communicator<PaxMessage> *communicator) : communicator_(communicator) {}
+
         int Send(node_id_t node_id, const PaxMessage &pax_message);
 
         int Broadcast(const PaxMessage &pax_message);

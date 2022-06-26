@@ -10,6 +10,10 @@
 #include "config.hpp"
 
 namespace paxosme {
+    struct NodeIdList {
+        std::vector<node_id_t> idList;
+    };
+
     class Node {
     public:
         virtual ~Node() = 0;

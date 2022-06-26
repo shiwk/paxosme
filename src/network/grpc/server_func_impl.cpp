@@ -20,7 +20,7 @@ namespace paxosme {
         paxMessage.SetProposingNodeId(request_.proposing_node_id());
         paxMessage.SetProposalId(request_.proposal_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
 
         // set reply
         reply.set_ack(true);
@@ -45,7 +45,7 @@ namespace paxosme {
         paxMessage.SetPromisedProposalId(request_.promised_proposal_id());
         paxMessage.SetPromisedNodeId(request_.promised_node_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -67,7 +67,7 @@ namespace paxosme {
         paxMessage.SetProposalId(request_.proposal_id());
         paxMessage.SetProposedLogValue(request_.proposed_log_value());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -90,7 +90,7 @@ namespace paxosme {
         paxMessage.SetPromisedNodeId(request_.promised_node_id());
         paxMessage.SetPromisedProposalId(request_.promised_proposal_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -108,7 +108,7 @@ namespace paxosme {
         paxMessage.SetProposalId(request_.proposal_id());
         paxMessage.SetProposingNodeId(request_.proposing_node_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -117,7 +117,7 @@ namespace paxosme {
         PaxMessage paxMessage(request_.sender_id(), kMSG_SHALL_I_LEARN);
         paxMessage.SetInstanceId(request_.instance_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -129,7 +129,7 @@ namespace paxosme {
         paxMessage.SetProposalId(request_.proposal_id());
         paxMessage.SetProposingNodeId(request_.proposing_node_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -143,7 +143,7 @@ namespace paxosme {
         paxMessage.SetProposalId(request_.proposal_id());
         paxMessage.SetProposingNodeId(request_.proposing_node_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -152,7 +152,7 @@ namespace paxosme {
         PaxMessage paxMessage(request_.sender_id(), kMSG_SYNC_VALUE_ACK);
         paxMessage.SetInstanceId(request_.instance_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -162,7 +162,7 @@ namespace paxosme {
         paxMessage.SetInstanceId(request_.follower_instance_id());
         paxMessage.SetLeaderInstanceId(request_.leader_instance_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 
@@ -171,7 +171,7 @@ namespace paxosme {
         PaxMessage paxMessage(request_.sender_id(), kMSG_TELL_INSTANCE_ID);
         paxMessage.SetInstanceId(request_.instance_id());
 
-        controller_->AddMessage(paxMessage);
+        msgCallback_(paxMessage);
         reply.set_ack(true);
     }
 }

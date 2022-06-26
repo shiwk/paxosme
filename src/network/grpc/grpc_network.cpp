@@ -3,32 +3,18 @@
 //
 
 #include "network_impl.hpp"
+#include "server.hpp"
+#include <memory>
 
 namespace paxosme {
 
     // todo I: another way for network inteface
 
-    void Network::Join(paxosme::Node *node) {
-        auto *impl = (NetworkImpl *) this;
-        // todo I: impl
-    }
-
-    void Network::Quit(paxosme::Node *node) {
-        auto *impl = (NetworkImpl *) this;
-        // todo I: impl
-    }
-
-    void Network::Init() {
-        auto *impl = (NetworkImpl *) this;
-        // todo I: impl
-    }
-
     Network *Network::New() {
-        return new NetworkImpl;
-    }
+        auto nwImpl = new NetworkImpl;
+        nwImpl->server_ = std::unique_ptr<NetworkServer>((NetworkServer *) new GrpcServer);
 
-    void Network::Delete(Network *network) {
-        delete network;
+        return nwImpl;
     }
 }
 

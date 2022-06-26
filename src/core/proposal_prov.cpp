@@ -94,6 +94,10 @@ namespace paxosme {
         lock_.UnLock();
         return true;
     }
+
+    millisec ProposalProv::GetNewValueTimeout() {
+        return timeout_ms_;
+    }
 }
 
 

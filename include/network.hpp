@@ -6,29 +6,69 @@
 #define PAXOSME_NETWORK_HPP
 
 #include <string>
-#include <vector>
+#include <unordered_set>
 #include "node.hpp"
 
 namespace paxosme {
-    struct Peer {
+    struct Endpoint {
         std::string ip;
         int port;
+
+        std::string ToString() const{
+            return ip + ":" + std::to_string(port);
+        }
+
+        bool operator== (const Endpoint &endpoint) const {
+            return this->port == endpoint.port && this->ip == endpoint.ip;
+        }
+    };
+
+    struct EndpointHash {
+        size_t operator()(const Endpoint &endpoint) const {
+            const int PRIME_CONST = 31;
+            size_t hashCode = 0;
+            auto st = endpoint.ToString();
+            for (int i = 0; i < st.length(); i++) {
+                hashCode += st[i] * pow(PRIME_CONST, i);
+            }
+            return hashCode;
+        }
     };
 
     struct PeerList {
-        std::vector<Peer> peers;
+        void Add(const Endpoint &endpoint) {
+            peers.insert(endpoint);
+        }
+
+        bool Contains(const Endpoint &endpoint) {
+            return peers.find(endpoint) != peers.end();
+        }
+
+        bool Remove(const Endpoint &endpoint) {
+            return peers.erase(endpoint);
+        }
+
+    private:
+        std::unordered_set<Endpoint, EndpointHash> peers;
     };
 
-    class Comm{};
+    class Comm {
+    };
+
     template<class M>
-    class Communicator : public Comm{
+    class Communicator : public Comm {
     public:
-        int Send(node_id_t node_id, const M &message) ;
+        int Send(node_id_t node_id, const M &message);
+
         int Broadcast(const M &message);
     };
 
     class Network {
     public:
+
+        Endpoint NodeIdToEndpoint(node_id_t) {
+            // todo I: convert node id to peer
+        }
 
         static Network *New();
 
@@ -37,11 +77,13 @@ namespace paxosme {
 //        Network(PeerList *);
         virtual ~Network() = default;
 
-        void Init();
+        void Start(NodeIdList *, const Endpoint &self);
 
-        void Join(paxosme::Node *);
+        void Join(node_id_t);
 
-        void Quit(paxosme::Node *);
+        void Quit(node_id_t);
+
+        void CloseAll();
     };
 }
 

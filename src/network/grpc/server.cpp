@@ -5,13 +5,13 @@
 #include <server.hpp>
 
 namespace paxosme {
-    ServerImpl::~ServerImpl() {
+    GrpcServer::~GrpcServer() {
         server_->Shutdown();
 
     }
 
-    void ServerImpl::Start(std::string &listening) {
-        const std::string &serverAddress(listening);
+    void GrpcServer::Start(const Endpoint &endpoint, MsgCallback msg_callback) {
+        const std::string &serverAddress(endpoint.ToString());
         ServerBuilder builder;
 
         //no authentication mechanism
@@ -23,13 +23,15 @@ namespace paxosme {
 
         // Proceed to the server's main loop.
         HandleRpcs();
+
+        msgCallback_ = msg_callback;
     }
 
-    void ServerImpl::HandleRpcs() {
+    void GrpcServer::HandleRpcs() {
         // Spawn a new CallData instance to serve new clients.
-        new CallData<paxos::ProposeRequest, paxos::ProposeReply>(&asyncService_, cq_.get(), paxController_);
-        new CallData<paxos::ProposeAckRequest, paxos::ProposeAckReply>(&asyncService_, cq_.get(), paxController_);
-        new CallData<paxos::AcceptRequest, paxos::AcceptReply>(&asyncService_, cq_.get(), paxController_);
+        new CallData<paxos::ProposeRequest, paxos::ProposeReply>(&asyncService_, cq_.get(), msgCallback_);
+        new CallData<paxos::ProposeAckRequest, paxos::ProposeAckReply>(&asyncService_, cq_.get(), msgCallback_);
+        new CallData<paxos::AcceptRequest, paxos::AcceptReply>(&asyncService_, cq_.get(), msgCallback_);
         // todo I: check more call data
         void *tag;  // uniquely identifies a request.
         bool ok;

@@ -7,9 +7,28 @@
 
 #include "common.hpp"
 #include "network.hpp"
-
+#include "controller.hpp"
 
 namespace paxosme {
-    class NetworkImpl : public Network {};
+    using MsgCallback = std::function<void(PaxMessage)>;
+//    typedef   void MsgCallback(PaxMessage);
+
+    class NetworkServer {
+    public:
+        virtual void Start(const Endpoint &, MsgCallback) = 0;
+
+    protected:
+        MsgCallback msgCallback_;
+    };
+
+    class NetworkImpl : public Network {
+        friend class Network;
+
+    private:
+        PeerList peers_;
+        std::unique_ptr<NetworkServer> server_;
+    protected:
+        PaxController *paxController_;
+    };
 }
 #endif //PAXOSME_NETWORK_IMPL_HPP

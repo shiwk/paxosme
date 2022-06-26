@@ -41,10 +41,6 @@ bool MyLock::WaitFor(std::chrono::milliseconds duration, Pred &&pred) {
     return cond_var_.wait_for(mtx_, duration, pred);
 }
 
-bool MyLock::WaitFor(std::chrono::milliseconds duration) {
-    return cond_var_.wait_for(mtx_, duration)==std::cv_status::timeout;
-}
-
 template<class Pred>
 bool MyLock::WaitUntil(std::chrono::steady_clock::time_point tp, Pred &&pred) {
     return cond_var_.wait_until(mtx_, tp, pred);
@@ -53,22 +49,6 @@ bool MyLock::WaitUntil(std::chrono::steady_clock::time_point tp, Pred &&pred) {
 template<class Pred>
 void MyLock::Wait(Pred &&pred) {
     cond_var_.wait(mtx_, pred);
-}
-
-void MyLock::Lock() {
-    mtx_.lock();
-}
-
-void MyLock::UnLock() {
-    mtx_.unlock();
-}
-
-void MyLock::NotifyOne() {
-    cond_var_.notify_one();
-}
-
-void MyLock::NotifyAll() {
-    // todo II
 }
 
 

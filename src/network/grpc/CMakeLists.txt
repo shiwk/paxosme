@@ -56,6 +56,6 @@ target_link_libraries(network_grpc
         ${_PROTOBUF_LIBPROTOBUF}
         paxosmecore)
 
-target_include_directories(network_grpc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
+target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CMAKE_CURRENT_BINARY_DIR}/protogen)

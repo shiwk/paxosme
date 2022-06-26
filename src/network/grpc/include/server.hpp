@@ -6,28 +6,30 @@
 #define PAXOSME_SERVER_HPP
 
 #include "paxosme.grpc.pb.h"
-#include "controller.hpp"
+#include "network_impl.hpp"
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server.h>
+
+#include <utility>
 
 using paxos::Paxosme;
 using grpc::ServerBuilder;
 using grpc::Server;
 
-class NetworkConfig;
-
 namespace paxosme {
-    class ServerImpl {
-    public:
-        void Start(std::string &listening);
+    class GrpcServer : public NetworkServer {
+        friend class ServerImpl;
 
-        ~ServerImpl();
+    public:
+
+        void Start(const Endpoint &, MsgCallback) override;
+
+        ~GrpcServer();
 
     private:
         std::unique_ptr<Server> server_;
         paxos::Paxosme::AsyncService asyncService_;
         std::unique_ptr<grpc::ServerCompletionQueue> cq_;
-        PaxController *paxController_;
 
         void HandleRpcs();
     };
@@ -47,7 +49,7 @@ namespace paxosme {
     protected:
         BaseCallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq) : service_(service),
                                                                                                cq_(cq),
-                                                                                               status_(CREATE){}
+                                                                                               status_(CREATE) {}
 
         // The means of communication with the gRPC runtime for an asynchronous
         // server.
@@ -79,8 +81,8 @@ namespace paxosme {
         // Take in the "service" instance (in this case representing an asynchronous
         // server) and the completion queue "cq" used for asynchronous communication
         // with the gRPC runtime.
-        CallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq, PaxController *controller)
-                : BaseCallData(service, cq), responder_(&ctx_), controller_(controller) {
+        CallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq, MsgCallback msg_callback)
+                : BaseCallData(service, cq), responder_(&ctx_), msgCallback_(std::move(msg_callback)) {
             // Invoke the serving logic right away.
             Proceed();
         }
@@ -99,7 +101,10 @@ namespace paxosme {
 
         // The means to get back to the client.
         grpc::ServerAsyncResponseWriter<TReply> responder_;
-        PaxController *controller_;
+//        PaxController *controller_;
+
+        MsgCallback msgCallback_;
+
         void CreateStatusFunc() override {
             // Make this instance progress to the PROCESS state.
             status_ = PROCESS;
@@ -118,7 +123,7 @@ namespace paxosme {
             // Spawn a new CallData instance to serve new clients while we process
             // the one for this CallData. The instance will deallocate itself as
             // part of its FINISH state.
-            new CallData<TRequest, TReply>(service_, cq_, controller_);
+            new CallData<TRequest, TReply>(service_, cq_, msgCallback_);
 
             // The actual processing.
 //                std::string prefix("Hello ");
