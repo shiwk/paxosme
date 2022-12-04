@@ -17,7 +17,7 @@ using grpc::ServerBuilder;
 using grpc::Server;
 
 namespace paxosme {
-    class GrpcServer : public NetworkServer {
+    class GrpcServer : public ServerInterface {
         friend class ServerImpl;
 
     public:

@@ -56,7 +56,7 @@ namespace paxosme {
 
     class ProposalCounter {
     public:
-        explicit ProposalCounter(const ConfigInfo *);
+        explicit ProposalCounter(const PaxosOptions *);
 
         bool IsMajorityAccepted();
 
@@ -77,7 +77,7 @@ namespace paxosme {
         bool SomeoneReject();
 
     private:
-        ConfigInfo *pax_config_;
+        PaxosOptions *pax_config_;
         int32_t vote_count_;
 
         std::set<node_id_t> approvals_;
@@ -88,7 +88,7 @@ namespace paxosme {
     class PaxProposer : public PaxPlayer {
 
     public:
-        explicit PaxProposer(const ConfigInfo *, const PaxCommunicator *, const PaxStorage *);
+        explicit PaxProposer(const PaxosOptions *, const PaxCommunicator *, const PaxStorage *);
 
         void NewValue();
 

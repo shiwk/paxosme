@@ -5,7 +5,7 @@
 
 namespace paxosme {
 
-    PaxLearner::PaxLearner(const ConfigInfo *config, const PaxCommunicator *communicator, const PaxStorage *storage)
+    PaxLearner::PaxLearner(const PaxosOptions *config, const PaxCommunicator *communicator, const PaxStorage *storage)
             : PaxPlayer(config, communicator, storage), learner_state_(config) {
         job_status_ = kStale;
         highest_known_instance_id_ = INSTANCE_DUMMY;

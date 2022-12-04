@@ -26,7 +26,7 @@ namespace paxosme {
 
     class PaxPlayer {
     public:
-        explicit PaxPlayer(const ConfigInfo*, const PaxCommunicator*, const PaxStorage *storage);
+        explicit PaxPlayer(const PaxosOptions*, const PaxCommunicator*, const PaxStorage *storage);
         virtual ~PaxPlayer() = default;
         PaxosStorageState ReadState(instance_id_t instance_id);
 
@@ -63,7 +63,7 @@ namespace paxosme {
         PaxCommunicator *communicator_;
         PaxStorage *storage_;
         Schedule *schedule_;
-        ConfigInfo *config_;
+        PaxosOptions *config_;
     };
 }
 #endif //PAXOSME_PLAYER_PAX_HPP

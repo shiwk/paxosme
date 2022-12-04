@@ -8,19 +8,27 @@
 #include <string>
 #include <vector>
 #include "config.hpp"
+#include "storage.hpp"
+#include "sm.hpp"
+#include "network.hpp"
 
 namespace paxosme {
-    struct NodeIdList {
-        std::vector<node_id_t> idList;
+    struct NodeOptions{
+        std::shared_ptr<Storage> storage;
+        std::shared_ptr<StateMachine> sm;
+        node_id_vector nodeIdList;
+        std::unique_ptr<Network> network;
+
     };
 
     class Node {
     public:
-        virtual ~Node() = 0;
-        virtual void Launch() = 0;
-        virtual void Quit() = 0;
-        virtual void Propose(const LogValue &log_value)= 0;
-        virtual node_id_t GetNodeId() = 0;
+        Node()=delete;
+        static void Run(NodeOptions &, PaxosOptions &, const std::shared_ptr<Node> &);
+        void Init(node_id_t);
+        void Quit();
+    private:
+        node_id_t nodeId_;
     };
 }
 

@@ -13,7 +13,7 @@
 namespace paxosme {
     class AcceptorState {
     public:
-        explicit AcceptorState(const ConfigInfo *config) : config_(const_cast<ConfigInfo *>(config)) {
+        explicit AcceptorState(const PaxosOptions *config) : config_(const_cast<PaxosOptions *>(config)) {
             promised_proposal_id_ = PROPOSAL_DUMMY;
             promised_node_id_ = NODE_DUMMY;
             accepted_proposal_id_ = PROPOSAL_DUMMY;
@@ -63,7 +63,7 @@ namespace paxosme {
         proposal_id_t accepted_proposal_id_;
         node_id_t accepted_proposer_;
         LogValue accepted_value_;
-        ConfigInfo *config_;
+        PaxosOptions *config_;
     };
 
     class PaxAcceptorReplyMessage {
@@ -138,7 +138,7 @@ namespace paxosme {
     class PaxAcceptor : public PaxPlayer {
         AcceptorState acceptor_state_;
     public:
-        PaxAcceptor(const ConfigInfo *, const PaxCommunicator *, const PaxStorage *);
+        PaxAcceptor(const PaxosOptions *, const PaxCommunicator *, const PaxStorage *);
         void HandlePropose(const PaxMessage &message);
 
         void HandleAccept(const PaxMessage &message);

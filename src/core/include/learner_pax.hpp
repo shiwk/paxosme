@@ -22,10 +22,10 @@ namespace paxosme {
     class PaxLearnerState {
         LogValue log_value_;
         bool learned_;
-        ConfigInfo *config_;
+        PaxosOptions *config_;
 
     public:
-        explicit PaxLearnerState(const ConfigInfo *config) : config_(const_cast<ConfigInfo *>(config)), learned_(false) {}
+        explicit PaxLearnerState(const PaxosOptions *config) : config_(const_cast<PaxosOptions *>(config)), learned_(false) {}
 
         void LearnNew(const LogValue &log_value, instance_id_t instance_id, proposal_id_t proposal_id,
                       node_id_t proposer_node_id) {
@@ -50,7 +50,7 @@ namespace paxosme {
 
     class PaxLearner : public PaxPlayer {
     public:
-        PaxLearner(const ConfigInfo *, const PaxCommunicator *, const PaxStorage *);
+        PaxLearner(const PaxosOptions *, const PaxCommunicator *, const PaxStorage *);
 
     public:
         void HandleMessage(const PaxMessage &) override;

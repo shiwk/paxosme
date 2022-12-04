@@ -12,7 +12,7 @@ namespace paxosme {
 
     Network *Network::New() {
         auto nwImpl = new NetworkImpl;
-        nwImpl->server_ = std::unique_ptr<NetworkServer>((NetworkServer *) new GrpcServer);
+        nwImpl->server_ = std::unique_ptr<ServerInterface>((ServerInterface *) new GrpcServer);
 
         return nwImpl;
     }

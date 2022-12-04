@@ -24,8 +24,8 @@ namespace paxosme {
         return message_type >> 6 == 0x1;
     }
 
-    PaxController::PaxController(const ConfigInfo *config)
-            : pax_config_(const_cast<ConfigInfo *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {
+    PaxController::PaxController(const PaxosOptions *config)
+            : pax_config_(const_cast<PaxosOptions *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {
 
     }
 

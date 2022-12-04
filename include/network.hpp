@@ -7,7 +7,7 @@
 
 #include <string>
 #include <unordered_set>
-#include "node.hpp"
+#include "common.hpp"
 
 namespace paxosme {
     struct Endpoint {
@@ -65,6 +65,7 @@ namespace paxosme {
 
     class Network {
     public:
+        Network()=default;
 
         Endpoint NodeIdToEndpoint(node_id_t) {
             // todo I: convert node id to peer
@@ -77,13 +78,10 @@ namespace paxosme {
 //        Network(PeerList *);
         virtual ~Network() = default;
 
-        void Start(NodeIdList *, const Endpoint &self);
-
-        void Join(node_id_t);
+        void Start(const node_id_vector &, const node_id_t &self);
 
         void Quit(node_id_t);
 
-        void CloseAll();
     };
 }
 

@@ -3,9 +3,15 @@
 //
 
 #include "network.hpp"
+#include "node.hpp"
 
 int main(){
-    auto network = paxosme::Network::New();
-    auto nodeIdList =  new paxosme::NodeIdList;
-    network->Start(nodeIdList, {"127.0.0.1", 8001});
+    paxosme::NodeOptions node_options;
+    node_options.network = std::unique_ptr<paxosme::Network> (paxosme::Network::New());
+    node_options.storage = std::shared_ptr<paxosme::Storage>();
+    node_options.sm = std::shared_ptr<paxosme::StateMachine>();
+
+    paxosme::PaxosOptions paxos_options;
+    std::shared_ptr<paxosme::Node> node;
+    paxosme::Node::Run(node_options, paxos_options, node);
 }

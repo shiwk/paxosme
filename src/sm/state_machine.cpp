@@ -3,6 +3,8 @@
 //
 
 #include "common.hpp"
-#include "state_machine.hpp"
-
-instance_id_t StateMachine::GetInstanceId() {}
+#include "sm.hpp"
+namespace paxosme {
+    instance_id_t StateMachine::GetInstanceId() {}
+    void StateMachine::Init() {}
+}

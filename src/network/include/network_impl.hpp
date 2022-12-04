@@ -13,7 +13,7 @@ namespace paxosme {
     using MsgCallback = std::function<void(PaxMessage)>;
 //    typedef   void MsgCallback(PaxMessage);
 
-    class NetworkServer {
+    class ServerInterface {
     public:
         virtual void Start(const Endpoint &, MsgCallback) = 0;
 
@@ -26,7 +26,7 @@ namespace paxosme {
 
     private:
         PeerList peers_;
-        std::unique_ptr<NetworkServer> server_;
+        std::unique_ptr<ServerInterface> server_;
     protected:
         PaxController *paxController_;
     };

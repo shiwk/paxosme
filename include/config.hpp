@@ -19,7 +19,7 @@ namespace paxosme {
 
     };// todo II: members (and some key variables) to be persisted
 
-    class ConfigInfo {
+    class PaxosOptions {
     private:
         node_id_t node_id_;
         double majority_threshold_;

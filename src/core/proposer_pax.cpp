@@ -9,7 +9,7 @@ namespace paxosme {
     int PaxProposer::PROPOSE_TIMEOUT = PROPOSE_TIMEOUT_CONST;
     int PaxProposer::ACCEPT_TIMEOUT = ACCEPT_TIMEOUT_CONST;
 
-    PaxProposer::PaxProposer(const ConfigInfo *config, const PaxCommunicator *communicator, const PaxStorage *storage)
+    PaxProposer::PaxProposer(const PaxosOptions *config, const PaxCommunicator *communicator, const PaxStorage *storage)
             : PaxPlayer(config, communicator, storage),
               proposal_counter_(config) {
         status_ = ProposerStatus::kNone;

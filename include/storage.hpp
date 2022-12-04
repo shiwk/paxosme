@@ -4,5 +4,11 @@
 
 #ifndef PAXOSME_STORAGE_HPP
 #define PAXOSME_STORAGE_HPP
-class Storage; // todo II:
+namespace paxosme{
+    class Storage {
+    public:
+        void Init();
+    };
+
+}
 #endif //PAXOSME_STORAGE_HPP

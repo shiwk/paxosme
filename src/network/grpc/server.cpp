@@ -32,6 +32,8 @@ namespace paxosme {
         new CallData<paxos::ProposeRequest, paxos::ProposeReply>(&asyncService_, cq_.get(), msgCallback_);
         new CallData<paxos::ProposeAckRequest, paxos::ProposeAckReply>(&asyncService_, cq_.get(), msgCallback_);
         new CallData<paxos::AcceptRequest, paxos::AcceptReply>(&asyncService_, cq_.get(), msgCallback_);
+        new CallData<paxos::AcceptAckRequest, paxos::AcceptAckReply>(&asyncService_, cq_.get(), msgCallback_);
+        new CallData<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>(&asyncService_, cq_.get(), msgCallback_);
         // todo I: check more call data
         void *tag;  // uniquely identifies a request.
         bool ok;

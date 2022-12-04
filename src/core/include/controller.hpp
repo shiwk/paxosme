@@ -10,13 +10,14 @@
 #include "acceptor_pax.hpp"
 #include "learner_pax.hpp"
 #include "proposal_prov.hpp"
+#include "sm.hpp"
 #include <future>
 #include <state_machine.hpp>
 
 namespace paxosme {
     class PaxController {
     public:
-        explicit PaxController(const ConfigInfo *);
+        explicit PaxController(const PaxosOptions *);
 
         ~PaxController();
 
@@ -50,7 +51,7 @@ namespace paxosme {
         PaxProposer *proposer_;
         PaxAcceptor *acceptor_;
         PaxLearner *learner_;
-        ConfigInfo *pax_config_;
+        PaxosOptions *pax_config_;
         std::future<void *> prov_loop_;
         MyQueue<PaxMessage*> msgProv_;
         StateMachine *state_machine_;

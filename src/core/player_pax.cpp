@@ -6,9 +6,9 @@
 #include <controller.hpp>
 
 namespace paxosme {
-    PaxPlayer::PaxPlayer(const ConfigInfo *config, const PaxCommunicator *communicator,
+    PaxPlayer::PaxPlayer(const PaxosOptions *config, const PaxCommunicator *communicator,
                          const PaxStorage *storage)
-            : config_(const_cast<ConfigInfo *>(config)),
+            : config_(const_cast<PaxosOptions *>(config)),
               communicator_(const_cast<PaxCommunicator *>(communicator)),
               storage_(const_cast<PaxStorage *>(storage)),
               schedule_(Schedule::OneInstance()) {
