@@ -121,7 +121,7 @@ namespace paxosme {
     }
 
     void PaxAcceptor::UpdatePromised(node_id_t proposer, proposal_id_t proposal_id) {
-        PaxosStorageState paxos_state;
+        PaxosStorageValue paxos_state;
 
         acceptor_state_.SetPromisedProposal(proposal_id, proposer);
 
@@ -155,7 +155,7 @@ namespace paxosme {
 
     instance_id_t PaxAcceptor::Init(const PaxController *controller) {
         PaxPlayer::InitController(controller);
-        PaxosStorageState paxos_state = ReadState(-1);
+        PaxosStorageValue paxos_state = ReadState(-1);
         acceptor_state_.Init(paxos_state);
         return paxos_state.instanceId;
     }
@@ -174,7 +174,7 @@ namespace paxosme {
         return true;
     }
 
-    void AcceptorState::Init(const PaxosStorageState &state) {
+    void AcceptorState::Init(const PaxosStorageValue &state) {
         LogValue log_value{state.acceptedValue};
         SetAcceptedValue(log_value);
         SetAcceptedProposal(state.acceptedProposalId, state.acceptedNodeId);

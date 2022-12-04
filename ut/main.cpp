@@ -8,7 +8,7 @@
 int main(){
     paxosme::NodeOptions node_options;
     node_options.network = std::unique_ptr<paxosme::Network> (paxosme::Network::New());
-    node_options.storage = std::shared_ptr<paxosme::Storage>();
+    node_options.storage = std::shared_ptr<paxosme::LogStorage>();
     node_options.sm = std::shared_ptr<paxosme::StateMachine>();
 
     paxosme::PaxosOptions paxos_options;

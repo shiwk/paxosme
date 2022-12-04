@@ -8,13 +8,13 @@
 #include <string>
 #include <vector>
 #include "config.hpp"
-#include "storage.hpp"
+#include "logstorage.hpp"
 #include "sm.hpp"
 #include "network.hpp"
 
 namespace paxosme {
     struct NodeOptions{
-        std::shared_ptr<Storage> storage;
+        std::shared_ptr<LogStorage> storage;
         std::shared_ptr<StateMachine> sm;
         node_id_vector nodeIdList;
         std::unique_ptr<Network> network;

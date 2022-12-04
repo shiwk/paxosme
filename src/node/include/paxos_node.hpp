@@ -9,12 +9,12 @@
 #include <node.hpp>
 #include <config.hpp>
 #include "network.hpp"
-#include "storage.hpp"
+#include "logstorage.hpp"
 
 namespace paxosme {
     class MemoryNode : public Node {
     public:
-        MemoryNode(paxosme::ConfigInfo *, Network *, Storage *);
+        MemoryNode(paxosme::ConfigInfo *, Network *, LogStorage *);
 
         void Launch() override;
 
@@ -23,7 +23,7 @@ namespace paxosme {
         PaxController *pax_controller_;
         PaxCommunicator *pax_communicator_;
         Network *network_;
-        Storage *storage_;
+        LogStorage *storage_;
     };
 
     class PersistNode : public Node {

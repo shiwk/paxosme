@@ -9,10 +9,11 @@
 #include <string>
 #include <database.hpp>
 #include <messages_pax.hpp>
+#include "logstorage.hpp"
 
 
 namespace paxosme{
-    struct PaxosStorageState{
+    struct PaxosStorageValue{
         instance_id_t instanceId;
         proposal_id_t proposalId;
         node_id_t proposer;
@@ -21,15 +22,16 @@ namespace paxosme{
         LogValue acceptedValue;
         node_id_t promisedNodeId;
         proposal_id_t promisedProposalId;
+        proposal_id_t leaderInstanceId;
     };
 
     class PaxStorage {
     public:
-        int Write(instance_id_t instance_id, const PaxosStorageState & value);
+        int Write(const PaxosStorageValue & value);
 
-        int Read(instance_id_t instance_id, PaxosStorageState & value);
+        int Read(instance_id_t instance_id, PaxosStorageValue & value);
     private:
-        Database * db;
+        LogStorage *logStorage_;
     };
 }
 

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package paxosme;
 
-message PaxosState {
+message PaxosLogEntry {
     uint64 instance_id = 1;
     uint64 promised_proposal_id = 2;
     uint64 promised_node_id = 3;

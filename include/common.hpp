@@ -17,7 +17,7 @@ using proposal_id_t = uint64_t;
 using instance_id_t = uint64_t;
 using index_t = uint64_t;
 using LogValue = std::string;
-using node_id_vector = std::vector<node_id_t>;
+
 
 
 #endif //PAXOSME_COMMON_H

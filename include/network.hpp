@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include "common.hpp"
 
+using node_id_vector = std::vector<node_id_t>;
+
 namespace paxosme {
     struct Endpoint {
         std::string ip;

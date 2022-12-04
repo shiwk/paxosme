@@ -20,7 +20,7 @@ namespace paxosme {
             accepted_proposer_ = NODE_DUMMY;
         }
 
-        void Init(const PaxosStorageState &state);
+        void Init(const PaxosStorageValue &state);
         void Reset();
 
         proposal_id_t GetPromisedProposal() const {

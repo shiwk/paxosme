@@ -47,7 +47,7 @@ namespace paxosme {
     }
 
     void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId, bool sync) {
-        PaxosStorageState paxosState = ReadState(instanceId);
+        PaxosStorageValue paxosState = ReadState(instanceId);
 
         PaxMessage pax_message(toNodeId,
                                sync ? MessageType::kMSG_LEARNER_VALUE_SYNC : MessageType::kMSG_LEARNER_VALUE_SEND);
@@ -165,7 +165,7 @@ namespace paxosme {
         learner_state_.LearnNew(value, instance_id, proposal_id, proposer);
 
         if (writeState) {
-            PaxosStorageState paxos_state;
+            PaxosStorageValue paxos_state;
             paxos_state.proposalId = proposal_id;
             paxos_state.proposer = proposer;
             paxos_state.instanceId = instance_id;

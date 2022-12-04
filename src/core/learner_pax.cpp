@@ -33,6 +33,15 @@ namespace paxosme {
     }
 
     void PaxLearner::HandleOthersPublish(const PaxMessage &pax_message) {
+        if (pax_message.GetInstanceId() != GetInstanceId())
+            return; // instance id not matched
+        if (pax_message.GetProposingNodeId() != GetNodeId())
+            return; // proposer not matched
+
+        auto proposal = GetAcceptedProposal();
+        if (proposal.proposal_id == PROPOSAL_DUMMY || pax_message.GetProposalId() != proposal.proposal_id)
+            return; // proposalId == PROPOSAL_DUMMY means not accepted yet
+
         LearnFromOthers(pax_message);
         // todo II: tell followers
     }
