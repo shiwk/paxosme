@@ -58,7 +58,7 @@ namespace paxosme {
         instance_id_t instance_id_;
         index_t index_;
         index_t finish_index_;
-        MyQueue<PendingNewValue> queue_;
+        SafeQueue<PendingNewValue> queue_;
         PaxController *paxController_;
     };
 }

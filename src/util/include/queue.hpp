@@ -6,12 +6,11 @@
 #define PAXOSME_QUEUE_HPP
 
 #include <queue>
-#include "lock.hpp"
 
 template<class T>
-class MyQueue {
+class SafeQueue {
 public:
-    explicit MyQueue(size_t limit) : limit_(limit) {}
+    explicit SafeQueue(size_t limit) : limit_(limit) {}
 
     bool TryAdd(const T &t) {
         std::unique_lock<std::mutex> lock(mtx_);

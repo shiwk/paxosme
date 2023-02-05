@@ -10,12 +10,14 @@
 using LogEntry = std::string;
 using LogEntryId = uint64_t;
 
-namespace paxosme{
+namespace paxosme {
     class LogStorage {
     public:
-        void Init();
-        bool Write(const LogEntryId llInstanceID, const LogEntry & sValue);
-        bool Read(const LogEntryId llInstanceID, const LogEntry & sValue);
+        virtual void Init()=0;
+
+        virtual int Put(LogEntryId llInstanceID, const LogEntry &sValue) = 0;
+
+        virtual bool Get(LogEntryId llInstanceID, LogEntry &sValue) = 0;
     };
 
 }

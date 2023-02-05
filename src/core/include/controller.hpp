@@ -53,7 +53,7 @@ namespace paxosme {
         PaxLearner *learner_;
         PaxosOptions *pax_config_;
         std::future<void *> prov_loop_;
-        MyQueue<PaxMessage*> msgProv_;
+        SafeQueue<PaxMessage*> msgProv_;
         StateMachine *state_machine_;
         PaxCommunicator *communicator_;
     };

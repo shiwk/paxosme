@@ -3,6 +3,7 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_library(db
         ${HEADERS}
-        ${SOURCES} logstorage.cpp)
+        ${SOURCES})
 
+target_link_libraries(db util)
 target_include_directories(db PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )

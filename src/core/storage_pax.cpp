@@ -21,7 +21,7 @@ int paxosme::PaxStorage::Write(const paxosme::PaxosStorageValue &value) {
     paxos_log_entry.set_proposer_id(value.proposer);
     paxos_log_entry.set_leader_instance_id(value.leaderInstanceId);
 
-    if (!logStorage_->Write(value.instanceId, paxos_log_entry.SerializeAsString()))
+    if (!logStorage_->Put(value.instanceId, paxos_log_entry.SerializeAsString()))
         return 0;
 
     return 1;
@@ -29,7 +29,7 @@ int paxosme::PaxStorage::Write(const paxosme::PaxosStorageValue &value) {
 
 int paxosme::PaxStorage::Read(instance_id_t instance_id, paxosme::PaxosStorageValue &value) {
     LogEntry log_entry;
-    if (logStorage_->Read(instance_id, log_entry)) {
+    if (logStorage_->Get(instance_id, log_entry)) {
         PaxosLogEntry paxos_log_entry;
         paxos_log_entry.ParseFromString(log_entry);
         value.instanceId = paxos_log_entry.instance_id();
