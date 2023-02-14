@@ -58,4 +58,4 @@ target_link_libraries(network_grpc
 
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CMAKE_CURRENT_BINARY_DIR}/protogen)
+target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/protogen)

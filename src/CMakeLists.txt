@@ -7,4 +7,5 @@ add_subdirectory(storage)
 add_subdirectory(core)
 
 add_subdirectory(network/grpc)
+add_subdirectory(network/asio)
 add_subdirectory(node)

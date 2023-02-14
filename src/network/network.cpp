@@ -3,7 +3,6 @@
 //
 
 #include "network_impl.hpp"
-#include "server.hpp"
 #include <memory>
 
 namespace paxosme {
