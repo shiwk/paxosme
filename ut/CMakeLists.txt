@@ -6,4 +6,4 @@ add_executable( ut
         ${HEADERS} ../include/sm.hpp)
 
 target_link_libraries(ut node)
-target_link_libraries(ut network_grpc)
+target_link_libraries(ut network)

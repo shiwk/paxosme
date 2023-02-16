@@ -6,7 +6,7 @@
 #define PAXOSME_SERVER_HPP
 
 #include "paxosme.grpc.pb.h"
-#include "network_impl.hpp"
+#include "network_server.hpp"
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server.h>
 
@@ -17,8 +17,7 @@ using grpc::ServerBuilder;
 using grpc::Server;
 
 namespace paxosme {
-    class GrpcServer : public ServerInterface {
-        friend class ServerImpl;
+    class GrpcServer : public NetworkServer {
 
     public:
 

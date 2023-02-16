@@ -38,8 +38,8 @@ add_custom_command(
 
 #find_package(Protobuf REQUIRED)
 message(STATUS ${_PROTOBUF_LIBPROTOBUF})
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/../include/*.hpp)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../*.cpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp )
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 # grpc_proto
 add_library(network_grpc
@@ -54,7 +54,8 @@ target_link_libraries(network_grpc
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
         ${_PROTOBUF_LIBPROTOBUF}
-        paxosmecore)
+        paxosmecore
+        )
 
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ )

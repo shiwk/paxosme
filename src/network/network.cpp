@@ -2,12 +2,24 @@
 // Created by k s on 2022/3/27.
 //
 
-#include "network_impl.hpp"
+#include "network_server.hpp"
+#include "controller.hpp"
+#include "messages_pax.hpp"
 #include <memory>
 
 namespace paxosme {
 
-    // todo I: another way for network inteface
+    class NetworkImpl : public Network {
+        friend class Network;
+
+    private:
+        PeerList peers_;
+        std::unique_ptr<NetworkServer> server_;
+    protected:
+        PaxController *paxController_;
+    };
+
+    // todo I: another way for network interface
 
     void Network::Quit(node_id_t node_id) {
         auto *impl = (NetworkImpl *) this;
@@ -27,12 +39,12 @@ namespace paxosme {
         impl->server_->Start(NodeIdToEndpoint(self), msgCallback);
     }
 
-//    Network *Network::New() {
-//        auto nwImpl = new NetworkImpl;
-//        nwImpl->server_ = std::unique_ptr<ServerImpl>((ServerImpl *) new GrpcServer);
-//
-//        return nwImpl;
-//    }
+    Network *Network::New() {
+        auto nwImpl = new NetworkImpl;
+        nwImpl->server_ = std::unique_ptr<NetworkServer>((NetworkServer *) NetworkServer::New());
+
+        return nwImpl;
+    }
 
     void Network::Delete(Network *network) {
         delete network;

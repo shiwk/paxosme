@@ -21,10 +21,10 @@ namespace paxosme {
         cq_ = builder.AddCompletionQueue();
         server_ = builder.BuildAndStart();
 
+        msgCallback_ = msg_callback;
+
         // Proceed to the server's main loop.
         HandleRpcs();
-
-        msgCallback_ = msg_callback;
     }
 
     void GrpcServer::HandleRpcs() {
@@ -47,5 +47,10 @@ namespace paxosme {
             GPR_ASSERT(ok);
             static_cast<BaseCallData *>(tag)->Proceed();
         }
+    }
+
+    NetworkServer * NetworkServer::New() {
+        // todo I:
+        return new GrpcServer;
     }
 }
