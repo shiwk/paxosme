@@ -10,16 +10,15 @@
 #include "messages_pax.hpp"
 
 namespace paxosme {
-    using MsgCallback = std::function<void(PaxMessage)>;
-//    typedef   void MsgCallback(PaxMessage);
 
     class NetworkServer {
     public:
         static NetworkServer *New();
-        virtual void Start(const Endpoint &, MsgCallback) = 0;
+        virtual void Start(const Endpoint &, Network::MsgCallback) = 0;
+        virtual ~ NetworkServer () = default;;
 
     protected:
-        MsgCallback msgCallback_;
+        Network::MsgCallback msgCallback_;
     };
 }
 #endif //PAXOSME_NETWORK_SERVER_HPP

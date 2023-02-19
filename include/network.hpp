@@ -7,6 +7,7 @@
 
 #include <string>
 #include <unordered_set>
+#include <vector>
 #include "common.hpp"
 
 using node_id_vector = std::vector<node_id_t>;
@@ -65,23 +66,27 @@ namespace paxosme {
         int Broadcast(const M &message);
     };
 
+
     class Network {
     public:
+        using MsgCallback = std::function<void(std::string)>;
+
+        struct NetworkOptions {
+            node_id_vector peers;
+            node_id_t self;
+            MsgCallback msgCallback;
+        };
         Network()=default;
 
-        Endpoint NodeIdToEndpoint(node_id_t) {
+        static Endpoint NodeIdToEndpoint(node_id_t) {
             // todo I: convert node id to peer
         }
 
         static Network *New();
-
-        static void Delete(Network *);
-
-//        Network(PeerList *);
         virtual ~Network() = default;
 
-        void Start(const node_id_vector &, const node_id_t &self);
-
+//        void Start(const node_id_vector &, const node_id_t &self);
+        void Start(NetworkOptions &);
         void Quit(node_id_t);
 
     };

@@ -25,7 +25,8 @@ namespace paxosme {
     }
 
     PaxController::PaxController(const PaxosOptions *config)
-            : pax_config_(const_cast<PaxosOptions *>(config)), msgProv_(HARDCODE_MSG_COUNT_LIMIT) {
+            : pax_config_(const_cast<PaxosOptions *>(config)),
+              msgProv_(new SafeQueue<PaxMessage *>(HARDCODE_MSG_COUNT_LIMIT)) {
 
     }
 
@@ -52,7 +53,7 @@ namespace paxosme {
     }
 
     void PaxController::Init(Comm *comm, PaxStorage *storage) {
-        communicator_ = new PaxCommunicator((Communicator<PaxMessage>*)comm);
+        communicator_ = new PaxCommunicator((Communicator<PaxMessage> *) comm);
 
         proposer_ = new PaxProposer{pax_config_, communicator_, storage};
         learner_ = new PaxLearner{pax_config_, communicator_, storage};
@@ -72,7 +73,8 @@ namespace paxosme {
             instance_id_ = instanceInSM + 1;
         }
 
-        prov_loop_ = std::async(std::launch::async, [this] { return MainLoop(); });
+        auto mainLoop = [this](void *ptr) { return MainLoop(ptr); };
+        PaxController::prov_loop = std::async(std::launch::async, mainLoop, nullptr);
         proposal_id_t proposalId = acceptor_->GetAcceptedProposalId();
 
         proposer_->Init(proposalId + 1, this);
@@ -121,7 +123,7 @@ namespace paxosme {
         }
     }
 
-    [[noreturn]] void *PaxController::MainLoop() {
+    [[noreturn]] void *PaxController::MainLoop(void *) {
         while (true) {
 
             Event eventToHandle;
@@ -131,11 +133,11 @@ namespace paxosme {
             EventTimeStamp nextEventTime;
             PaxMessage *paxMessage = nullptr;
             if (schedule_.NextEventTime(nextEventTime)) {
-                if (msgProv_.Take(paxMessage, Time::DurationMS(STEADY_TIME_NOW, nextEventTime))) {
+                if (msgProv_->Take(paxMessage, Time::DurationMS(STEADY_TIME_NOW, nextEventTime))) {
                     HandleMessage(*paxMessage);
                     delete paxMessage;
                 }
-            } else if (msgProv_.Take(paxMessage, Time::MS(500))) {
+            } else if (msgProv_->Take(paxMessage, Time::MS(500))) {
                 // waiting 500 ms by default
                 HandleMessage(*paxMessage);
                 delete paxMessage;
@@ -154,6 +156,9 @@ namespace paxosme {
 
         delete acceptor_;
         acceptor_ = nullptr;
+
+        delete msgProv_;
+        msgProv_ = nullptr;
     }
 
     void PaxController::InstanceDone() {
@@ -169,6 +174,8 @@ namespace paxosme {
 
     void PaxController::AddMessage(PaxMessage &pax_message) {
         auto message = new PaxMessage(std::move(pax_message));
-        msgProv_.TryAdd(message);
+        msgProv_->TryAdd(message);
     }
+
+    std::future<void *> PaxController::prov_loop;
 }

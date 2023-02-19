@@ -11,9 +11,12 @@ using LogEntry = std::string;
 using LogEntryId = uint64_t;
 
 namespace paxosme {
-    class LogStorage {
+    class Storage {
     public:
-        virtual void Init()=0;
+        struct StorageOptions {
+        };
+
+        virtual void Init() = 0;
 
         virtual int Put(LogEntryId llInstanceID, const LogEntry &sValue) = 0;
 

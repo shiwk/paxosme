@@ -5,8 +5,12 @@
 #ifndef PAXOSME_SM_HPP
 #define PAXOSME_SM_HPP
 namespace paxosme {
+
     class StateMachine {
+
     public:
+        struct SMOptions{};
+
         void Init();
 
         virtual ~StateMachine() {}

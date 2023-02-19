@@ -31,7 +31,7 @@ namespace paxosme{
 
         int Read(instance_id_t instance_id, PaxosStorageValue & value);
     private:
-        LogStorage *logStorage_;
+        Storage *logStorage_;
     };
 }
 

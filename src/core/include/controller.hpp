@@ -39,12 +39,14 @@ namespace paxosme {
 
         void AddMessage(PaxMessage &);
 
-        [[noreturn]] void *MainLoop();
+        [[noreturn]] void *MainLoop(void*);
 
     private:
         void PushSMByState(instance_id_t target_instance_id);
         void NewInstance();
         void InstanceDone();
+
+        static std::future<void *> prov_loop;
 
         Schedule schedule_;
         instance_id_t instance_id_;
@@ -52,8 +54,7 @@ namespace paxosme {
         PaxAcceptor *acceptor_;
         PaxLearner *learner_;
         PaxosOptions *pax_config_;
-        std::future<void *> prov_loop_;
-        SafeQueue<PaxMessage*> msgProv_;
+        SafeQueue<PaxMessage*>* msgProv_;
         StateMachine *state_machine_;
         PaxCommunicator *communicator_;
     };

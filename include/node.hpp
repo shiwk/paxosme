@@ -11,24 +11,37 @@
 #include "logstorage.hpp"
 #include "sm.hpp"
 #include "network.hpp"
+#include "controller.hpp"
 
 namespace paxosme {
-    struct NodeOptions{
-        std::shared_ptr<LogStorage> storage;
-        std::shared_ptr<StateMachine> sm;
+    struct NodeOptions {
         node_id_vector nodeIdList;
-        std::unique_ptr<Network> network;
-
+        node_id_t nodeId;
+        std::shared_ptr<Storage> storage;
+        std::shared_ptr<StateMachine> sm;
+        std::shared_ptr<Network> network;
     };
 
     class Node {
     public:
-        Node()=delete;
+        Node() = delete;
+
         static void Run(NodeOptions &, PaxosOptions &, const std::shared_ptr<Node> &);
-        void Init(node_id_t);
-        void Quit();
+
+        void Init(node_id_t, PaxosOptions &);
+
     private:
+        void InitNetwork(Network::NetworkOptions);
+
+        void InitSM(StateMachine::SMOptions);
+
+        void InitStorage(Storage::StorageOptions);
+
         node_id_t nodeId_;
+        std::shared_ptr<Network> network_;
+        std::shared_ptr<Storage> storage_;
+        std::shared_ptr<StateMachine> sm_;
+        std::shared_ptr<PaxController> paxController_;
     };
 }
 

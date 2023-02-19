@@ -12,7 +12,7 @@
 #endif //PAXOSME_LOGSTORAGE_HPP
 
 namespace paxosme {
-    class MemLogStorage : public LogStorage {
+    class MemLogStorage : public Storage {
     public:
         void Init() override;
 
