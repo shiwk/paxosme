@@ -50,7 +50,6 @@ namespace paxosme {
         LogValue learned_value_;
         LogValue chosen_value_;
 
-    private:
         proposal_id_t promisedProposalId_{};
         node_id_t promisedNodeId_{};
         instance_id_t instanceId_{};

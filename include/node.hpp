@@ -24,7 +24,6 @@ namespace paxosme {
 
     class Node {
     public:
-        Node() = delete;
 
         static void Run(NodeOptions &, PaxosOptions &, const std::shared_ptr<Node> &);
 

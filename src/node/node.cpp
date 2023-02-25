@@ -11,8 +11,13 @@ namespace paxosme {
 
         node->Init(options.nodeId, paxos_options);
 
+
+        std::vector<Peer> peers;
+        for (auto node_id: options.nodeIdList) {
+            peers.emplace_back(Network::NodeIdToPeer(node_id));
+        }
         auto networkOption = Network::NetworkOptions{
-                options.nodeIdList,
+                peers,
                 paxos_options.GetNodeId(),
         };
         node->network_ = options.network;

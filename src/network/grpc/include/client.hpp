@@ -5,8 +5,8 @@
 #ifndef PAXOSME_CLIENT_HPP
 #define PAXOSME_CLIENT_HPP
 
-#include <messages_pax.hpp>
 #include "paxosme.grpc.pb.h"
+#include "network_client.hpp"
 
 using grpc::Channel;
 using paxos::Paxosme;
@@ -41,17 +41,27 @@ namespace paxosme {
     };
 
 
-    class GrpcClient {
+    class GrpcClient : public NetworkClient {
     public:
         explicit GrpcClient(const std::shared_ptr<ChannelInterface> &channel)
                 : stub_(Paxosme::NewStub(channel)) {}
 
+        friend class Client;
+
+        static GrpcClient *NewClient(const std::string &);
+
+        void Send(const PodMsg &) override;
     private:
+
+
         std::unique_ptr<Paxosme::Stub> stub_;
 
         template<class TRequest, class TResponse>
-        std::unique_ptr<::grpc::ClientAsyncResponseReader<TResponse>> PrepareRequest(::grpc::ClientContext *c,::grpc::CompletionQueue *cq, TRequest &request);
+        std::unique_ptr<::grpc::ClientAsyncResponseReader<TResponse>>
+        PrepareRequest(::grpc::ClientContext *c, ::grpc::CompletionQueue *cq, TRequest &request);
 
+        template<class TRequest, class TResponse>
+        bool Send(TRequest &);
 
 //        Paxosme::Stub stub_;
 
@@ -92,7 +102,7 @@ namespace paxosme {
     public:
         // code reference https://github.com/grpc/grpc/blob/master/examples/cpp/helloworld/greeter_async_client2.cc
         template<class TRequest, class TResponse>
-        bool AsyncCall(TRequest request, TResponse &r) {
+        bool AsyncCall(TRequest request, TResponse &response) {
 
 //            RequestCall<TResponse> async_request = MakePrepareRequest<TRequest, TResponse>(request,kPROPOSE);
 
@@ -123,7 +133,7 @@ namespace paxosme {
             GPR_ASSERT(ret && got_tag == (void *) 1);
 
             if (call->status.ok()) {
-                r = call->reply;
+                response = call->reply;
                 delete call;
                 return true;
             }
@@ -132,5 +142,11 @@ namespace paxosme {
             return false;
         }
     };
+
+    template<class TRequest, class TResponse>
+    bool GrpcClient::Send(TRequest &request) {
+        TResponse response;
+        return AsyncCall(request, response);
+    }
 }
 #endif //PAXOSME_CLIENT_HPP

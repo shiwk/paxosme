@@ -12,6 +12,6 @@ int main(){
     node_options.sm = std::shared_ptr<paxosme::StateMachine>();
 
     paxosme::PaxosOptions paxos_options;
-    std::shared_ptr<paxosme::Node> node;
+    std::shared_ptr<paxosme::Node> node = std::make_shared<paxosme::Node>();
     paxosme::Node::Run(node_options, paxos_options, node);
 }

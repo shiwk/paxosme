@@ -13,7 +13,7 @@
 using node_id_vector = std::vector<node_id_t>;
 
 namespace paxosme {
-    struct Endpoint {
+    struct Peer {
         std::string ip;
         int port;
 
@@ -21,13 +21,13 @@ namespace paxosme {
             return ip + ":" + std::to_string(port);
         }
 
-        bool operator== (const Endpoint &endpoint) const {
+        bool operator== (const Peer &endpoint) const {
             return this->port == endpoint.port && this->ip == endpoint.ip;
         }
     };
 
-    struct EndpointHash {
-        size_t operator()(const Endpoint &endpoint) const {
+    struct PeerHash {
+        size_t operator()(const Peer &endpoint) const {
             const int PRIME_CONST = 31;
             size_t hashCode = 0;
             auto st = endpoint.ToString();
@@ -36,34 +36,32 @@ namespace paxosme {
             }
             return hashCode;
         }
+
+        static PeerHash peerHash;
     };
 
+
     struct PeerList {
-        void Add(const Endpoint &endpoint) {
+        PeerList(std::vector<Peer> nodeList) : peers(nodeList.begin(), nodeList.end()){
+
+        }
+        void Add(const Peer &endpoint) {
             peers.insert(endpoint);
         }
 
-        bool Contains(const Endpoint &endpoint) {
+        bool Contains(const Peer &endpoint) {
             return peers.find(endpoint) != peers.end();
         }
 
-        bool Remove(const Endpoint &endpoint) {
+        bool Remove(const Peer &endpoint) {
             return peers.erase(endpoint);
         }
 
+        auto begin() { return peers.begin(); }
+        auto end() { return peers.end(); }
+
     private:
-        std::unordered_set<Endpoint, EndpointHash> peers;
-    };
-
-    class Comm {
-    };
-
-    template<class M>
-    class Communicator : public Comm {
-    public:
-        int Send(node_id_t node_id, const M &message);
-
-        int Broadcast(const M &message);
+        std::unordered_set<Peer, PeerHash> peers;
     };
 
 
@@ -72,14 +70,18 @@ namespace paxosme {
         using MsgCallback = std::function<void(std::string)>;
 
         struct NetworkOptions {
-            node_id_vector peers;
+            PeerList peers;
             node_id_t self;
             MsgCallback msgCallback;
         };
         Network()=default;
 
-        static Endpoint NodeIdToEndpoint(node_id_t) {
+        static Peer NodeIdToPeer(node_id_t) {
             // todo I: convert node id to peer
+        }
+
+        static node_id_t PeerToNodeId(Peer) {
+            // todo I: convert peer to node id
         }
 
         static Network *New();
@@ -87,8 +89,28 @@ namespace paxosme {
 
 //        void Start(const node_id_vector &, const node_id_t &self);
         void Start(NetworkOptions &);
+
+        template<class M>
+        void Send(const Peer &, const M &message);
+
+        template<class M>
+        void Broadcast(const M &message);
+
         void Quit(node_id_t);
 
+    };
+
+    class Comm {
+    };
+
+    template<class M>
+    class Communicator : public Comm {
+    public:
+        int SendMessage(node_id_t node_id, const M &message);
+
+        int BroadcastMessage(const M &message);
+    private:
+        Network *network_;
     };
 }
 

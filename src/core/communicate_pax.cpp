@@ -6,10 +6,10 @@
 
 namespace paxosme {
     int PaxCommunicator::Send(node_id_t node_id, const PaxMessage &pax_message) {
-        communicator_->Send(node_id, pax_message);
+        communicator_->SendMessage(node_id, pax_message);
     }
 
     int PaxCommunicator::Broadcast(const PaxMessage &pax_message) {
-        communicator_->Broadcast(pax_message);
+        communicator_->BroadcastMessage(pax_message);
     }
 }

@@ -7,14 +7,13 @@
 
 #include "common.hpp"
 #include "network.hpp"
-#include "messages_pax.hpp"
 
 namespace paxosme {
 
     class NetworkServer {
     public:
-        static NetworkServer *New();
-        virtual void Start(const Endpoint &, Network::MsgCallback) = 0;
+        static NetworkServer* New();
+        virtual void Start(const Peer &, Network::MsgCallback) = 0;
         virtual ~ NetworkServer () = default;;
 
     protected:

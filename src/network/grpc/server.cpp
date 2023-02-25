@@ -10,7 +10,7 @@ namespace paxosme {
         cq_->Shutdown();
     }
 
-    void GrpcServer::Start(const Endpoint &endpoint, Network::MsgCallback msg_callback) {
+    void GrpcServer::Start(const Peer &endpoint, Network::MsgCallback msg_callback) {
         const std::string &serverAddress(endpoint.ToString());
         ServerBuilder builder;
 
@@ -44,7 +44,7 @@ namespace paxosme {
         }
     }
 
-    NetworkServer * NetworkServer::New() {
+    NetworkServer* NetworkServer::New() {
         return new GrpcServer;
     }
 }

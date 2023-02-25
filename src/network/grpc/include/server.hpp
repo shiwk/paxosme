@@ -20,7 +20,7 @@ namespace paxosme {
     class GrpcServer : public NetworkServer {
 
     public:
-        void Start(const Endpoint &, Network::MsgCallback) override;
+        void Start(const Peer &, Network::MsgCallback) override;
         ~GrpcServer() override;
 
     private:
