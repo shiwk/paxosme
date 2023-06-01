@@ -11,9 +11,7 @@ using version_id = uint64_t;
 
 class KV {
 public:
-    bool Init(const std::string &);
-
-    static KV *MYKV();
+    bool Init(const std::string &dbpath);
 
     bool Get(const std::string &key, std::string &value, version_id &);
 
@@ -21,6 +19,7 @@ public:
 
 private:
     leveldb::DB *leveldb_;
+    std::string dbpath_;
 };
 
 #endif //PAXOSME_KV_HPP
