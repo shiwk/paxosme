@@ -1,0 +1,7 @@
+syntax = "proto3";
+package paxosme;
+
+message KVMsg {
+  bytes value = 1;
+  uint64 version = 2;
+};

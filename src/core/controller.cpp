@@ -60,7 +60,7 @@ namespace paxosme {
         acceptor_ = new PaxAcceptor{pax_config_, communicator_, storage};
 
         instance_id_t instanceInState = acceptor_->Init(this);
-        instance_id_t instanceInSM = state_machine_->GetInstanceId();
+        instance_id_t instanceInSM = state_machine_->GetSMInstanceId();
 
         if (instanceInState > instanceInSM + 1) {
             // if instance_id > instance id in checkpoint, it means needs to execute some log_values
@@ -96,7 +96,7 @@ namespace paxosme {
     }
 
     void PaxController::PushSMByState(instance_id_t target_instance_id) {
-        instance_id_t instanceInSM = state_machine_->GetInstanceId();
+        instance_id_t instanceInSM = state_machine_->GetSMInstanceId();
         for (instance_id_t i = instanceInSM; i < target_instance_id; ++i) {
             PaxosStorageValue paxos_state = acceptor_->ReadState(i);
             state_machine_->Execute(i, paxos_state.acceptedValue);

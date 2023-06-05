@@ -1,9 +1,0 @@
-//
-// Created by shiwk on 2021/3/23.
-//
-
-#ifndef PAXOSME_STATE_MACHINE_HPP
-#define PAXOSME_STATE_MACHINE_HPP
-
-
-#endif //PAXOSME_STATE_MACHINE_HPP

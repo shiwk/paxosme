@@ -6,6 +6,7 @@
 #define PAXOSME_KV_HPP
 
 #include <leveldb/db.h>
+#include <mutex>
 
 using version_id = uint64_t;
 
@@ -15,11 +16,12 @@ public:
 
     bool Get(const std::string &key, std::string &value, version_id &);
 
-    bool Put(const std::string &key, const std::string &value);
+    bool Put(const std::string &key, const std::string &value, version_id);
 
 private:
     leveldb::DB *leveldb_;
     std::string dbpath_;
+    std::mutex mutex_;
 };
 
 #endif //PAXOSME_KV_HPP
