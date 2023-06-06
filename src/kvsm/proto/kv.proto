@@ -1,7 +1,19 @@
 syntax = "proto3";
 package paxosme;
 
-message KVMsg {
+message ValuePB {
   bytes value = 1;
-  uint64 version = 2;
+  uint64 ver = 2;
 };
+
+message PaxosKVPB{
+  string key = 1;
+  bytes value = 2;
+  uint64 ver = 3;
+  enum KVMethod{
+    GET = 0;
+    PUT = 1;
+  }
+
+  KVMethod method = 4;
+}

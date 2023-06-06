@@ -19,7 +19,7 @@ bool KV::Init(const std::string &dbpath) {
     return true;
 }
 
-bool KV::Get(const std::string &key, std::string &value, version_id &version_id) {
+bool KV::Get(const std::string &key, std::string &value, version_id &ver) {
     if (dbpath_.empty())
         return false;
 
@@ -30,14 +30,14 @@ bool KV::Get(const std::string &key, std::string &value, version_id &version_id)
         return false;
     }
 
-    paxosme::KVMsg kv_msg;
+    paxosme::ValuePB value_pb;
 
-    if (!kv_msg.ParseFromArray(sBuffer.data(), sBuffer.size())) {
+    if (!value_pb.ParseFromArray(sBuffer.data(), sBuffer.size())) {
         // parsing error
         return false;
     }
 
-    version_id = kv_msg.version();
+    ver = value_pb.ver();
 
     return true;
 }
@@ -58,12 +58,12 @@ bool KV::Put(const std::string &key, const std::string &value, version_id ver) {
         return false;
     }
 
-    paxosme::KVMsg kv_msg;
-    kv_msg.set_value(value);
-    kv_msg.set_version(ver + 1);
+    paxosme::ValuePB value_pb;
+    value_pb.set_value(value);
+    value_pb.set_ver(ver + 1);
 
     std::string serialized;
-    bool serialization_result = kv_msg.SerializeToString(&serialized);
+    bool serialization_result = value_pb.SerializeToString(&serialized);
     if (!serialization_result) {
         // serialization failed
         return false;
