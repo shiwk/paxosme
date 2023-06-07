@@ -118,6 +118,7 @@ namespace paxosme {
 
         if (learner_->Learned()) {
             // todo II: state machine execute
+            state_machine_->Execute(instance_id_, message.GetLearnedValue());
             InstanceDone();
             NewInstance();
         }

@@ -6,6 +6,8 @@
 #include "state_machine.hpp"
 #include "kv.pb.h"
 
+#define SM_INSTANCE_ID "SM_INSTANCE_ID"
+
 bool paxosme::KVStateMachine::Execute(instance_id_t instance_id, const std::string &paxos_value) {
 
     paxosme::PaxosKVPB paxos_kvpb;
@@ -25,8 +27,8 @@ bool paxosme::KVStateMachine::Execute(instance_id_t instance_id, const std::stri
         return false;
     }
 
-    // todo I:
-    //  update SM InstanceId
+    // update sm instance id
+    SetSmInstanceId(instance_id);
 
     return true;
 }
@@ -37,6 +39,12 @@ void paxosme::KVStateMachine::Init(SMOptions sm_options) {
 
 instance_id_t paxosme::KVStateMachine::GetSMInstanceId() {
     return 0;
+}
+
+bool paxosme::KVStateMachine::SetSmInstanceId(instance_id_t instance_id)
+{
+    //todo II: sm instance id 
+    return true;
 }
 
 paxosme::KVStateMachine::KVStateMachine(SMReceipt sm_receipt) : smExecutionCtx_(sm_receipt) {
