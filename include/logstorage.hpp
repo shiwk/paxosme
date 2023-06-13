@@ -7,21 +7,24 @@
 
 #include <string>
 
-using LogEntry = std::string;
-using LogEntryId = uint64_t;
-
-namespace paxosme {
-    class Storage {
+namespace paxosme
+{
+    class LogStorage
+    {
     public:
-        struct StorageOptions {
+        struct LogStorageOptions
+        {
         };
+
+        using LogEntryValue = std::string;
+        using LogEntryKey = std::string;
 
         virtual void Init() = 0;
 
-        virtual int Put(LogEntryId llInstanceID, const LogEntry &sValue) = 0;
+        virtual int Put(LogEntryKey log_entry_id, const LogEntryValue &) = 0;
 
-        virtual bool Get(LogEntryId llInstanceID, LogEntry &sValue) = 0;
+        virtual bool Get(LogEntryKey llInstanceID, LogEntryValue &sValue) = 0;
     };
 
 }
-#endif //PAXOSME_LOGSTORAGE_HPP
+#endif // PAXOSME_LOGSTORAGE_HPP
