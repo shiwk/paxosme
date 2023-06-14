@@ -26,9 +26,9 @@ namespace paxosme {
 
     class PaxPlayer {
     public:
-        explicit PaxPlayer(const PaxosOptions*, const PaxCommunicator*, const PaxStorage *storage);
+        explicit PaxPlayer(const PaxosOptions*, const PaxCommunicator*, const PaxStore *storage);
         virtual ~PaxPlayer() = default;
-        PaxosStorageValue ReadState(instance_id_t instance_id);
+        PaxosLogEntry ReadState(instance_id_t instance_id);
 
         void InitController(const PaxController*);
 
@@ -50,7 +50,7 @@ namespace paxosme {
 
         void SendMessage(const PaxMessage &pax_message, node_id_t node_id);
 
-        void WriteState(const paxosme::PaxosStorageValue &paxos_state);
+        void WriteState(const paxosme::PaxosLogEntry &paxos_state);
 
         void Publish(EventType event_type, const EventHandler &callback, millisec = 0);
         void Withdraw(EventType);
@@ -61,7 +61,7 @@ namespace paxosme {
 
     private:
         PaxCommunicator *communicator_;
-        PaxStorage *storage_;
+        PaxStore *storage_;
         Schedule *schedule_;
         PaxosOptions *config_;
     };

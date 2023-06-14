@@ -20,7 +20,7 @@ namespace paxosme {
             accepted_proposer_ = NODE_DUMMY;
         }
 
-        void Init(const PaxosStorageValue &state);
+        void Init(const PaxosLogEntry &state);
         void Reset();
 
         proposal_id_t GetPromisedProposal() const {
@@ -138,7 +138,7 @@ namespace paxosme {
     class PaxAcceptor : public PaxPlayer {
         AcceptorState acceptor_state_;
     public:
-        PaxAcceptor(const PaxosOptions *, const PaxCommunicator *, const PaxStorage *);
+        PaxAcceptor(const PaxosOptions *, const PaxCommunicator *, const PaxStore *);
         void HandlePropose(const PaxMessage &message);
 
         void HandleAccept(const PaxMessage &message);

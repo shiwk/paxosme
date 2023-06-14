@@ -12,7 +12,7 @@
 #include "proposal_prov.hpp"
 #include "sm.hpp"
 #include <future>
-#include <state_machine.hpp>
+#include <sm.hpp>
 
 namespace paxosme {
     class PaxController {
@@ -23,7 +23,7 @@ namespace paxosme {
 
         void HandleMessage(const PaxMessage &message);
 
-        void Init(Comm*, PaxStorage*); // start loop
+        void Init(Comm*, PaxStore*); // start loop
 
         instance_id_t GetInstanceId() const;
 
@@ -55,7 +55,7 @@ namespace paxosme {
         PaxLearner *learner_;
         PaxosOptions *pax_config_;
         SafeQueue<PaxMessage*>* msgProv_;
-        StateMachine *state_machine_;
+        Statemachine *state_machine_;
         PaxCommunicator *communicator_;
     };
 }

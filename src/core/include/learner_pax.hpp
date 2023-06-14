@@ -50,7 +50,7 @@ namespace paxosme {
 
     class PaxLearner : public PaxPlayer {
     public:
-        PaxLearner(const PaxosOptions *, const PaxCommunicator *, const PaxStorage *);
+        PaxLearner(const PaxosOptions *, const PaxCommunicator *, const PaxStore *);
 
     public:
         void HandleMessage(const PaxMessage &) override;

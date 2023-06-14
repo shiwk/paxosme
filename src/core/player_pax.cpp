@@ -7,10 +7,10 @@
 
 namespace paxosme {
     PaxPlayer::PaxPlayer(const PaxosOptions *config, const PaxCommunicator *communicator,
-                         const PaxStorage *storage)
+                         const PaxStore *storage)
             : config_(const_cast<PaxosOptions *>(config)),
               communicator_(const_cast<PaxCommunicator *>(communicator)),
-              storage_(const_cast<PaxStorage *>(storage)),
+              storage_(const_cast<PaxStore *>(storage)),
               schedule_(Schedule::OneInstance()) {
     }
 
@@ -38,12 +38,12 @@ namespace paxosme {
         controller_->HandleMessage(message);
     }
 
-    void PaxPlayer::WriteState(const PaxosStorageValue &paxos_state) {
+    void PaxPlayer::WriteState(const PaxosLogEntry &paxos_state) {
         storage_->Write(paxos_state);
     }
 
-    PaxosStorageValue PaxPlayer::ReadState(instance_id_t instance_id) {
-        PaxosStorageValue paxos_state;
+    PaxosLogEntry PaxPlayer::ReadState(instance_id_t instance_id) {
+        PaxosLogEntry paxos_state;
         storage_->Read(instance_id, paxos_state);
         return paxos_state;
     }

@@ -10,19 +10,21 @@
 #include <kv.hpp>
 
 namespace paxosme {
-    class KVStateMachine : public StateMachine {
+    class KVStatemachine : public Statemachine {
+        friend class Statemachine;
     public:
-        explicit KVStateMachine(SMReceipt);
 
         bool Execute(instance_id_t instance_id, const std::string &) override;
 
-        void Init(SMOptions) override;
+        void Init(SmOptions) override;
 
         instance_id_t GetSMInstanceId() override;
 
+        bool SetSmInstanceId(instance_id_t instance_id);
+
     private:
         std::unique_ptr<KV> kv_;
-        SMReceipt smExecutionCtx_;
+        SmReceipt smExecutionCtx_;
     };
 }
 

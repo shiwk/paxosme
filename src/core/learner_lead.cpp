@@ -47,14 +47,14 @@ namespace paxosme {
     }
 
     void PaxLearner::SendLearnedValue(instance_id_t instanceId, node_id_t toNodeId, bool sync) {
-        PaxosStorageValue paxosState = ReadState(instanceId);
+        PaxosLogEntry paxosState = ReadState(instanceId);
 
         PaxMessage pax_message(toNodeId,
                                sync ? MessageType::kMSG_LEARNER_VALUE_SYNC : MessageType::kMSG_LEARNER_VALUE_SEND);
         pax_message.SetInstanceId(instanceId);
-        pax_message.SetChosenValue(LogValue(paxosState.acceptedValue));
-        pax_message.SetProposalId(paxosState.proposalId);
-        pax_message.SetProposingNodeId(paxosState.proposer);
+        pax_message.SetChosenValue(LogValue(paxosState.accepted_value()));
+        pax_message.SetProposalId(paxosState.accepted_proposal_id());
+        pax_message.SetProposingNodeId(paxosState.proposer_id());
 
         SendMessage(pax_message, toNodeId);
     }
@@ -165,13 +165,12 @@ namespace paxosme {
         learner_state_.LearnNew(value, instance_id, proposal_id, proposer);
 
         if (writeState) {
-            PaxosStorageValue paxos_state;
-            paxos_state.proposalId = proposal_id;
-            paxos_state.proposer = proposer;
-            paxos_state.instanceId = instance_id;
-            paxos_state.acceptedProposalId = proposal_id;
-            paxos_state.acceptedNodeId = proposer;
-            paxos_state.acceptedValue = value;
+            PaxosLogEntry paxos_state;
+            paxos_state.set_proposer_id(proposer);
+            paxos_state.set_instance_id(instance_id);
+            paxos_state.set_accepted_proposal_id(proposal_id);
+            paxos_state.set_accepted_node_id (proposer);
+            paxos_state.set_accepted_value(value);
 
             WriteState(paxos_state);
         }

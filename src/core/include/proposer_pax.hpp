@@ -88,7 +88,7 @@ namespace paxosme {
     class PaxProposer : public PaxPlayer {
 
     public:
-        explicit PaxProposer(const PaxosOptions *, const PaxCommunicator *, const PaxStorage *);
+        explicit PaxProposer(const PaxosOptions *, const PaxCommunicator *, const PaxStore *);
 
         void NewValue();
 

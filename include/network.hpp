@@ -78,10 +78,12 @@ namespace paxosme {
 
         static Peer NodeIdToPeer(node_id_t) {
             // todo I: convert node id to peer
+            return Peer();
         }
 
         static node_id_t PeerToNodeId(Peer) {
             // todo I: convert peer to node id
+            return 0;
         }
 
         static Network *New();

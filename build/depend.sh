@@ -1,11 +1,14 @@
 # dep: boost
 
+# submodules init
 git submodule update --init --recursive
 
+# build ptorobuf
+echo 'CMAKE_PATH: ' ${CMAKE_PATH}
 mkdir protobuf
-$1/cmake ../3rd_party/grpc/third_party/protobuf/cmake -B ./protobuf
+${CMAKE_PATH}/cmake ../3rd_party/grpc/third_party/protobuf/cmake -B ./protobuf
 
-cd ./protobuf
+cd ./protobuf || exit
 make&&make install
 
 #cd ..

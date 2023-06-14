@@ -6,22 +6,25 @@
 #define PAXOSME_SM_HPP
 
 
-using SMReceipt = void*;
+// struct SMExecutionCtx {
+//     void *receipt;
+// };
 
-//struct SMExecutionCtx {
-//    void *receipt;
-//};
-
-class StateMachine {
+class Statemachine
+{
 
 public:
-    struct SMOptions {
+    using SmReceipt = void *;
+
+    struct SmOptions
+    {
         std::string dbpath;
+        SmReceipt smReceipt;
     };
 
-    virtual void Init(SMOptions) = 0;
+    virtual void Init(SmOptions) = 0;
 
-    virtual ~StateMachine() = default;
+    virtual ~Statemachine() = default;
 
     // invoke after value learned
     // sm_ctx means context(user-defined struct) about the learned state
@@ -29,7 +32,9 @@ public:
 
     virtual instance_id_t GetSMInstanceId() = 0;
 
+    static Statemachine *New();
+
 private:
 };
 
-#endif //PAXOSME_SM_HPP
+#endif // PAXOSME_SM_HPP

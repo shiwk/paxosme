@@ -1,5 +1,5 @@
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 #set(PROTOBUF_AS_SUBMODULE TRUE)
 #set(PROTOBUF_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/grpc/third_party/protobuf)
@@ -40,7 +40,7 @@ add_library(paxosmecore
 
 target_link_libraries(paxosmecore util)
 target_link_libraries(paxosmecore sm)
-target_link_libraries(paxosmecore db)
+target_link_libraries(paxosmecore storage)
 target_link_libraries(paxosmecore ${Protobuf_LIBRARIES})
 
 
