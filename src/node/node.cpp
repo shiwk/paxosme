@@ -28,19 +28,19 @@ namespace paxosme {
         node->sm_ = options.sm;
     }
 
-    void Node::Init(node_id_t, PaxosOptions &paxos_options) {
-        paxController_ = std::make_shared<PaxController>(PaxController(&paxos_options));
+    void Node::Init(node_id_t node_id, PaxosOptions &paxos_options) {
+        // paxController_ = std::make_shared<PaxController>(PaxController(&paxos_options));
     }
 
     void Node::InitNetwork(Network::NetworkOptions network_options) {
         network_->Start(network_options);
     }
 
-    void Node::InitSM(StateMachine::SMOptions) {
+    void Node::InitSM(Statemachine::SmOptions) {
         // todo II
     }
 
-    void Node::InitStorage(Storage::StorageOptions) {
+    void Node::InitStorage(LogStorage::LogStorageOptions) {
         // todo II
     }
 
