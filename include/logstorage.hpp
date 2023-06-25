@@ -14,12 +14,15 @@ namespace paxosme
     public:
         struct LogStorageOptions
         {
+            std::string dbPath;
         };
 
         using LogEntryValue = std::string;
         using LogEntryKey = std::string;
 
-        virtual void Init() = 0;
+        static LogStorage *New();
+
+        virtual bool Init(const LogStorageOptions &) = 0;
 
         virtual int Put(LogEntryKey log_entry_id, const LogEntryValue &) = 0;
 

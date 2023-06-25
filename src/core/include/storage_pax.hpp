@@ -28,9 +28,9 @@ namespace paxosme{
 
     class PaxStore {
     public:
-        int Write(const PaxosLogEntry & value);
+        int WriteLog(const PaxosLogEntry & value);
 
-        int Read(instance_id_t instance_id, PaxosLogEntry & value);
+        int ReadLog(instance_id_t instance_id, PaxosLogEntry & value);
     private:
         LogStorage *logStorage_;
     };

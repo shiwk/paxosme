@@ -6,7 +6,7 @@
 
 //todo I:implement
 
-int paxosme::PaxStore::Write(const paxosme::PaxosLogEntry &value) {
+int paxosme::PaxStore::WriteLog(const paxosme::PaxosLogEntry &value) {
     // PaxosLogEntry paxos_log_entry;
     // paxos_log_entry.set_accepted_node_id(value.acceptedNodeId());
     // paxos_log_entry.set_accepted_proposal_id(value.acceptedProposalId);
@@ -26,7 +26,7 @@ int paxosme::PaxStore::Write(const paxosme::PaxosLogEntry &value) {
     return 1;
 }
 
-int paxosme::PaxStore::Read(instance_id_t instance_id, paxosme::PaxosLogEntry &value) {
+int paxosme::PaxStore::ReadLog(instance_id_t instance_id, paxosme::PaxosLogEntry &value) {
     LogStorage::LogEntryValue log_entry_value;
     if (logStorage_->Get(std::to_string(instance_id), log_entry_value)) {
         value.ParseFromString(log_entry_value);
