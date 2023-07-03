@@ -9,8 +9,9 @@
 class LogSegmentStore
 {
 public:
-    bool Init(const LogStorageOptions &);
+    bool Init(const paxosme::LogStorage::LogStorageOptions &);
     bool Read(const LogIndex, IndexKey &, LogEntryValue &);
+    bool Append(const LogEntryKey &, const LogEntryValue &, LogIndex &);
     static LogSegmentStore *New();
 };
 

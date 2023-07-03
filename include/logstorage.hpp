@@ -10,20 +10,20 @@
 using LogEntryValue = std::string;
 using LogEntryKey = std::string;
 
-struct LogStorageOptions
-{
-    std::string dbPath;
-};
 namespace paxosme
 {
     class LogStorage
     {
     public:
+        struct LogStorageOptions
+        {
+            std::string dbPath;
+        };
         static LogStorage *New();
 
         virtual bool Init(const LogStorageOptions &) = 0;
 
-        virtual int Put(const LogEntryKey &, const LogEntryValue &) = 0;
+        virtual bool Put(const LogEntryKey &, const LogEntryValue &) = 0;
 
         virtual bool Get(const LogEntryKey &, LogEntryValue &) = 0;
     };

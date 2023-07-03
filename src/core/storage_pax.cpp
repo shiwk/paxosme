@@ -27,7 +27,7 @@ int paxosme::PaxStore::WriteLog(const paxosme::PaxosLogEntry &value) {
 }
 
 int paxosme::PaxStore::ReadLog(instance_id_t instance_id, paxosme::PaxosLogEntry &value) {
-    LogStorage::LogEntryValue log_entry_value;
+    LogEntryValue log_entry_value;
     if (logStorage_->Get(std::to_string(instance_id), log_entry_value)) {
         value.ParseFromString(log_entry_value);
 

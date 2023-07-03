@@ -10,9 +10,9 @@ using IndexKey = std::string;
 class LogIndexDB
 {
 public:
-    bool Init(const LogStorageOptions &);
-    bool GetLogIndex(const IndexKey, LogIndex &);
-    bool PutLogIndex(const IndexKey, const LogIndex &);
+    bool Init(const paxosme::LogStorage::LogStorageOptions &);
+    bool GetLogIndex(const IndexKey &, LogIndex &);
+    bool PutLogIndex(const IndexKey &, const LogIndex &);
     static LogIndexDB *New();
 
 private:
