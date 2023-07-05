@@ -7,9 +7,12 @@
 #include "logstorage.hpp"
 #include <mutex>
 
+#define SEGMENT_STORE_DIR "/segment"
+#define METADATA_FILE "/.metadata"
+
 class LogSegmentStore
 {
-    using FD = int64_t;
+    using FD = int;
     using FID = uint16_t;
 
 public:
@@ -19,7 +22,10 @@ public:
     static LogSegmentStore *New();
 
 private:
-    private : std::string path_;
+    bool PathExistsOrCreate(const std::string &);
+private:
+    std::string path_;
+    FD meta_data_fd_;
     std::mutex mutex_;
 };
 

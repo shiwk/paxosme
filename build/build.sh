@@ -1,4 +1,4 @@
-#bash
+#!/bin/bash
 
 echo 'CMAKE_PATH: ' ${CMAKE_PATH}
 echo 'BOOST_PATH: ' ${BOOST_PATH}

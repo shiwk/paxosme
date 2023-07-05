@@ -1,4 +1,4 @@
-#bash
+#!/bin/bash
 
 # clean targets
 cd ../cmake-build-debug || exit
