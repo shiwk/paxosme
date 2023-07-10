@@ -14,6 +14,7 @@ class LogSegmentStore
 {
     using FD = int;
     using FID = uint16_t;
+    using SEGMENTID = int;
 
 public:
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
@@ -24,9 +25,10 @@ public:
 private:
     bool PathExistsOrCreate(const std::string &);
 private:
-    std::string path_;
-    FD meta_data_fd_;
+    std::string db_path_;
+    FD meta_fd_;
     std::mutex mutex_;
+    SEGMENTID cur_segment_id_;
 };
 
 #endif
