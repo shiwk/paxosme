@@ -14,10 +14,16 @@ bool DataBaseLogStorage::Init(const LogStorageOptions &log_storage_options)
         return false;
     }
 
-    if (!log_segment_store_ || !log_index_db_->Init(log_storage_options))
+    if (!log_segment_store_ || !log_segment_store_->Init(log_storage_options))
     {
         return false;
     }
+
+    if (!AlignIndexWithSegmentStore())
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -28,16 +34,16 @@ bool DataBaseLogStorage::Put(const LogEntryKey &key, const LogEntryValue &value)
     2. put log index
     */
 
-   LogIndex log_index;
-   bool has_log_index = GenerateLogIndex(key, value, log_index);
+    LogIndex log_index;
+    bool has_log_index = GenerateLogIndex(key, value, log_index);
 
-   if (!has_log_index)
-   {
+    if (!has_log_index)
+    {
         return false;
-   }
+    }
 
     IndexKey index_key = GenerateIndexKey(key);
-    bool write_log_index = log_index_db_->PutLogIndex(index_key,log_index);
+    bool write_log_index = log_index_db_->PutLogIndex(index_key, log_index);
     if (!write_log_index)
     {
         return false;
@@ -82,8 +88,7 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
 
 IndexKey DataBaseLogStorage ::GenerateIndexKey(const LogEntryKey &log_entry_key)
 {
-    // todo I: implement log entry key  => log index key 
-    IndexKey index_key;
+    IndexKey index_key(log_entry_key);
     return index_key;
 }
 
@@ -94,6 +99,19 @@ bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, cons
     {
         return true;
     }
+
+    return false;
+}
+
+bool DataBaseLogStorage::AlignIndexWithSegmentStore()
+{
+    // reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
+    IndexKey last_index_key;
+
+    bool last_index_key_exists = log_index_db_->GetLastIndexKey(last_index_key);
+
+    //todo I: read segment stor from last_index_key
+    
 
     return false;
 }

@@ -20,6 +20,7 @@ public:
 
 private:
     bool GenerateLogIndex(const LogEntryKey &, const LogEntryValue &, LogIndex &);
+    bool AlignIndexWithSegmentStore();
     std::string dbpath_;
     LogIndexDB *log_index_db_;
     LogSegmentStore *log_segment_store_;
