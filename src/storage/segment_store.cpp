@@ -74,12 +74,10 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         }
     }
 
-    /*
-     2. reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
-     3. open the last file (create new if first time init) and locate offset
-    */
+    // todo I: [be careful with index store aligning]open the last file (create new if first time init) and locate offset
 
-    return false;
+
+    return true;
 }
 
 bool LogSegmentStore::PathExistsOrCreate(const std::string &path)
