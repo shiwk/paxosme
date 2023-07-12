@@ -18,6 +18,7 @@ namespace paxosme
         struct LogStorageOptions
         {
             std::string dbPath;
+            size_t segmentMaxSize;
         };
         static LogStorage *New();
 

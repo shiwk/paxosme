@@ -24,11 +24,15 @@ public:
 
 private:
     bool PathExistsOrCreate(const std::string &);
+    static int PaddingIfNewFile(const FD, size_t &fileSize, size_t padding_length);
 private:
     std::string db_path_;
     FD meta_fd_;
     std::mutex mutex_;
     SEGMENTID cur_segment_id_;
+    FD cur_segment_fd_;
+    off_t cur_segment_offset_;
+    size_t cur_segment_file_size_;
 };
 
 #endif

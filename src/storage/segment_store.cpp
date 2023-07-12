@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <zlib.h>
 #include <zconf.h>
+
 bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options)
 {
     if (!db_path_.empty())
@@ -74,8 +75,37 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         }
     }
 
-    // todo I: [be careful with index store aligning]open the last file (create new if first time init) and locate offset
+    const std::string file_path = db_path_ + "/" + std::to_string(cur_segment_id_);
+    
+    // create it if not exists and read&write permission for file owner
+    cur_segment_fd_ = open(file_path.c_str(), O_CREAT | O_RDWR, S_IWUSR | S_IREAD);
+    if (cur_segment_fd_ == -1)
+    {
+        // open segment file failed
+        return false;
+    }
 
+    // padding
+    int padding_result = PaddingIfNewFile(cur_segment_fd_, cur_segment_file_size_, options.segmentMaxSize);
+    if (padding_result < 0)
+    {
+        // on error
+        return false;
+    }
+
+    if (padding_result == 1)
+    {
+        // seek to begin
+        int offset = lseek(cur_segment_fd_, 0, SEEK_SET);
+        cur_segment_offset_ = 0;
+        if (offset != 0)
+        {
+            // on error, seek failed
+            return false;
+        }
+    }
+
+     // todo I: [be careful with index store aligning to locate offset]open the last file (create new if first time init) and locate offset
 
     return true;
 }
@@ -89,14 +119,50 @@ bool LogSegmentStore::PathExistsOrCreate(const std::string &path)
         // not exixts and create
         if (mkdir(cpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH /*Read, Write, Execute by owner and others*/) == -1)
         {
-            // create dir failed
+            // on error, create dir failed
             return false;
         }
     }
     else if (!(path_info.st_mode & S_IFDIR))
     {
-        // exists but not directory
+        // on error, exists but not directory
         return false;
     }
     return true;
+}
+
+int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t & fileSize, size_t padding_length)
+{
+    // seek to end
+    fileSize = lseek(fd, 0, SEEK_END);
+    if (fileSize == -1)
+    {
+        // on error, seek failed.
+        return -1;
+    }
+
+    if (fileSize > 0)
+    {
+        // file not empty, no need padding
+        return 0;
+    }
+
+    // padding if file empty (recently created)
+    // seek to last byte and write padding byte
+    fileSize = lseek(fd, padding_length - 1, SEEK_SET);
+    if (fileSize != padding_length - 1)
+    {
+        // on error, padding length not match 
+        return -1;
+    }
+
+    ssize_t write_size = write(fd, "\0", 1);
+    if (write_size != 1)
+    {
+        // on error, write padding failed
+        return -1;
+    }
+
+    fileSize = padding_length;
+    return 1;
 }
