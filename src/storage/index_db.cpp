@@ -29,3 +29,23 @@ bool LogIndexDB::PutLogIndex(const IndexKey &index_key, const LogIndex &log_inde
     leveldb::Status status = leveldb_->Put(leveldb::WriteOptions(), index_key, log_index);
     return status.ok();
 }
+
+bool LogIndexDB::GetLastLogIndex(LogIndex & log_index)
+{
+    auto iter = leveldb_->NewIterator(leveldb::ReadOptions());
+    
+    // iter is invalid before seek
+    iter->SeekToLast();
+
+    // assume that only logindex in this db instance, otherwise iter could be any other entry 
+    // todo II: maybe more cases to consider
+    if (!iter->Valid())
+    {
+        // no indexkey found
+        log_index = "";
+        delete iter;
+        return true;
+    }
+    delete iter;
+    return GetLogIndex(iter->key().ToString(),  log_index);
+}

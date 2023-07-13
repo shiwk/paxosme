@@ -63,10 +63,10 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
 
     // read next crc and check equality with calculation result
     uint32_t read_check_sum = 0;
-    read_len = read(meta_fd_, &read_check_sum, sizeof(uLong));
-    if (read_len == (ssize_t)sizeof(uLong))
+    read_len = read(meta_fd_, &read_check_sum, sizeof(CHECKSUM));
+    if (read_len == (ssize_t)sizeof(CHECKSUM))
     {
-        uLong cal_check_sum = crc32(0, (const Bytef *)(&cur_segment_id_), sizeof(SEGMENTID));
+        CHECKSUM cal_check_sum = crc32(0, (const Bytef *)(&cur_segment_id_), sizeof(SEGMENTID));
 
         if (cal_check_sum != read_check_sum)
         {
@@ -105,7 +105,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         }
     }
 
-     // todo I: [be careful with index store aligning to locate offset]open the last file (create new if first time init) and locate offset
+     // todo I: (maybe in aligning proccessing)[be careful with index store aligning to locate offset]open the last file and locate offset
 
     return true;
 }
@@ -165,4 +165,16 @@ int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t & fileSize, size_t pad
 
     fileSize = padding_length;
     return 1;
+}
+
+void LogSegmentStore::ParseLogIndex(const LogIndex & log_index, FID &file_id, off_t & offset, CHECKSUM &check_sum)
+{
+    memcpy(&file_id, (void *)log_index.c_str(), sizeof(FID));
+    memcpy(&offset, (void *)(log_index.c_str() + sizeof(FID)), sizeof(off_t));
+    memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(FID) + sizeof(off_t)), sizeof(uint32_t));
+}
+
+void LogSegmentStore::ToLogIndex(const FID, const off_t, const CHECKSUM, LogIndex &)
+{
+    // todo I: impl
 }

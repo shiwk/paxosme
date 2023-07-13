@@ -106,11 +106,17 @@ bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, cons
 bool DataBaseLogStorage::AlignIndexWithSegmentStore()
 {
     // reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
-    IndexKey last_index_key;
+    LogIndex log_index;
 
-    bool last_index_key_exists = log_index_db_->GetLastIndexKey(last_index_key);
+    bool last_index_key_exists = log_index_db_->GetLastLogIndex(log_index);
 
-    //todo I: read segment stor from last_index_key
+    if (!last_index_key_exists)
+    {
+        // no index in indexstore, directly return
+        return true;
+    }
+
+    //todo I: read next logindex(s) from segmentstore, and put into indexstore if any 
     
 
     return false;
