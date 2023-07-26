@@ -12,27 +12,30 @@
 
 class LogSegmentStore
 {
-    using FD = int;
-    using FID = uint16_t;
-    using SEGMENTID = int;
-    using CHECKSUM = unsigned long; 
-
 public:
+    using FD = int;
+    using SEGMENT_ID = uint16_t;
+    // using SEGMENT_ID = int;
+    using CHECKSUM = unsigned long; 
+    
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
     bool Read(const LogIndex, IndexKey &, LogEntryValue &);
     bool Append(const LogEntryKey &, const LogEntryValue &, LogIndex &);
+    SEGMENT_ID GetLastSegementId();
     static LogSegmentStore *New();
+
+    static void ParseLogIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
+    static void ToLogIndex(const SEGMENT_ID,const off_t,const CHECKSUM, LogIndex &);
 
 private:
     bool PathExistsOrCreate(const std::string &);
     static int PaddingIfNewFile(const FD, size_t &fileSize, size_t padding_length);
-    static void ParseLogIndex(const LogIndex &, FID &, off_t &, CHECKSUM &);
-    static void ToLogIndex(const FID,const off_t,const CHECKSUM, LogIndex &);
+
 private:
     std::string db_path_;
     FD meta_fd_;
     std::mutex mutex_;
-    SEGMENTID cur_segment_id_;
+    SEGMENT_ID cur_segment_id_;
     FD cur_segment_fd_;
     off_t cur_segment_offset_;
     size_t cur_segment_file_size_;

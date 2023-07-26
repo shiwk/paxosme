@@ -116,9 +116,28 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
         return true;
     }
 
-    //todo I: read next logindex(s) from segmentstore, and put into indexstore if any 
     
+    LogSegmentStore::SEGMENT_ID db_segement_id;
+    off_t offset;
+    LogSegmentStore::CHECKSUM checksum;
+    LogSegmentStore::ParseLogIndex(log_index, db_segement_id, offset, checksum);
+    LogSegmentStore::SEGMENT_ID last_segement_id = log_segment_store_->GetLastSegementId();
 
+    if (last_segement_id < db_segement_id) 
+    {
+        // some chaos happened, log in index_db should not be higher than that in segement store
+        return false;
+    }
+    
+    
+    auto segement_id = db_segement_id;
+    while (true)
+    {   
+        //todo I: replay next segement from segmentstore, and put into indexstore if any exists 
+        // replay offset should always start from zero except the first time, as offset exists for the last log in index_db
+    }
+    
+    
     return false;
 }
 

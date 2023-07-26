@@ -48,16 +48,16 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         return false;
     }
 
-    // read first SEGMENTID as segment id
-    ssize_t read_len = read(meta_fd_, &cur_segment_id_, sizeof(SEGMENTID));
+    // read first SEGMENT_ID as segment id
+    ssize_t read_len = read(meta_fd_, &cur_segment_id_, sizeof(SEGMENT_ID));
     if (read_len == 0)
     {
-        // means first time init if read SEGMENTID empty, set 0 to cur_segment_id_
+        // means first time init if read SEGMENT_ID empty, set 0 to cur_segment_id_
         cur_segment_id_ = 0;
     }
-    else if (read_len != (ssize_t)sizeof(SEGMENTID))
+    else if (read_len != (ssize_t)sizeof(SEGMENT_ID))
     {
-        // read SEGMENTID failed
+        // read SEGMENT_ID failed
         return false;
     }
 
@@ -66,7 +66,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     read_len = read(meta_fd_, &read_check_sum, sizeof(CHECKSUM));
     if (read_len == (ssize_t)sizeof(CHECKSUM))
     {
-        CHECKSUM cal_check_sum = crc32(0, (const Bytef *)(&cur_segment_id_), sizeof(SEGMENTID));
+        CHECKSUM cal_check_sum = crc32(0, (const Bytef *)(&cur_segment_id_), sizeof(SEGMENT_ID));
 
         if (cal_check_sum != read_check_sum)
         {
@@ -167,14 +167,14 @@ int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t & fileSize, size_t pad
     return 1;
 }
 
-void LogSegmentStore::ParseLogIndex(const LogIndex & log_index, FID &file_id, off_t & offset, CHECKSUM &check_sum)
+void LogSegmentStore::ParseLogIndex(const LogIndex & log_index, SEGMENT_ID &segement_id, off_t & offset, CHECKSUM &check_sum)
 {
-    memcpy(&file_id, (void *)log_index.c_str(), sizeof(FID));
-    memcpy(&offset, (void *)(log_index.c_str() + sizeof(FID)), sizeof(off_t));
-    memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(FID) + sizeof(off_t)), sizeof(uint32_t));
+    memcpy(&segement_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
+    memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
+    memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
 }
 
-void LogSegmentStore::ToLogIndex(const FID, const off_t, const CHECKSUM, LogIndex &)
+void LogSegmentStore::ToLogIndex(const SEGMENT_ID fid, const off_t offsize, const CHECKSUM checksum, LogIndex &logIndex)
 {
     // todo I: impl
 }
