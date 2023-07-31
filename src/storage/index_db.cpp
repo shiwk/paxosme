@@ -30,7 +30,7 @@ bool LogIndexDB::PutLogIndex(const IndexKey &index_key, const LogIndex &log_inde
     return status.ok();
 }
 
-bool LogIndexDB::GetLastLogIndex(LogIndex & log_index)
+bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, LogIndex & log_index)
 {
     auto iter = leveldb_->NewIterator(leveldb::ReadOptions());
     
@@ -38,7 +38,7 @@ bool LogIndexDB::GetLastLogIndex(LogIndex & log_index)
     iter->SeekToLast();
 
     // assume that only logindex in this db instance, otherwise iter could be any other entry 
-    // todo II: maybe more cases to consider
+    // todo II: maybe more cases to consider, such as invalid data
     if (!iter->Valid())
     {
         // no indexkey found

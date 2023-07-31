@@ -10,22 +10,24 @@
 #define SEGMENT_STORE_DIR "/segment"
 #define METADATA_FILE "/.metadata"
 
+using SEGMENT_ID = uint32_t;
+// using SEGMENT_ID = int;
+using CHECKSUM = unsigned long;
 class LogSegmentStore
 {
 public:
     using FD = int;
-    using SEGMENT_ID = uint16_t;
-    // using SEGMENT_ID = int;
-    using CHECKSUM = unsigned long; 
-    
+
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
     bool Read(const LogIndex, IndexKey &, LogEntryValue &);
     bool Append(const LogEntryKey &, const LogEntryValue &, LogIndex &);
     SEGMENT_ID GetLastSegementId();
+    bool Replay(const SEGMENT_ID &, off_t &, IndexKey &, LogIndex &);
+
     static LogSegmentStore *New();
 
-    static void ParseLogIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
-    static void ToLogIndex(const SEGMENT_ID,const off_t,const CHECKSUM, LogIndex &);
+    // static void ParseLogIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
+    static void ToLogIndex(const SEGMENT_ID, const off_t, const CHECKSUM, LogIndex &);
 
 private:
     bool PathExistsOrCreate(const std::string &);

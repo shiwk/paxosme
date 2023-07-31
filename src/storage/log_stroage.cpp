@@ -106,38 +106,55 @@ bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, cons
 bool DataBaseLogStorage::AlignIndexWithSegmentStore()
 {
     // reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
-    LogIndex log_index;
-
-    bool last_index_key_exists = log_index_db_->GetLastLogIndex(log_index);
+    LogIndex exist_log_index;
+    IndexKey exist_index_key;
+    bool last_index_key_exists = log_index_db_->GetLastLogIndex(exist_index_key, exist_log_index);
 
     if (!last_index_key_exists)
     {
         // no index in indexstore, directly return
+        // todo II: should consider the case that log exists in the first segment, but not stored in index db
         return true;
     }
 
-    
-    LogSegmentStore::SEGMENT_ID db_segement_id;
-    off_t offset;
-    LogSegmentStore::CHECKSUM checksum;
-    LogSegmentStore::ParseLogIndex(log_index, db_segement_id, offset, checksum);
-    LogSegmentStore::SEGMENT_ID last_segement_id = log_segment_store_->GetLastSegementId();
+    SEGMENT_ID db_segment_id;
+    off_t segment_offset;
+    CHECKSUM checksum;
+    ParseLogIndex(exist_log_index, db_segment_id, segment_offset, checksum);
+    SEGMENT_ID last_segement_id = log_segment_store_->GetLastSegementId();
 
-    if (last_segement_id < db_segement_id) 
+    if (last_segement_id < db_segment_id)
     {
         // some chaos happened, log in index_db should not be higher than that in segement store
         return false;
     }
-    
-    
-    auto segement_id = db_segement_id;
+
+    auto segment_id = db_segment_id;
     while (true)
-    {   
-        //todo I: replay next segement from segmentstore, and put into indexstore if any exists 
-        // replay offset should always start from zero except the first time, as offset exists for the last log in index_db
+    {
+        // todo I: replay next segement from segmentstore, and put into indexstore if any exists
+        //  replay offset should always start from zero except the first time, as offset exists for the last log in index_db
+        LogIndex next_log_index;
+        IndexKey next_index_key;
+        while (log_segment_store_->Replay(segment_id, segment_offset, next_index_key, next_log_index))
+        {
+            log_index_db_->PutLogIndex(next_index_key, next_log_index);
+        }
+
+        if (segment_offset > 0)
+        {
+            // reach end of this segment
+            segment_offset = 0;
+            segment_id += 1;
+            continue;
+        }
+        else 
+        {
+            // segment not exists 
+            break;
+        }
     }
-    
-    
+
     return false;
 }
 
@@ -145,4 +162,11 @@ paxosme::LogStorage *paxosme::LogStorage::New()
 {
     auto logStorage = new DataBaseLogStorage;
     return logStorage;
+}
+
+void DataBaseLogStorage::ParseLogIndex(const LogIndex & log_index, SEGMENT_ID &segment_id, off_t & offset, CHECKSUM &check_sum)
+{
+    memcpy(&segment_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
+    memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
+    memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
 }

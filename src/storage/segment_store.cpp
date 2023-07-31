@@ -167,14 +167,14 @@ int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t & fileSize, size_t pad
     return 1;
 }
 
-void LogSegmentStore::ParseLogIndex(const LogIndex & log_index, SEGMENT_ID &segement_id, off_t & offset, CHECKSUM &check_sum)
-{
-    memcpy(&segement_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
-    memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
-    memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
-}
+// void LogSegmentStore::ParseLogIndex(const LogIndex & log_index, SEGMENT_ID &segement_id, off_t & offset, CHECKSUM &check_sum)
+// {
+//     memcpy(&segement_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
+//     memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
+//     memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
+// }
 
-void LogSegmentStore::ToLogIndex(const SEGMENT_ID fid, const off_t offsize, const CHECKSUM checksum, LogIndex &logIndex)
+void LogSegmentStore::ToLogIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, LogIndex &logIndex)
 {
     // todo I: impl
 }

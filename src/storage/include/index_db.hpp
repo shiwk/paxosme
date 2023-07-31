@@ -14,7 +14,7 @@ public:
     bool GetLogIndex(const IndexKey &, LogIndex &);
     bool PutLogIndex(const IndexKey &, const LogIndex &);
     static LogIndexDB *New();
-    bool GetLastLogIndex(LogIndex &);
+    bool GetLastLogIndex(IndexKey &,LogIndex &);
 private:
     leveldb::DB *leveldb_;
     std::string dbpath_;
