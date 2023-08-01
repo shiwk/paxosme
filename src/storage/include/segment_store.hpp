@@ -30,7 +30,8 @@ public:
     static void ToLogIndex(const SEGMENT_ID, const off_t, const CHECKSUM, LogIndex &);
 
 private:
-    bool PathExistsOrCreate(const std::string &);
+    static bool PathExistsOrCreate(const std::string &);
+    static bool PathExists(const std::string &);
     static int PaddingIfNewFile(const FD, size_t &fileSize, size_t padding_length);
 
 private:

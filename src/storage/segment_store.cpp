@@ -76,7 +76,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     }
 
     const std::string file_path = db_path_ + "/" + std::to_string(cur_segment_id_);
-    
+
     // create it if not exists and read&write permission for file owner
     cur_segment_fd_ = open(file_path.c_str(), O_CREAT | O_RDWR, S_IWUSR | S_IREAD);
     if (cur_segment_fd_ == -1)
@@ -105,9 +105,74 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         }
     }
 
-     // todo I: (maybe in aligning proccessing)[be careful with index store aligning to locate offset]open the last file and locate offset
+    // todo I: (maybe in aligning proccessing)[be careful with index store aligning to locate offset]open the last file and locate offset
 
     return true;
+}
+
+bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexKey &index_key, LogIndex &log_index)
+{
+    const std::string file_path = db_path_ + "/" + std::to_string(segemnt_id);
+
+    if (access(file_path.c_str(), F_OK) == -1)
+    {
+        // segment not exists
+        offset = -1;
+        return false;
+    }
+
+    FD fd = open(file_path.c_str(),
+                 O_RDWR /* creat if not exists and open for read&write */,
+                 S_IREAD | S_IWRITE /* Read, Write by owner */
+    );
+
+    if (fd < 0)
+    {
+        // open failed
+        offset = -1;
+        return false;
+    }
+
+    off_t file_size = lseek(fd, 0, SEEK_END);
+    if (file_size < 0)
+    {
+        // segment file corrupted
+        close(fd);
+        offset = -1;
+        return false;
+    }
+    off_t pos = lseek(fd, offset, SEEK_SET);
+    if (pos == -1)
+    {
+        close(fd);
+        offset = -1;
+        return false;
+    }
+
+    while (true)
+    {
+        int length = 0;
+        // read first length
+        ssize_t read_len = read(fd, (char *)&length, sizeof(int));
+        if (read_len != sizeof(int))
+        {
+            // todo II: means read to the end if read_len == 0, otherwise needs truncate segement(discard the extra data after pos)
+            offset = pos;
+            break;
+        }
+
+        if(length == 0)
+        {
+            // end of the segment, no need to read more
+            offset = pos;
+            break;
+        }
+
+        // todo I: read next [length] bytes from fd
+
+    }
+
+    return false;
 }
 
 bool LogSegmentStore::PathExistsOrCreate(const std::string &path)
@@ -131,7 +196,7 @@ bool LogSegmentStore::PathExistsOrCreate(const std::string &path)
     return true;
 }
 
-int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t & fileSize, size_t padding_length)
+int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t &fileSize, size_t padding_length)
 {
     // seek to end
     fileSize = lseek(fd, 0, SEEK_END);
@@ -152,7 +217,7 @@ int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t & fileSize, size_t pad
     fileSize = lseek(fd, padding_length - 1, SEEK_SET);
     if (fileSize != padding_length - 1)
     {
-        // on error, padding length not match 
+        // on error, padding length not match
         return -1;
     }
 
