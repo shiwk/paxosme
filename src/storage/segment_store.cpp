@@ -19,6 +19,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         1.2 open meta file and get metafile fd
     */
     db_path_ = options.dbPath + SEGMENT_STORE_DIR;
+    index_key_length_ = options.indeKeyLength;
 
     if (!PathExistsOrCreate(db_path_))
     {
@@ -110,7 +111,13 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     return true;
 }
 
-bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexKey &index_key, LogIndex &log_index)
+bool LogSegmentStore::Append(const LogEntryKey &, const LogEntryValue &, SegmentLogIndex &)
+{
+    // todo I: segement append.
+    return false;
+}
+
+bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexKey &index_key, SegmentLogIndex &log_index)
 {
     const std::string file_path = db_path_ + "/" + std::to_string(segemnt_id);
 
@@ -149,30 +156,47 @@ bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexK
         return false;
     }
 
-    while (true)
+
+    int length = 0;
+    // read first length
+    ssize_t read_len = read(fd, (char *)&length, sizeof(int));
+    if (read_len != sizeof(int))
     {
-        int length = 0;
-        // read first length
-        ssize_t read_len = read(fd, (char *)&length, sizeof(int));
-        if (read_len != sizeof(int))
-        {
-            // todo II: means read to the end if read_len == 0, otherwise needs truncate segement(discard the extra data after pos)
-            offset = pos;
-            break;
-        }
-
-        if(length == 0)
-        {
-            // end of the segment, no need to read more
-            offset = pos;
-            break;
-        }
-
-        // todo I: read next [length] bytes from fd
-
+        // todo II: means read to the end if read_len == 0, otherwise needs truncate segment(discard the extra data after pos)
+        offset = pos;
+        close(fd);
+        return false;
     }
 
-    return false;
+    if (length == 0)
+    {
+        // end of the segment, no need to read more
+        offset = pos;
+        close(fd);
+        return false;
+    }
+
+    char index_key_buf[index_key_length_];
+    read_len = read(fd, index_key_buf, index_key_length_);
+
+    if (length != index_key_length_)
+    {
+        // todo II: means read to the end if read_len == 0, otherwise needs truncate segment(discard the extra data after pos)
+        return false;
+    }
+
+    index_key.append(index_key_buf, index_key_length_);
+
+    // todo I: read next [length - index_key_length_] bytes from fd
+    char buffer[length - index_key_length_];
+    read_len = read(fd, buffer, length - index_key_length_);
+
+    uint32_t checksum = crc32(0, (const uint8_t *)buffer, length - index_key_length_);
+
+    close(fd);
+    ToSegmentLogIndex(segemnt_id, offset, checksum, log_index);
+
+    return true;
 }
 
 bool LogSegmentStore::PathExistsOrCreate(const std::string &path)
@@ -239,7 +263,7 @@ int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t &fileSize, size_t padd
 //     memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
 // }
 
-void LogSegmentStore::ToLogIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, LogIndex &logIndex)
+void LogSegmentStore::ToSegmentLogIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentLogIndex &logIndex)
 {
     // todo I: impl
 }

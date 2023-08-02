@@ -18,19 +18,19 @@ bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_
     return true;
 }
 
-bool LogIndexDB::GetLogIndex(const IndexKey & index_key, LogIndex &log_index)
+bool LogIndexDB::GetLogIndex(const IndexKey & index_key, SegmentLogIndex &log_index)
 {
     leveldb::Status status = leveldb_->Get(leveldb::ReadOptions(), index_key, &log_index);
     return status.ok();
 }
 
-bool LogIndexDB::PutLogIndex(const IndexKey &index_key, const LogIndex &log_index)
+bool LogIndexDB::PutLogIndex(const IndexKey &index_key, const SegmentLogIndex &log_index)
 {
     leveldb::Status status = leveldb_->Put(leveldb::WriteOptions(), index_key, log_index);
     return status.ok();
 }
 
-bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, LogIndex & log_index)
+bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, SegmentLogIndex & log_index)
 {
     auto iter = leveldb_->NewIterator(leveldb::ReadOptions());
     

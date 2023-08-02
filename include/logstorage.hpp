@@ -19,6 +19,7 @@ namespace paxosme
         {
             std::string dbPath;
             size_t segmentMaxSize;
+            size_t indeKeyLength;
         };
         static LogStorage *New();
 
