@@ -12,12 +12,6 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         return false;
     }
 
-    // todo I: implement
-    /*
-    1. read metafile
-        1.1 compact meta file path
-        1.2 open meta file and get metafile fd
-    */
     db_path_ = options.dbPath + SEGMENT_STORE_DIR;
     index_key_length_ = options.indeKeyLength;
 
@@ -105,21 +99,50 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
             return false;
         }
     }
+    else
+    {
+        // replay latest segment and get offset
+        off_t offset = 0;
+        bool replay_res = ReplaySegment(cur_segment_id_, offset);
+        cur_segment_offset_ = offset;
+        assert(replay_res && cur_segment_offset_ > 0);
+    }
+    return true;
+}
 
-    // todo I: (maybe in aligning proccessing)[be careful with index store aligning to locate offset]open the last file and locate offset
+bool LogSegmentStore::Append(const LogEntryKey &, const LogEntryValue &, SegmentIndex &)
+{
+    // todo I: segment append.
+    return false;
+}
+
+bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
+{
+    IndexKey next_index_key;
+    SegmentIndex next_log_index;
+    bool replay_res = false;
+    off_t replay_offset = offset;
+
+    do
+    {
+        replay_res = ReplayLog(segment_id, replay_offset, next_index_key, next_log_index);
+    } while (replay_res);
+
+    if (replay_offset < 0)
+    {
+        // replay failed
+        return false;
+    }
+
+    // reach the end of segment
+    offset = replay_offset;
 
     return true;
 }
 
-bool LogSegmentStore::Append(const LogEntryKey &, const LogEntryValue &, SegmentLogIndex &)
+bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, IndexKey &index_key, SegmentIndex &log_index)
 {
-    // todo I: segement append.
-    return false;
-}
-
-bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexKey &index_key, SegmentLogIndex &log_index)
-{
-    const std::string file_path = db_path_ + "/" + std::to_string(segemnt_id);
+    const std::string file_path = db_path_ + "/" + std::to_string(segment_id);
 
     if (access(file_path.c_str(), F_OK) == -1)
     {
@@ -156,7 +179,6 @@ bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexK
         return false;
     }
 
-
     int length = 0;
     // read first length
     ssize_t read_len = read(fd, (char *)&length, sizeof(int));
@@ -187,14 +209,14 @@ bool LogSegmentStore::Replay(const SEGMENT_ID &segemnt_id, off_t &offset, IndexK
 
     index_key.append(index_key_buf, index_key_length_);
 
-    // todo I: read next [length - index_key_length_] bytes from fd
+    // read next [length - index_key_length_] bytes from fd
     char buffer[length - index_key_length_];
     read_len = read(fd, buffer, length - index_key_length_);
 
     uint32_t checksum = crc32(0, (const uint8_t *)buffer, length - index_key_length_);
 
     close(fd);
-    ToSegmentLogIndex(segemnt_id, offset, checksum, log_index);
+    ToSegmentIndex(segment_id, offset, checksum, log_index);
 
     return true;
 }
@@ -256,14 +278,11 @@ int LogSegmentStore::PaddingIfNewFile(const FD fd, size_t &fileSize, size_t padd
     return 1;
 }
 
-// void LogSegmentStore::ParseLogIndex(const LogIndex & log_index, SEGMENT_ID &segement_id, off_t & offset, CHECKSUM &check_sum)
-// {
-//     memcpy(&segement_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
-//     memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
-//     memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
-// }
 
-void LogSegmentStore::ToSegmentLogIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentLogIndex &logIndex)
+void LogSegmentStore::ToSegmentIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentIndex &logIndex)
 {
-    // todo I: impl
+    logIndex = std::string(sizeof(int) + sizeof(int) + sizeof(uint32_t), 0);
+    memcpy((void *)logIndex.c_str(), (char *)&segment_id, sizeof(SEGMENT_ID));
+    memcpy((void *)(logIndex.c_str() + sizeof(SEGMENT_ID)), (char *)&offset, sizeof(off_t));
+    memcpy((void *)(logIndex.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), (char *)&checksum, sizeof(CHECKSUM));
 }

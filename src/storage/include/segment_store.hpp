@@ -19,15 +19,17 @@ public:
     using FD = int;
 
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
-    bool Read(const SegmentLogIndex, IndexKey &, LogEntryValue &);
-    bool Append(const LogEntryKey &, const LogEntryValue &, SegmentLogIndex &);
-    SEGMENT_ID GetLastSegementId();
-    bool Replay(const SEGMENT_ID &, off_t &, IndexKey &, SegmentLogIndex &);
+    bool Read(const SegmentIndex, IndexKey &, LogEntryValue &);
+    bool Append(const LogEntryKey &, const LogEntryValue &, SegmentIndex &);
+    SEGMENT_ID GetLastSegmentId();
+    bool ReplaySegment(const SEGMENT_ID &, off_t &);
 
     static LogSegmentStore *New();
 
     // static void ParseLogIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
-    static void ToSegmentLogIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentLogIndex &);
+    static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
+    bool ReplayLog(const SEGMENT_ID &, off_t &, IndexKey &, SegmentIndex &);
+
 
 private:
     static bool PathExistsOrCreate(const std::string &);

@@ -4,7 +4,7 @@
 #include <leveldb/db.h>
 #include "logstorage.hpp"
 
-using SegmentLogIndex = std::string;
+using SegmentIndex = std::string;
 using IndexKey = std::string;
 #define INDEX_KEY_LENGTH sizeof(uint64_t)
 
@@ -12,10 +12,10 @@ class LogIndexDB
 {
 public:
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
-    bool GetLogIndex(const IndexKey &, SegmentLogIndex &);
-    bool PutLogIndex(const IndexKey &, const SegmentLogIndex &);
+    bool GetSegmentIndex(const IndexKey &, SegmentIndex &);
+    bool PutSegmentIndex(const IndexKey &, const SegmentIndex &);
     static LogIndexDB *New();
-    bool GetLastLogIndex(IndexKey &,SegmentLogIndex &);
+    bool GetLastLogIndex(IndexKey &,SegmentIndex &);
 private:
     leveldb::DB *leveldb_;
     std::string dbpath_;

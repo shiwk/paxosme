@@ -18,19 +18,19 @@ bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_
     return true;
 }
 
-bool LogIndexDB::GetLogIndex(const IndexKey & index_key, SegmentLogIndex &log_index)
+bool LogIndexDB::GetSegmentIndex(const IndexKey & index_key, SegmentIndex &log_index)
 {
     leveldb::Status status = leveldb_->Get(leveldb::ReadOptions(), index_key, &log_index);
     return status.ok();
 }
 
-bool LogIndexDB::PutLogIndex(const IndexKey &index_key, const SegmentLogIndex &log_index)
+bool LogIndexDB::PutSegmentIndex(const IndexKey &index_key, const SegmentIndex &log_index)
 {
     leveldb::Status status = leveldb_->Put(leveldb::WriteOptions(), index_key, log_index);
     return status.ok();
 }
 
-bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, SegmentLogIndex & log_index)
+bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, SegmentIndex & log_index)
 {
     auto iter = leveldb_->NewIterator(leveldb::ReadOptions());
     
@@ -47,5 +47,5 @@ bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, SegmentLogIndex & log_inde
         return true;
     }
     delete iter;
-    return GetLogIndex(iter->key().ToString(),  log_index);
+    return GetSegmentIndex(iter->key().ToString(),  log_index);
 }

@@ -34,7 +34,7 @@ bool DataBaseLogStorage::Put(const LogEntryKey &key, const LogEntryValue &value)
     2. put log index
     */
 
-    SegmentLogIndex log_index;
+    SegmentIndex log_index;
     bool has_log_index = GenerateLogIndex(key, value, log_index);
 
     if (!has_log_index)
@@ -43,7 +43,7 @@ bool DataBaseLogStorage::Put(const LogEntryKey &key, const LogEntryValue &value)
     }
 
     IndexKey index_key = GenerateIndexKey(key);
-    bool write_log_index = log_index_db_->PutLogIndex(index_key, log_index);
+    bool write_log_index = log_index_db_->PutSegmentIndex(index_key, log_index);
     if (!write_log_index)
     {
         return false;
@@ -65,8 +65,8 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     IndexKey index_key = GenerateIndexKey(key);
 
     // get log index
-    SegmentLogIndex log_index;
-    bool res = log_index_db_->GetLogIndex(index_key, log_index);
+    SegmentIndex log_index;
+    bool res = log_index_db_->GetSegmentIndex(index_key, log_index);
     if (!res)
     {
         // get log inde failed
@@ -92,7 +92,7 @@ IndexKey DataBaseLogStorage ::GenerateIndexKey(const LogEntryKey &log_entry_key)
     return index_key;
 }
 
-bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, const LogEntryValue &log_entry_value, SegmentLogIndex &log_index)
+bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, const LogEntryValue &log_entry_value, SegmentIndex &log_index)
 {
     bool append_res = log_segment_store_->Append(log_entry_key, log_entry_value, log_index);
     if (append_res)
@@ -106,7 +106,7 @@ bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, cons
 bool DataBaseLogStorage::AlignIndexWithSegmentStore()
 {
     // reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
-    SegmentLogIndex exist_log_index;
+    SegmentIndex exist_log_index;
     IndexKey exist_index_key;
     bool last_index_key_exists = log_index_db_->GetLastLogIndex(exist_index_key, exist_log_index);
 
@@ -121,24 +121,23 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
     off_t segment_offset;
     CHECKSUM checksum;
     ParseLogIndex(exist_log_index, db_segment_id, segment_offset, checksum);
-    SEGMENT_ID last_segement_id = log_segment_store_->GetLastSegementId();
+    SEGMENT_ID last_segment_id = log_segment_store_->GetLastSegmentId();
 
-    if (last_segement_id < db_segment_id)
+    if (last_segment_id < db_segment_id)
     {
-        // some chaos happened, log in index_db should not be higher than that in segement store
+        // some chaos happened, log in index_db should not be higher than that in segment store
         return false;
     }
 
     auto segment_id = db_segment_id;
     while (true)
     {
-        // todo I: replay next segement from segmentstore, and put into indexstore if any exists
-        //  replay offset should always start from zero except the first time, as offset exists for the last log in index_db
-        SegmentLogIndex next_log_index;
+        // replay offset should always start from zero except the first time, as offset exists for the last log in index_db
+        SegmentIndex next_log_index;
         IndexKey next_index_key;
-        while (log_segment_store_->Replay(segment_id, segment_offset, next_index_key, next_log_index))
+        while (log_segment_store_->ReplayLog(segment_id, segment_offset, next_index_key, next_log_index))
         {
-            log_index_db_->PutLogIndex(next_index_key, next_log_index);
+            log_index_db_->PutSegmentIndex(next_index_key, next_log_index);
         }
 
         if (segment_offset > 0)
@@ -148,14 +147,15 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
             segment_id += 1;
             continue;
         }
-        else 
+        else
         {
-            // segment not exists 
+            // segment not exists
             break;
         }
+
+        next_index_key += 1;
     }
 
-    // todo I: how to pos "now_offset" of segment store for next append()
 
     return true;
 }
@@ -166,7 +166,7 @@ paxosme::LogStorage *paxosme::LogStorage::New()
     return logStorage;
 }
 
-void DataBaseLogStorage::ParseLogIndex(const SegmentLogIndex & log_index, SEGMENT_ID &segment_id, off_t & offset, CHECKSUM &check_sum)
+void DataBaseLogStorage::ParseLogIndex(const SegmentIndex &log_index, SEGMENT_ID &segment_id, off_t &offset, CHECKSUM &check_sum)
 {
     memcpy(&segment_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
     memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
