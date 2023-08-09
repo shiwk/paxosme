@@ -6,7 +6,7 @@
 
 using SegmentIndex = std::string;
 using IndexKey = std::string;
-#define INDEX_KEY_LENGTH sizeof(uint64_t)
+// #define INDEX_KEY_LENGTH sizeof(uint64_t)
 
 class LogIndexDB
 {

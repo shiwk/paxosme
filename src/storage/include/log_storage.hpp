@@ -16,8 +16,6 @@ public:
 
     bool Get(const LogEntryKey &, LogEntryValue &) override;
 
-    static void ParseLogIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
-
     static IndexKey GenerateIndexKey(const LogEntryKey &);
 
 private:

@@ -120,7 +120,7 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
     SEGMENT_ID db_segment_id;
     off_t segment_offset;
     CHECKSUM checksum;
-    ParseLogIndex(exist_log_index, db_segment_id, segment_offset, checksum);
+    LogSegmentStore::ParseLogIndex(exist_log_index, db_segment_id, segment_offset, checksum);
     SEGMENT_ID last_segment_id = log_segment_store_->GetLastSegmentId();
 
     if (last_segment_id < db_segment_id)
@@ -166,9 +166,3 @@ paxosme::LogStorage *paxosme::LogStorage::New()
     return logStorage;
 }
 
-void DataBaseLogStorage::ParseLogIndex(const SegmentIndex &log_index, SEGMENT_ID &segment_id, off_t &offset, CHECKSUM &check_sum)
-{
-    memcpy(&segment_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
-    memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
-    memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
-}

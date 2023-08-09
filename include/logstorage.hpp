@@ -9,6 +9,7 @@
 
 using LogEntryValue = std::string;
 using LogEntryKey = std::string;
+#define LOG_ENTRY_KEY_LENGTH sizeof(uint64_t)
 
 namespace paxosme
 {
@@ -19,7 +20,7 @@ namespace paxosme
         {
             std::string dbPath;
             size_t segmentMaxSize;
-            size_t indeKeyLength;
+            size_t indexKeyLength = LOG_ENTRY_KEY_LENGTH;
         };
         static LogStorage *New();
 
