@@ -4,38 +4,37 @@
 #define SEGMENT_STORE_HPP
 
 #include "index_db.hpp"
-#include "logstorage.hpp"
+// #include "logstorage.hpp"
 #include <mutex>
 
 #define SEGMENT_STORE_DIR "/segment"
 #define METADATA_FILE "/.metadata"
 
 using SEGMENT_ID = int32_t;
-// using SEGMENT_ID = int;
 using CHECKSUM = unsigned long;
+using SegmentIndex = std::string;
+
 class LogSegmentStore
 {
 public:
     using FD = int;
 
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
-    bool Read(const SegmentIndex, IndexKey &, LogEntryValue &);
-    bool Append(const LogEntryKey &, const LogEntryValue &, SegmentIndex &);
+    bool Read(const SegmentIndex & segment_index, std::string &key_in_segment, std::string &value_in_segment);
+    bool Append(const std::string &, const std::string &, SegmentIndex &);
     SEGMENT_ID GetLastSegmentId();
     bool ReplaySegment(const SEGMENT_ID &, off_t &);
-
     static LogSegmentStore *New();
 
     // static void ParseLogIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
     static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
-    bool ReplayLog(const SEGMENT_ID &, off_t &, IndexKey &, SegmentIndex &);
+    bool ReplayLog(const SEGMENT_ID &, off_t &, SegmentIndex &, SegmentIndex &);
     static void ParseLogIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
 
 private:
     static bool DirExistsOrCreate(const std::string &);
     static bool PathExists(const std::string &);
     int PaddingIfNewSegment();
-
     bool NewSegment(const size_t &toWriteSize);
     bool UpdateMetadata();
     bool OpenSegment(const SEGMENT_ID&, FD &);

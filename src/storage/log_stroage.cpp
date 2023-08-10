@@ -14,7 +14,7 @@ bool DataBaseLogStorage::Init(const LogStorageOptions &log_storage_options)
         return false;
     }
 
-    if (!log_segment_store_ || !log_segment_store_->Init(log_storage_options))
+    if (!segment_store_ || !segment_store_->Init(log_storage_options))
     {
         return false;
     }
@@ -35,15 +35,15 @@ bool DataBaseLogStorage::Put(const LogEntryKey &key, const LogEntryValue &value)
     */
 
     SegmentIndex log_index;
-    bool has_log_index = GenerateLogIndex(key, value, log_index);
+    bool has_log_index = segment_store_->Append(key, value, log_index);
 
     if (!has_log_index)
     {
         return false;
     }
 
-    IndexKey index_key = GenerateIndexKey(key);
-    bool write_log_index = log_index_db_->PutSegmentIndex(index_key, log_index);
+    std::string index_key = ToIndexKey(key);
+    bool write_log_index = log_index_db_->PutIndex(index_key, log_index);
     if (!write_log_index)
     {
         return false;
@@ -62,11 +62,11 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     */
 
     // log_entry_key -> log_index_key
-    IndexKey index_key = GenerateIndexKey(key);
+    std::string index_key = ToIndexKey(key);
 
     // get log index
-    SegmentIndex log_index;
-    bool res = log_index_db_->GetSegmentIndex(index_key, log_index);
+    SegmentIndex segment_index;
+    bool res = log_index_db_->GetIndex(index_key, segment_index);
     if (!res)
     {
         // get log inde failed
@@ -74,41 +74,35 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     }
 
     // read segment with offset
-    IndexKey key_from_segment;
-    bool read_res = log_segment_store_->Read(log_index, key_from_segment, value);
+    std::string key_in_segment;
+    bool read_res = segment_store_->Read(segment_index, key_in_segment, value);
 
-    if (!read_res || key_from_segment != log_index)
+    if (!read_res)
     {
         // read failed
         return false;
     }
 
-    return false;
-}
-
-IndexKey DataBaseLogStorage ::GenerateIndexKey(const LogEntryKey &log_entry_key)
-{
-    IndexKey index_key(log_entry_key);
-    return index_key;
-}
-
-bool DataBaseLogStorage::GenerateLogIndex(const LogEntryKey &log_entry_key, const LogEntryValue &log_entry_value, SegmentIndex &log_index)
-{
-    bool append_res = log_segment_store_->Append(log_entry_key, log_entry_value, log_index);
-    if (append_res)
+    if (key_in_segment != key)
     {
-        return true;
+        // key not matched
+        return false;
     }
 
-    return false;
+    return true;
+}
+
+std::string DataBaseLogStorage ::ToIndexKey(const LogEntryKey &log_entry_key)
+{
+    // TBD
+    return log_entry_key;
 }
 
 bool DataBaseLogStorage::AlignIndexWithSegmentStore()
 {
     // reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
     SegmentIndex exist_log_index;
-    IndexKey exist_index_key;
-    bool last_index_key_exists = log_index_db_->GetLastLogIndex(exist_index_key, exist_log_index);
+    bool last_index_key_exists = log_index_db_->GetLastIndex(exist_log_index);
 
     if (!last_index_key_exists)
     {
@@ -121,7 +115,7 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
     off_t segment_offset;
     CHECKSUM checksum;
     LogSegmentStore::ParseLogIndex(exist_log_index, db_segment_id, segment_offset, checksum);
-    SEGMENT_ID last_segment_id = log_segment_store_->GetLastSegmentId();
+    SEGMENT_ID last_segment_id = segment_store_->GetLastSegmentId();
 
     if (last_segment_id < db_segment_id)
     {
@@ -134,10 +128,10 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
     {
         // replay offset should always start from zero except the first time, as offset exists for the last log in index_db
         SegmentIndex next_log_index;
-        IndexKey next_index_key;
-        while (log_segment_store_->ReplayLog(segment_id, segment_offset, next_index_key, next_log_index))
+        std::string next_index_key;
+        while (segment_store_->ReplayLog(segment_id, segment_offset, next_index_key, next_log_index))
         {
-            log_index_db_->PutSegmentIndex(next_index_key, next_log_index);
+            log_index_db_->PutIndex(next_index_key, next_log_index);
         }
 
         if (segment_offset > 0)

@@ -16,13 +16,13 @@ public:
 
     bool Get(const LogEntryKey &, LogEntryValue &) override;
 
-    static IndexKey GenerateIndexKey(const LogEntryKey &);
+private:
+    static SegmentIndex ToIndexKey(const LogEntryKey &);
 
 private:
-    bool GenerateLogIndex(const LogEntryKey &, const LogEntryValue &, SegmentIndex &);
     bool AlignIndexWithSegmentStore();
     std::string dbpath_;
     LogIndexDB *log_index_db_;
-    LogSegmentStore *log_segment_store_;
+    LogSegmentStore *segment_store_;
 };
 #endif

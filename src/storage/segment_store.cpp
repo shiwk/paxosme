@@ -113,7 +113,13 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     return true;
 }
 
-bool LogSegmentStore::Append(const LogEntryKey &log_entry_key, const LogEntryValue &log_entry_value, SegmentIndex &segment_index)
+bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &key_in_segment, std::string &value_in_segment)
+{
+    // todo I: implement
+    return false;
+}
+
+bool LogSegmentStore::Append(const std::string &key, const std::string &value, SegmentIndex &segment_index)
 {
     std::unique_lock<std::mutex> lock(mutex_);
 
@@ -122,7 +128,7 @@ bool LogSegmentStore::Append(const LogEntryKey &log_entry_key, const LogEntryVal
     off_t offset;
 
     // NewSegment will set the new segement and offset pos if need
-    const size_t value_size = log_entry_value.size();
+    const size_t value_size = value.size();
     if (cur_segment_offset_ + value_size > cur_segment_file_size_)
     {
         // close current segment
@@ -142,8 +148,8 @@ bool LogSegmentStore::Append(const LogEntryKey &log_entry_key, const LogEntryVal
     const size_t buffer_length = sizeof(size_t) + key_value_size;
     char buffer[buffer_length];
     memcpy(buffer, &key_value_size, sizeof(size_t));
-    memcpy(buffer + sizeof(size_t), log_entry_key.c_str(), index_key_length_);
-    memcpy(buffer + sizeof(size_t) + index_key_length_, log_entry_value.c_str(), value_size);
+    memcpy(buffer + sizeof(size_t), key.c_str(), index_key_length_);
+    memcpy(buffer + sizeof(size_t) + index_key_length_, value.c_str(), value_size);
 
     size_t write_length = write(cur_segment_fd_, buffer, buffer_length);
     
@@ -162,7 +168,7 @@ bool LogSegmentStore::Append(const LogEntryKey &log_entry_key, const LogEntryVal
 
 bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
 {
-    IndexKey next_index_key;
+    SegmentIndex next_index_key;
     SegmentIndex next_log_index;
     bool replay_res = false;
     off_t replay_offset = offset;
@@ -184,7 +190,7 @@ bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
     return true;
 }
 
-bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, IndexKey &index_key, SegmentIndex &log_index)
+bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, SegmentIndex &index_key, SegmentIndex &log_index)
 {
     const std::string file_path = ToSegmentPath(segment_id);
 

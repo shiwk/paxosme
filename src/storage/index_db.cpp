@@ -18,34 +18,34 @@ bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_
     return true;
 }
 
-bool LogIndexDB::GetSegmentIndex(const IndexKey & index_key, SegmentIndex &log_index)
+bool LogIndexDB::GetIndex(const std::string &idx_key, std::string &idx_val)
 {
-    leveldb::Status status = leveldb_->Get(leveldb::ReadOptions(), index_key, &log_index);
+    leveldb::Status status = leveldb_->Get(leveldb::ReadOptions(), idx_key, &idx_val);
     return status.ok();
 }
 
-bool LogIndexDB::PutSegmentIndex(const IndexKey &index_key, const SegmentIndex &log_index)
+bool LogIndexDB::PutIndex(const std::string &idx_key, const std::string &idx_val)
 {
-    leveldb::Status status = leveldb_->Put(leveldb::WriteOptions(), index_key, log_index);
+    leveldb::Status status = leveldb_->Put(leveldb::WriteOptions(), idx_key, idx_val);
     return status.ok();
-}
+} 
 
-bool LogIndexDB::GetLastLogIndex(IndexKey &index_key, SegmentIndex & log_index)
+bool LogIndexDB::GetLastIndex(std::string &idx_val)
 {
     auto iter = leveldb_->NewIterator(leveldb::ReadOptions());
-    
+
     // iter is invalid before seek
     iter->SeekToLast();
 
-    // assume that only logindex in this db instance, otherwise iter could be any other entry 
+    // assume that only logindex in this db instance, otherwise iter could be any other entry
     // todo II: maybe more cases to consider, such as invalid data
     if (!iter->Valid())
     {
         // no indexkey found
-        log_index = "";
+        idx_val = "";
         delete iter;
         return true;
     }
     delete iter;
-    return GetSegmentIndex(iter->key().ToString(),  log_index);
+    return GetIndex(iter->key().ToString(), idx_val);
 }
