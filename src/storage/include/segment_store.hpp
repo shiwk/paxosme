@@ -30,7 +30,6 @@ public:
     static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
     bool ReplayLog(const SEGMENT_ID &, off_t &, IndexKey &, SegmentIndex &);
     static void ParseLogIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
-    static void ToLogIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
 
 private:
     static bool DirExistsOrCreate(const std::string &);

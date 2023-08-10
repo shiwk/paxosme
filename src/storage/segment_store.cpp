@@ -125,6 +125,8 @@ bool LogSegmentStore::Append(const LogEntryKey &log_entry_key, const LogEntryVal
     const size_t value_size = log_entry_value.size();
     if (cur_segment_offset_ + value_size > cur_segment_file_size_)
     {
+        // close current segment
+        close(cur_segment_fd_);
         bool ready = NewSegment(value_size);
 
         if (!ready)
@@ -153,8 +155,8 @@ bool LogSegmentStore::Append(const LogEntryKey &log_entry_key, const LogEntryVal
     
     cur_segment_offset_ += buffer_length;
     uint32_t checksum = crc32(0, (const uint8_t *)(buffer + sizeof(size_t)), key_value_size);
-    // todo I: implement
-    
+    ToSegmentIndex(cur_segment_id_, cur_segment_offset_, checksum, segment_index);
+
     return true;
 }
 
@@ -343,8 +345,6 @@ int LogSegmentStore::PaddingIfNewSegment()
 
 bool LogSegmentStore::NewSegment(const size_t &sizeToWrite)
 {
-    // close current segment
-    close(cur_segment_fd_);
     bool st = UpdateMetadata();
     if (!st)
     {
@@ -452,9 +452,4 @@ void LogSegmentStore::ParseLogIndex(const SegmentIndex &log_index, SEGMENT_ID &s
     memcpy(&segment_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
     memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));
     memcpy(&check_sum, (void *)(log_index.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), sizeof(uint32_t));
-}
-
-void LogSegmentStore::ToLogIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &)
-{
-    //todo I: implement
 }
