@@ -61,9 +61,9 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     read_len = read(meta_fd_, &read_check_sum, sizeof(CHECKSUM));
     if (read_len == (ssize_t)sizeof(CHECKSUM))
     {
-        CHECKSUM cal_check_sum = crc32(0, (const Bytef *)(&cur_segment_id_), sizeof(SEGMENT_ID));
+        CHECKSUM cal_checksum = crc32(0, (const Bytef *)(&cur_segment_id_), sizeof(SEGMENT_ID));
 
-        if (cal_check_sum != read_check_sum)
+        if (cal_checksum != read_check_sum)
         {
             // checksum not match
             return false;
@@ -113,10 +113,75 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     return true;
 }
 
-bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &key_in_segment, std::string &value_in_segment)
+bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index_key, std::string &value_in_segment)
 {
-    // todo I: implement
-    return false;
+    std::unique_lock<std::mutex> lock(mutex_);
+    SEGMENT_ID segment_id;
+    off_t offset;
+    CHECKSUM parse_checksum;
+    ParseSegmentIndex(segment_index, segment_id, offset, parse_checksum);
+
+    
+    FD segment_fd;
+    bool st = OpenSegment(segment_id, segment_fd);
+    if (!st)
+    {
+        // on err, open segment failed
+        return false;
+    }
+
+    if (!lseek(segment_fd, offset, SEEK_SET))
+    {
+        // on err, seek failed
+        return false; 
+    }
+
+    
+    size_t kv_size;
+    // todo II: read file with c++-style
+    size_t read_len = read(segment_fd, &kv_size, sizeof(size_t));
+    if (read_len != sizeof(size_t))
+    {
+        // on err, read kv_size failed
+        return false;
+    }
+
+    std::string key_in_segment(index_key_length_, '\0');
+    read_len = read(segment_fd, &key_in_segment, index_key_length_);
+    
+    if (read_len != index_key_length_)
+    {
+        // on err, read key_in_segment failed
+        return false;
+    }
+
+    if (key_in_segment != index_key)
+    {
+        // on err, key_in_segment not match
+        return false;
+    }
+
+    value_in_segment.clear();
+    size_t value_len = kv_size - index_key_length_;
+    value_in_segment.resize(value_len);
+
+    read_len = read(segment_fd, &value_in_segment, value_len);
+
+    if (read_len != value_len)
+    {
+        // on err, read value failed
+        return false;
+    }
+
+    CHECKSUM cal_checksum = crc32(0, (const uint8_t *)(&value_in_segment), value_len);
+
+    if (cal_checksum != parse_checksum)
+    {
+        // on err, calculated checksum not matched
+        return false;
+    }
+
+    return true;
 }
 
 bool LogSegmentStore::Append(const std::string &key, const std::string &value, SegmentIndex &segment_index)
@@ -142,7 +207,6 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
         }
     }
     
-
     const size_t key_value_size = index_key_length_ + value_size;
     // length + key_value_size
     const size_t buffer_length = sizeof(size_t) + key_value_size;
@@ -453,7 +517,7 @@ void LogSegmentStore::ToSegmentIndex(const SEGMENT_ID segment_id, const off_t of
     memcpy((void *)(logIndex.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), (char *)&checksum, sizeof(CHECKSUM));
 }
 
-void LogSegmentStore::ParseLogIndex(const SegmentIndex &log_index, SEGMENT_ID &segment_id, off_t &offset, CHECKSUM &check_sum)
+void LogSegmentStore::ParseSegmentIndex(const SegmentIndex &log_index, SEGMENT_ID &segment_id, off_t &offset, CHECKSUM &check_sum)
 {
     memcpy(&segment_id, (void *)log_index.c_str(), sizeof(SEGMENT_ID));
     memcpy(&offset, (void *)(log_index.c_str() + sizeof(SEGMENT_ID)), sizeof(off_t));

@@ -26,10 +26,10 @@ public:
     bool ReplaySegment(const SEGMENT_ID &, off_t &);
     static LogSegmentStore *New();
 
-    // static void ParseLogIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
+    // static void ParseSegmentIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
     static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
     bool ReplayLog(const SEGMENT_ID &, off_t &, SegmentIndex &, SegmentIndex &);
-    static void ParseLogIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
+    static void ParseSegmentIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
 
 private:
     static bool DirExistsOrCreate(const std::string &);

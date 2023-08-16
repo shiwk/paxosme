@@ -69,7 +69,7 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     bool res = log_index_db_->GetIndex(index_key, segment_index);
     if (!res)
     {
-        // get log inde failed
+        // on err, get log inde failed
         return false;
     }
 
@@ -79,13 +79,12 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
 
     if (!read_res)
     {
-        // read failed
         return false;
     }
 
     if (key_in_segment != key)
     {
-        // key not matched
+        // on err, key not matched
         return false;
     }
 
@@ -94,7 +93,7 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
 
 std::string DataBaseLogStorage ::ToIndexKey(const LogEntryKey &log_entry_key)
 {
-    // TBD
+    // todo II: TBD
     return log_entry_key;
 }
 
@@ -114,7 +113,7 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
     SEGMENT_ID db_segment_id;
     off_t segment_offset;
     CHECKSUM checksum;
-    LogSegmentStore::ParseLogIndex(exist_log_index, db_segment_id, segment_offset, checksum);
+    LogSegmentStore::ParseSegmentIndex(exist_log_index, db_segment_id, segment_offset, checksum);
     SEGMENT_ID last_segment_id = segment_store_->GetLastSegmentId();
 
     if (last_segment_id < db_segment_id)
