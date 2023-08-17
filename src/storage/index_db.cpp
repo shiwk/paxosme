@@ -28,7 +28,13 @@ bool LogIndexDB::PutIndex(const std::string &idx_key, const std::string &idx_val
 {
     leveldb::Status status = leveldb_->Put(leveldb::WriteOptions(), idx_key, idx_val);
     return status.ok();
-} 
+}
+
+bool LogIndexDB::DelIndex(const std::string &idx_key)
+{
+    leveldb::Status status = leveldb_->Delete(leveldb::WriteOptions(), idx_key);
+    return status.ok();
+}
 
 bool LogIndexDB::GetLastIndex(std::string &idx_val)
 {

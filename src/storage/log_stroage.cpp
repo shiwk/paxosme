@@ -91,6 +91,38 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     return true;
 }
 
+bool DataBaseLogStorage::Delete(const LogEntryKey &log_entry_key)
+{
+    std::string idx_key = ToIndexKey(log_entry_key);
+    SegmentIndex segment_index;
+    bool st = log_index_db_->GetIndex(idx_key, segment_index);
+
+    if(!st)
+    {
+        //on err, index not exists
+        return false;
+    }
+
+    st = segment_store_->Remove(segment_index);
+    
+    if(!st)
+    {
+        //on err, segment remove failed
+        return false;
+    }
+
+    
+    st = log_index_db_->DelIndex(idx_key);
+    if(!st)
+    {
+        //on err, index delete failed
+        return false;
+    }
+    
+
+    return true;
+}
+
 std::string DataBaseLogStorage ::ToIndexKey(const LogEntryKey &log_entry_key)
 {
     // todo II: TBD

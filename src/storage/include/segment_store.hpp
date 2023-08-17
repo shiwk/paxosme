@@ -22,6 +22,7 @@ public:
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
     bool Read(const SegmentIndex & segment_index, std::string &key_in_segment, std::string &value_in_segment);
     bool Append(const std::string &, const std::string &, SegmentIndex &);
+    bool Remove(const SegmentIndex &);
     SEGMENT_ID GetLastSegmentId();
     bool ReplaySegment(const SEGMENT_ID &, off_t &);
     static LogSegmentStore *New();

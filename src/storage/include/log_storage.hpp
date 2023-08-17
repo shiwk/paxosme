@@ -16,6 +16,8 @@ public:
 
     bool Get(const LogEntryKey &, LogEntryValue &) override;
 
+    bool Delete(const LogEntryKey &) override;
+
 private:
     static SegmentIndex ToIndexKey(const LogEntryKey &);
 

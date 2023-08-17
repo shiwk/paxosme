@@ -44,6 +44,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     }
 
     // read first SEGMENT_ID as segment id
+    // todo II: read file with c++ style
     ssize_t read_len = read(meta_fd_, &cur_segment_id_, sizeof(SEGMENT_ID));
     if (read_len == 0)
     {
@@ -138,7 +139,7 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
 
     
     size_t kv_size;
-    // todo II: read file with c++-style
+    // todo II: read file with c++ style
     size_t read_len = read(segment_fd, &kv_size, sizeof(size_t));
     if (read_len != sizeof(size_t))
     {
@@ -215,6 +216,7 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     memcpy(buffer + sizeof(size_t), key.c_str(), index_key_length_);
     memcpy(buffer + sizeof(size_t) + index_key_length_, value.c_str(), value_size);
 
+    // todo II: read file with c++ style
     size_t write_length = write(cur_segment_fd_, buffer, buffer_length);
     
     if (write_length != buffer_length)
@@ -228,6 +230,12 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     ToSegmentIndex(cur_segment_id_, cur_segment_offset_, checksum, segment_index);
 
     return true;
+}
+
+bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
+{
+    // todo I: implement
+    return false;
 }
 
 bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
@@ -295,6 +303,7 @@ bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, Seg
 
     size_t length = 0;
     // read first length
+    // todo II: read file with c++ style
     ssize_t read_len = read(fd, (char *)&length, sizeof(size_t));
     if (read_len != sizeof(int))
     {

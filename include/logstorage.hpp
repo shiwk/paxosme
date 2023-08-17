@@ -29,6 +29,8 @@ namespace paxosme
         virtual bool Put(const LogEntryKey &, const LogEntryValue &) = 0;
 
         virtual bool Get(const LogEntryKey &, LogEntryValue &) = 0;
+
+        virtual bool Delete(const LogEntryKey &) = 0;
     };
 
 }
