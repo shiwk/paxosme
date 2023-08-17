@@ -40,6 +40,7 @@ private:
     bool UpdateMetadata();
     bool OpenSegment(const SEGMENT_ID&, FD &);
     const std::string ToSegmentPath(const SEGMENT_ID&);
+    bool DeleteOldSegments(const SEGMENT_ID);
 
 private:
     std::string db_path_;

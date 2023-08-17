@@ -198,6 +198,7 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     if (cur_segment_offset_ + value_size > cur_segment_file_size_)
     {
         // close current segment
+        // todo I: truncate current segment
         close(cur_segment_fd_);
         bool ready = NewSegment(value_size);
 
@@ -234,7 +235,50 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
 
 bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
 {
-    // todo I: implement
+    SEGMENT_ID segment_id;
+    off_t offset;
+    CHECKSUM parse_checksum;
+    ParseSegmentIndex(segment_index, segment_id, offset, parse_checksum);
+
+    FD segment_fd;
+    bool st = OpenSegment(segment_id, segment_fd);
+    if (!st)
+    {
+        // on err, open segment failed
+        return false;
+    }
+    
+
+    if (!lseek(segment_fd, offset, SEEK_SET))
+    {
+        // on err, seek failed
+        close(segment_fd);
+        return false; 
+    }
+
+    size_t kv_size;
+    // todo II: read file with c++ style
+    size_t read_len = read(segment_fd, &kv_size, sizeof(size_t));
+    if (read_len != sizeof(size_t))
+    {
+        // on err, read kv_size failed
+        close(segment_fd);
+        return false;
+    }
+
+    off_t next = offset + sizeof(size_t) + kv_size;
+    off_t end = lseek(segment_fd, 0, SEEK_END);
+    if (next != end)
+    {
+        // not the last one log
+        close(segment_fd);
+        return true; 
+    }
+
+    close(segment_fd);
+    // delete this segment as the last one log to be removed
+    DeleteOldSegments(segment_id);
+
     return false;
 }
 
@@ -516,6 +560,12 @@ const std::string LogSegmentStore::ToSegmentPath(const SEGMENT_ID &segment_id)
 {
     std::string path = db_path_ + "/" + std::to_string(segment_id);
     return path;
+}
+
+bool LogSegmentStore::DeleteOldSegments(const SEGMENT_ID segment_id)
+{
+    // todo I: implement delete "all" segments before segment_id
+    return false;
 }
 
 void LogSegmentStore::ToSegmentIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentIndex &logIndex)
