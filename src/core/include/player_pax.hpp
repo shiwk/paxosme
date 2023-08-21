@@ -11,7 +11,7 @@
 #include "config.hpp"
 #include "storage_pax.hpp"
 #include "communicate_pax.hpp"
-#include "schedule.hpp"
+#include <event.hpp>
 #include <base.hpp>
 
 namespace paxosme {
@@ -62,7 +62,6 @@ namespace paxosme {
     private:
         PaxCommunicator *communicator_;
         PaxStore *storage_;
-        Schedule *schedule_;
         PaxosOptions *config_;
     };
 }

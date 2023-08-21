@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <zlib.h>
 #include <zconf.h>
+#include <schedule.hpp>
 
 bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options)
 {
@@ -268,18 +269,21 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
 
     off_t next = offset + sizeof(size_t) + kv_size;
     off_t end = lseek(segment_fd, 0, SEEK_END);
-    if (next != end)
+    close(segment_fd);
+    
+    if (next == end)
     {
-        // not the last one log
-        close(segment_fd);
-        return true; 
+        // delete this segment in which all logs have been removed
+        EventTimeStamp t = STEADY_TIME_NOW;
+        const int delayInMilli = 100;
+        const std::chrono::duration<int> delay(delayInMilli);
+        t.operator+=(delay);
+        auto callback = [this, segment_id] { DeleteSegment(segment_id); };
+        Scheduler::OneInstance()->AddEvent(callback, t, kEVENT_CLEAN_SEGMENT);
+        // todo I: loop for segment clean
     }
 
-    close(segment_fd);
-    // delete this segment as the last one log to be removed
-    DeleteOldSegments(segment_id);
-
-    return false;
+    return true;
 }
 
 bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
@@ -562,7 +566,7 @@ const std::string LogSegmentStore::ToSegmentPath(const SEGMENT_ID &segment_id)
     return path;
 }
 
-bool LogSegmentStore::DeleteOldSegments(const SEGMENT_ID segment_id)
+bool LogSegmentStore::DeleteSegment(const SEGMENT_ID segment_id)
 {
     // todo I: implement delete "all" segments before segment_id
     return false;

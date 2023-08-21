@@ -3,6 +3,7 @@
 //
 
 #include <controller.hpp>
+#include <schedule.hpp>
 
 #define HARDCODE_MSG_COUNT_LIMIT 1000
 
@@ -158,12 +159,13 @@ namespace paxosme
         {
 
             Event eventToHandle;
-            while (schedule_.Dispatch(eventToHandle))
+            while (Scheduler::OneInstance()->Dispatch(eventToHandle))
+            {
                 eventToHandle();
-
+            }
             EventTimeStamp nextEventTime;
             PaxMessage *paxMessage = nullptr;
-            if (schedule_.NextEventTime(nextEventTime))
+            if (Scheduler::OneInstance()->NextEventTime(nextEventTime))
             {
                 if (msgProv_->Take(paxMessage, Time::DurationMS(STEADY_TIME_NOW, nextEventTime)))
                 {

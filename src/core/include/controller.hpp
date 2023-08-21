@@ -48,7 +48,6 @@ namespace paxosme {
 
         static std::future<void *> prov_loop;
 
-        Schedule schedule_;
         instance_id_t instance_id_;
         PaxProposer *proposer_;
         PaxAcceptor *acceptor_;
