@@ -34,13 +34,14 @@ public:
 
 private:
     static bool DirExistsOrCreate(const std::string &);
-    static bool PathExists(const std::string &);
+    bool SegmentExists(const SEGMENT_ID);
     int PaddingIfNewSegment();
     bool NewSegment(const size_t &toWriteSize);
     bool UpdateMetadata();
-    bool OpenSegment(const SEGMENT_ID&, FD &);
+    bool OpenSegment(const SEGMENT_ID&, FD &, bool = true);
     const std::string ToSegmentPath(const SEGMENT_ID&);
     bool DeleteSegment(const SEGMENT_ID);
+    bool DeleteSegmentBefore(const SEGMENT_ID);
 
 private:
     std::string db_path_;

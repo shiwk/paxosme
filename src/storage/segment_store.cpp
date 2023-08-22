@@ -5,6 +5,7 @@
 #include <zlib.h>
 #include <zconf.h>
 #include <schedule.hpp>
+#include <stdio.h>
 
 bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options)
 {
@@ -77,7 +78,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
 
     if (!st)
     {
-        // on error, open segment file failed
+        // on err, open segment file failed
         return false;
     }
 
@@ -89,7 +90,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     bool padding_result = PaddingIfNewSegment();
     if (!padding_result)
     {
-        // on error, padding failed
+        // on err, padding failed
         return false;
     }
 
@@ -100,7 +101,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         cur_segment_offset_ = 0;
         if (offset != 0)
         {
-            // on error, seek failed
+            // on err, seek failed
             return false;
         }
     }
@@ -194,12 +195,28 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     SEGMENT_ID segment_id;
     off_t offset;
 
-    // NewSegment will set the new segement and offset pos if need
     const size_t value_size = value.size();
+    const size_t key_value_size = index_key_length_ + value_size;
+    // buffer_length = size(length) + key_value_size
+    const size_t buffer_length = sizeof(size_t) + key_value_size;
+
+    if (buffer_length > segment_max_size_)
+    {
+        // on err, too big buffer to write
+        return false;
+    }
+
+    // NewSegment will set the new segement and offset pos if need
     if (cur_segment_offset_ + value_size > cur_segment_file_size_)
     {
+        // truncate current segment as not enough space for new log
+        if (ftruncate(cur_segment_fd_, cur_segment_offset_) != 0)
+        {
+            // on err, truncate segment failed
+            return false;
+        }
+        
         // close current segment
-        // todo I: truncate current segment
         close(cur_segment_fd_);
         bool ready = NewSegment(value_size);
 
@@ -210,9 +227,6 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
         }
     }
     
-    const size_t key_value_size = index_key_length_ + value_size;
-    // length + key_value_size
-    const size_t buffer_length = sizeof(size_t) + key_value_size;
     char buffer[buffer_length];
     memcpy(buffer, &key_value_size, sizeof(size_t));
     memcpy(buffer + sizeof(size_t), key.c_str(), index_key_length_);
@@ -278,7 +292,9 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
         const int delayInMilli = 100;
         const std::chrono::duration<int> delay(delayInMilli);
         t.operator+=(delay);
-        auto callback = [this, segment_id] { DeleteSegment(segment_id); };
+
+        // 10 is the safe distance, TBD
+        auto callback = [this, segment_id] { DeleteSegmentBefore(segment_id - 10); };
         Scheduler::OneInstance()->AddEvent(callback, t, kEVENT_CLEAN_SEGMENT);
         // todo I: loop for segment clean
     }
@@ -312,19 +328,15 @@ bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
 
 bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, SegmentIndex &index_key, SegmentIndex &log_index)
 {
-    const std::string file_path = ToSegmentPath(segment_id);
-
-    if (!PathExists(file_path))
+    if (!SegmentExists(segment_id))
     {
         // segment not exists
         offset = -1;
         return false;
     }
 
-    FD fd = open(file_path.c_str(),
-                 O_RDWR /* creat if not exists and open for read&write */,
-                 S_IREAD | S_IWRITE /* Read, Write by owner */
-    );
+    FD fd;
+    OpenSegment(segment_id, fd);
 
     if (fd < 0)
     {
@@ -401,21 +413,22 @@ bool LogSegmentStore::DirExistsOrCreate(const std::string &path)
         // not exixts and create
         if (mkdir(cpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH /*Read, Write, Execute by owner and others*/) == -1)
         {
-            // on error, create dir failed
+            // on err, create dir failed
             return false;
         }
     }
     else if (!(path_info.st_mode & S_IFDIR))
     {
-        // on error, exists but not directory
+        // on err, exists but not directory
         return false;
     }
     return true;
 }
 
-bool LogSegmentStore::PathExists(const std::string &path)
+bool LogSegmentStore::SegmentExists(const SEGMENT_ID segment_id)
 {
-    if (access(path.c_str(), F_OK) == -1)
+    const std::string file_path = ToSegmentPath(segment_id);
+    if (access(file_path.c_str(), F_OK) == -1)
     {
         // segment not exists
         return false;
@@ -430,7 +443,7 @@ int LogSegmentStore::PaddingIfNewSegment()
     off_t fileSize = lseek(cur_segment_fd_, 0, SEEK_END);
     if (fileSize == -1)
     {
-        // on error, seek failed.
+        // on err, seek failed.
         return -1;
     }
 
@@ -446,14 +459,14 @@ int LogSegmentStore::PaddingIfNewSegment()
     fileSize = lseek(cur_segment_fd_, segment_max_size_ - 1, SEEK_SET);
     if (fileSize != segment_max_size_ - 1)
     {
-        // on error, padding length not match
+        // on err, padding length not match
         return -1;
     }
 
     ssize_t write_size = write(cur_segment_fd_, "\0", 1);
     if (write_size != 1)
     {
-        // on error, write padding failed
+        // on err, write padding failed
         return -1;
     }
 
@@ -461,7 +474,7 @@ int LogSegmentStore::PaddingIfNewSegment()
     off_t offset = lseek(cur_segment_fd_, 0, SEEK_SET);
     if (offset != 0)
     {
-        // on error
+        // on err
         return -1;
     }
 
@@ -475,33 +488,34 @@ bool LogSegmentStore::NewSegment(const size_t &sizeToWrite)
     bool st = UpdateMetadata();
     if (!st)
     {
-        // on error, update metadata failed
+        // on err, update metadata failed
         return false;
     }
 
     cur_segment_id_++;
+
+    if(SegmentExists(cur_segment_id_))
+    {
+        // on err, new segment already exists, somehing chaos
+        return false;
+    }
+
     FD fd;
     st = OpenSegment(cur_segment_id_, fd);
 
     if (!st)
     {
-        // on error, open segment file failed
+        // on err, open segment file failed
         return false;
     }
 
     cur_segment_fd_ = fd;
-    const std::string file_path = ToSegmentPath(cur_segment_fd_);
-    if(PathExists(file_path))
-    {
-        // on error, new segment already exists, somehing chaos
-        return false;
-    }
 
     int padding_result = PaddingIfNewSegment();
     if (padding_result < 0)
     {
         close(cur_segment_fd_);
-        // on error, padding failed
+        // on err, padding failed
         return false;
     }
 
@@ -513,16 +527,16 @@ bool LogSegmentStore::UpdateMetadata()
     // update metadata
     if(lseek(meta_fd_, 0, SEEK_SET) == -1)
     {
-        // on error, seek metadata failed
+        // on err, seek metadata failed
         return false;
     }
 
-    // on error, write new seg id
+    // on err, write new seg id
     SEGMENT_ID tmp_segid = cur_segment_id_ +1;
     size_t write_segid_len = write(meta_fd_, (char *)&tmp_segid, sizeof(SEGMENT_ID));
     if (write_segid_len != sizeof(SEGMENT_ID))
     {
-        // on error, update metadata seg id failed
+        // on err, update metadata seg id failed
         return false;
     }
 
@@ -531,29 +545,30 @@ bool LogSegmentStore::UpdateMetadata()
     size_t write_crc_len = write(meta_fd_, (char *)&new_seg_crc, sizeof(CHECKSUM));
     if (write_crc_len != sizeof(CHECKSUM))
     {
-        // on error, update metadata seg crc failed
+        // on err, update metadata seg crc failed
         return -1;
     }
 
     int ret = fsync(meta_fd_);
     if (ret != 0)
     {
-        // on error, flush failed
+        // on err, flush failed
         return false;
     }
 
     return true;
 }
 
-bool LogSegmentStore::OpenSegment(const SEGMENT_ID& segment_id, FD &fd)
+bool LogSegmentStore::OpenSegment(const SEGMENT_ID& segment_id, FD &fd, bool need_create)
 {
     const std::string file_path = ToSegmentPath(segment_id);
 
     // create it if not exists and read&write permission for file owner
-    fd = open(file_path.c_str(), O_CREAT | O_RDWR, S_IWUSR | S_IREAD);
-    if (cur_segment_fd_ == -1)
+    
+    fd = open(file_path.c_str(), O_RDWR | (need_create ? O_CREAT : O_RDONLY), S_IWUSR | S_IREAD);
+    if (fd == -1)
     {
-        // open segment file failed
+        // on err, open segment file failed
         return false;
     }
 
@@ -568,8 +583,37 @@ const std::string LogSegmentStore::ToSegmentPath(const SEGMENT_ID &segment_id)
 
 bool LogSegmentStore::DeleteSegment(const SEGMENT_ID segment_id)
 {
-    // todo I: implement delete "all" segments before segment_id
-    return false;
+    const std::string path = ToSegmentPath(segment_id);
+    bool st = remove(path.c_str());
+    if (st != 0)
+    {
+        // on err, delete segment failed.
+        return false;
+    }
+
+    return true;
+}
+
+bool LogSegmentStore::DeleteSegmentBefore(const SEGMENT_ID segment_id)
+{
+    if (segment_id >= cur_segment_id_)
+    {
+        // on err, segment id not out of date
+        return false;
+    }
+    
+    auto to_delete_segment = segment_id;
+    while (SegmentExists(to_delete_segment))
+    {
+        if (!DeleteSegment(to_delete_segment))
+        {
+            // on err, delete segment failed.
+            return false;
+        }
+
+        to_delete_segment -= 1;
+    }
+    return true;
 }
 
 void LogSegmentStore::ToSegmentIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentIndex &logIndex)
