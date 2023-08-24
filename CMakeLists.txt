@@ -12,4 +12,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/leveldb/include)
 add_subdirectory(3rd_party/leveldb)
 
 add_subdirectory(src)
-add_subdirectory(ut)
+add_subdirectory(ft)
