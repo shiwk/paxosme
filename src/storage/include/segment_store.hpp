@@ -4,6 +4,7 @@
 #define SEGMENT_STORE_HPP
 
 #include "index_db.hpp"
+#include "common.hpp"
 // #include "logstorage.hpp"
 #include <mutex>
 

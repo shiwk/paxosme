@@ -19,5 +19,11 @@ using index_t = uint64_t;
 using LogValue = std::string;
 
 
+class LongLife {
+public:
+    template <class TClass>
+    static TClass* CreateInstance(){return TClass::New();}
+};
+
 
 #endif //PAXOSME_COMMON_H

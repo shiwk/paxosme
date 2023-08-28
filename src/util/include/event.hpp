@@ -22,9 +22,9 @@ enum EventType
     kEVENT_NEWVALUE_TIMEOUT = 3,
 
     // schedule events
-    kEVENT_SHALL_I_LEARN = 4,
+    kEVENT_SHALL_I_LEARN = 0x01 << 2,
 
-    kEVENT_CLEAN_SEGMENT = 0x01 >> 3
+    kEVENT_CLEAN_SEGMENT = 0x01 << 3
 };
 
 using EventId = uint64_t;

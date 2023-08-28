@@ -326,6 +326,12 @@ bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
     return true;
 }
 
+LogSegmentStore *LogSegmentStore::New()
+{   
+    static LogSegmentStore logSegmentStore;
+    return &logSegmentStore;
+}
+
 bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, SegmentIndex &index_key, SegmentIndex &log_index)
 {
     if (!SegmentExists(segment_id))
