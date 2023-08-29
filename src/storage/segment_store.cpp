@@ -6,6 +6,7 @@
 #include <zconf.h>
 #include <schedule.hpp>
 #include <stdio.h>
+#include <iostream>
 
 bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options)
 {
@@ -87,14 +88,13 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
 
     // padding
     segment_max_size_ = options.segmentMaxSize;
-    bool padding_result = PaddingIfNewSegment();
-    if (!padding_result)
+    int padding_result = PaddingIfNewSegment();
+    if (padding_result < 0)
     {
         // on err, padding failed
         return false;
     }
-
-    if (padding_result == 1)
+    else if (padding_result == 1)
     {
         // seek to begin
         int offset = lseek(cur_segment_fd_, 0, SEEK_SET);
@@ -457,7 +457,7 @@ int LogSegmentStore::PaddingIfNewSegment()
     {
         // file not empty, no need padding
         cur_segment_file_size_ = fileSize;
-        return 1;
+        return 0;
     }
 
     // padding if file empty (recently created)
@@ -484,9 +484,10 @@ int LogSegmentStore::PaddingIfNewSegment()
         return -1;
     }
 
+    
     cur_segment_offset_ = 0;
     
-    return 0;
+    return 1;
 }
 
 bool LogSegmentStore::NewSegment(const size_t &sizeToWrite)
