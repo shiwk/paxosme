@@ -8,8 +8,8 @@
 // #include "logstorage.hpp"
 #include <mutex>
 
-#define SEGMENT_STORE_DIR "/segment"
-#define METADATA_FILE "/.metadata"
+#define SEGMENT_STORE_DIR "segment"
+#define METADATA_FILE ".metadata"
 
 using SEGMENT_ID = int32_t;
 using CHECKSUM = unsigned long;
@@ -34,7 +34,7 @@ public:
     static void ParseSegmentIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
 
 private:
-    static bool DirExistsOrCreate(const std::string &);
+    static bool CreateIfNotExists(const std::string &);
     bool SegmentExists(const SEGMENT_ID);
     int PaddingIfNewSegment();
     bool NewSegment(const size_t &toWriteSize);

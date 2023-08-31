@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 #include <ftw.h>
+#include <fstream>
 
 const std::string &DirPath = "/tmp/segment_test";
 
@@ -32,7 +33,24 @@ protected:
         rmrf(DirPath.c_str());
     }
 
-private:
+public:
+    static size_t FileSize(const std::string &path)
+    {
+        std::ifstream testFile(path, std::ios::binary);
+        const auto begin = testFile.tellg();
+        testFile.seekg (0, std::ios::end);
+        const auto end = testFile.tellg();
+        const auto fsize = (end-begin);
+        return fsize;
+    }
+
+    static bool DirExists(const std::string &path)
+    {
+        struct stat path_info;
+        const char *cpath = path.c_str();
+        return stat(cpath, &path_info) == 0;
+    }
+    
     static bool DirExistsOrCreate(const std::string &path)
     {
         struct stat path_info;
@@ -46,7 +64,7 @@ private:
                 return false;
             }
 
-            printf("Create directory: %s\n", path.c_str());
+            // printf("Create directory: %s\n", path.c_str());
         }
         else if (!(path_info.st_mode & S_IFDIR))
         {
@@ -65,10 +83,10 @@ private:
             return true;
         }
         if (rmdir(path.c_str()) == -1) {  // Remove the directory
-            printf("Clean directory %s falied: %s", path.c_str(), strerror(errno));
+            // printf("Clean directory %s falied: %s", path.c_str(), strerror(errno));
             return false;
         }
-        printf("Clean directory success: %s\n", path.c_str());
+        // printf("Clean directory success: %s\n", path.c_str());
         return true;
     }
 
@@ -79,7 +97,7 @@ private:
         if (rv)
             perror(fpath);
 
-        printf("Clean directory success: %s\n", fpath);
+        // printf("Clean directory success: %s\n", fpath);
         return rv;
     }
 

@@ -15,15 +15,15 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         return false;
     }
 
-    db_path_ = options.dbPath + SEGMENT_STORE_DIR;
+    db_path_ = options.dbPath + (options.dbPath.back() == '/' ? "" : "/") + SEGMENT_STORE_DIR;
     index_key_length_ = options.indexKeyLength;
 
-    if (!DirExistsOrCreate(db_path_))
+    if (!CreateIfNotExists(db_path_))
     {
         return false;
     }
 
-    const std::string &path = db_path_ + METADATA_FILE;
+    const std::string &path = db_path_ + (options.dbPath.back() == '/' ? "" : "/") + METADATA_FILE;
     auto meta_data_cpath = path.c_str();
 
     meta_fd_ = open(meta_data_cpath,
@@ -410,7 +410,7 @@ bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, Seg
     return true;
 }
 
-bool LogSegmentStore::DirExistsOrCreate(const std::string &path)
+bool LogSegmentStore::CreateIfNotExists(const std::string &path)
 {
     struct stat path_info;
     const char *cpath = path.c_str();
@@ -584,7 +584,7 @@ bool LogSegmentStore::OpenSegment(const SEGMENT_ID& segment_id, FD &fd, bool nee
 
 const std::string LogSegmentStore::ToSegmentPath(const SEGMENT_ID &segment_id)
 {
-    std::string path = db_path_ + "/" + std::to_string(segment_id);
+    std::string path = db_path_ + (db_path_.back() == '/' ? "" : "/") + std::to_string(segment_id);
     return path;
 }
 
