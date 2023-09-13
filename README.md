@@ -17,7 +17,7 @@ And then, follow the scripts provided for dependency
 
 ## Build
 
-
+`sudo sh build/build.sh`
 
 ## Implementations
 
