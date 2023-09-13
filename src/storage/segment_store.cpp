@@ -7,11 +7,14 @@
 #include <schedule.hpp>
 #include <stdio.h>
 #include <iostream>
+// #include <gflags/gflags.h>
+#include <glog/logging.h>
 
 bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options)
 {
     if (!db_path_.empty())
     {
+        LOG(ERROR) << "db path = " << db_path_ << " not empty";
         return false;
     }
 
@@ -20,6 +23,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
 
     if (!CreateIfNotExists(db_path_))
     {
+        LOG(ERROR) << "Create db path failed." << db_path_;
         return false;
     }
 
@@ -34,6 +38,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     if (meta_fd_ == -1)
     {
         // open meta data file failed
+        LOG(ERROR) << "Open meta data file failed." << meta_data_cpath;
         return false;
     }
 
@@ -43,6 +48,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     if (head_pos == -1)
     {
         // lseek failed
+        LOG(ERROR) << "Meta data file seek failed.";
         return false;
     }
 
@@ -57,6 +63,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     else if (read_len != (ssize_t)sizeof(SEGMENT_ID))
     {
         // read SEGMENT_ID failed
+        LOG(ERROR) << "Read SEGMENT_ID failed.";
         return false;
     }
 
@@ -70,6 +77,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         if (cal_checksum != read_check_sum)
         {
             // checksum not match
+            LOG(ERROR) << "Checksum not match.";
             return false;
         }
     }
@@ -80,6 +88,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     if (!st)
     {
         // on err, open segment file failed
+        LOG(ERROR) << "Open segment file failed.";
         return false;
     }
 
@@ -92,6 +101,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     if (padding_result < 0)
     {
         // on err, padding failed
+        LOG(ERROR) << "New segment padding failed.";
         return false;
     }
     else if (padding_result == 1)
@@ -102,6 +112,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         if (offset != 0)
         {
             // on err, seek failed
+            LOG(ERROR) << "Segment seek failed.";
             return false;
         }
     }
@@ -302,6 +313,12 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
     return true;
 }
 
+SEGMENT_ID LogSegmentStore::GetLastSegmentId()
+{
+    // todo I: implement this
+    return SEGMENT_ID();
+}
+
 bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
 {
     SegmentIndex next_index_key;
@@ -326,10 +343,15 @@ bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
     return true;
 }
 
-LogSegmentStore *LogSegmentStore::New()
+LogSegmentStore *LogSegmentStore::OneInstance()
 {   
     static LogSegmentStore logSegmentStore;
     return &logSegmentStore;
+}
+
+LogSegmentStore *LogSegmentStore::New()
+{   
+    return new LogSegmentStore;
 }
 
 bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, SegmentIndex &index_key, SegmentIndex &log_index)

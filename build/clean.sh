@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # clean targets
-cd ../cmake-build-debug || exit
+echo 'PAXOS_ROOT: ' ${PAXOS_ROOT}
+cd ${PAXOS_ROOT}/cmake-build-debug || exit
 make clean
 
 # clean cmake stuff
-cd ..
+cd ${PAXOS_ROOT}
 rm -rf cmake-build-debug/
 

@@ -8,7 +8,6 @@
 #define PROPOSE_TIMEOUT_CONST 50
 #define ACCEPT_TIMEOUT_CONST 50
 
-#include <log_value.hpp>
 #include "player_pax.hpp"
 #include "config.hpp"
 #include "proposal_prov.hpp"

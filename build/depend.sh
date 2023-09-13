@@ -4,13 +4,17 @@
 # submodules init
 git submodule update --init --recursive
 
+
 # build ptorobuf
 echo 'CMAKE_PATH: ' ${CMAKE_PATH}
+echo 'PAXOS_ROOT: ' ${PAXOS_ROOT}
+cd ${PAXOS_ROOT}/build
 mkdir protobuf
-${CMAKE_PATH}/cmake ../3rd_party/grpc/third_party/protobuf/cmake -B ./protobuf
+
+${CMAKE_PATH}/cmake ${PAXOS_ROOT}/3rd_party/protobuf -DCMAKE_CXX_STANDARD=14 -B ./protobuf
 
 cd ./protobuf || exit
-make&&make install
+sudo make&& sudo make install
 
 #cd ..
 #mkdir leveldb

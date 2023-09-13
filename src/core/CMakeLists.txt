@@ -21,9 +21,9 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 #        "${proto}"
 #        DEPENDS "${proto}")
 
-INCLUDE(FindProtobuf)
-FIND_PACKAGE(Protobuf REQUIRED)
-message(STATUS "_PROTOBUF_PROTOC: ${_PROTOBUF_PROTOC}")
+# INCLUDE(FindProtobuf)
+find_package(Protobuf REQUIRED)
+message(STATUS "[CORE] deps Protobuf_LIBRARIES:" ${Protobuf_LIBRARIES})
 #INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
 PROTOBUF_GENERATE_CPP(PROTO_SRC PROTO_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/proto/state.proto)
 
@@ -41,6 +41,7 @@ add_library(paxosmecore
 target_link_libraries(paxosmecore util)
 target_link_libraries(paxosmecore sm)
 target_link_libraries(paxosmecore storage)
+target_link_libraries(paxosmecore network)
 target_link_libraries(paxosmecore ${Protobuf_LIBRARIES})
 
 

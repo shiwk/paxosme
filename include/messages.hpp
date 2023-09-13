@@ -1,12 +1,6 @@
-//
-// Created by shiwk on 2020/7/18.
-//
+#ifndef MESSAGES_HPP
+#define MESSAGES_HPP
 
-#ifndef PAXOSME_MESSAGES_PAX_HPP
-#define PAXOSME_MESSAGES_PAX_HPP
-
-
-#include <log_value.hpp>
 #include <utility>
 #include <string>
 #include "common.hpp"
@@ -190,4 +184,4 @@ namespace paxosme {
     };
 }
 
-#endif //PAXOSME_MESSAGES_PAX_HPP
+#endif

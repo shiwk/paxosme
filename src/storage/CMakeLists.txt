@@ -9,4 +9,5 @@ add_library(storage
 # target_link_libraries(storage )
 target_include_directories(storage PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 
-target_link_libraries(storage PRIVATE util leveldb)
+# libz for crc32
+target_link_libraries(storage PRIVATE util leveldb glog::glog z)

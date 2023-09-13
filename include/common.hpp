@@ -18,12 +18,18 @@ using instance_id_t = uint64_t;
 using index_t = uint64_t;
 using LogValue = std::string;
 
-
-class LongLife {
+class LongLife
+{
 public:
     template <class TClass>
-    static TClass* CreateInstance(){return TClass::New();}
+    static TClass *CreateInstance() { return TClass::OneInstance(); }
 };
 
+class ShortLife
+{
+public:
+    template <class TClass>
+    static std::shared_ptr<TClass> CreateInstance() { return std::shared_ptr<TClass>(TClass::New()); }
+};
 
-#endif //PAXOSME_COMMON_H
+#endif // PAXOSME_COMMON_H

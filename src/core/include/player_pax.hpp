@@ -6,8 +6,7 @@
 #define PAXOSME_PLAYER_PAX_HPP
 
 
-#include <log_value.hpp>
-#include "messages_pax.hpp"
+#include <messages.hpp>
 #include "config.hpp"
 #include "storage_pax.hpp"
 #include "communicate_pax.hpp"

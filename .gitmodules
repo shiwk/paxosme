@@ -13,4 +13,4 @@
 [submodule "3rd_party/protobuf"]
 	path = 3rd_party/protobuf
 	url = https://github.com/protocolbuffers/protobuf.git
-	branch = 21.x
+	branch = 21.x # absl involved in 22.x which cause linking error, to be fixed

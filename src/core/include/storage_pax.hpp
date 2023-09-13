@@ -5,9 +5,9 @@
 #ifndef PAXOSME_STORAGE_PAX_HPP
 #define PAXOSME_STORAGE_PAX_HPP
 
-#include "common.hpp"
+#include <common.hpp>
 #include <string>
-#include <messages_pax.hpp>
+#include <messages.hpp>
 #include "logstorage.hpp"
 #include <state.pb.h>
 

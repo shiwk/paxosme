@@ -5,7 +5,6 @@
 #ifndef PAXOSME_LEARNER_PAX_HPP
 #define PAXOSME_LEARNER_PAX_HPP
 
-#include <log_value.hpp>
 #include "player_pax.hpp"
 #include "config.hpp"
 #include "lock.hpp"

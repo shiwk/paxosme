@@ -18,7 +18,7 @@ set(grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/protogen/${PROTO_NAME}.grpc.pb.cc")
 set(grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/protogen/${PROTO_NAME}.grpc.pb.h")
 
 #INCLUDE(FindProtobuf)
-#FIND_PACKAGE(Protobuf REQUIRED)
+find_package(Protobuf REQUIRED)
 
 
 add_custom_command(
@@ -37,7 +37,8 @@ add_custom_command(
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 #find_package(Protobuf REQUIRED)
-message(STATUS ${_PROTOBUF_LIBPROTOBUF})
+message(STATUS "[CORE] deps Protobuf_LIBRARIES:" ${Protobuf_LIBRARIES})
+message(STATUS "[CORE] deps _PROTOBUF_PROTOC:" ${_PROTOBUF_PROTOC})
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp )
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
@@ -53,7 +54,7 @@ add_library(network_grpc
 target_link_libraries(network_grpc
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
-        ${_PROTOBUF_LIBPROTOBUF}
+        ${Protobuf_LIBRARIES}
         )
 
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )

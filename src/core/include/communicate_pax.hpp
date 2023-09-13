@@ -5,7 +5,7 @@
 #ifndef PAXOSME_COMMUNICATE__PAXHPP
 #define PAXOSME_COMMUNICATE__PAXHPP
 
-#include "messages_pax.hpp"
+#include "messages.hpp"
 #include "network.hpp"
 
 namespace paxosme {

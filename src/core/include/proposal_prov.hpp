@@ -5,7 +5,6 @@
 #ifndef PAXOSME_PROVIDER_PAX_HPP
 #define PAXOSME_PROVIDER_PAX_HPP
 
-#include <log_value.hpp>
 #include "common.hpp"
 #include "lock.hpp"
 #include "queue.hpp"

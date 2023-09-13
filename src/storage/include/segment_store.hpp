@@ -27,6 +27,7 @@ public:
     SEGMENT_ID GetLastSegmentId();
     bool ReplaySegment(const SEGMENT_ID &, off_t &);
     static LogSegmentStore *New();
+    static LogSegmentStore *OneInstance();
 
     // static void ParseSegmentIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
     static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);

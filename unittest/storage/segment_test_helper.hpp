@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <ftw.h>
 #include <fstream>
+#include <glog/logging.h>
 
 const std::string &DirPath = "/tmp/segment_test";
 
@@ -18,18 +19,18 @@ public:
 
     static void TearDownTestCase()
     {
-        
-        // std::cout << "TearDownTestCase()" << std::endl;
     }
 
 protected:
     virtual void SetUp() override
     {
+        LOG(INFO) << "mkdir "<< DirPath;
         DirExistsOrCreate(DirPath);
     }
 
     virtual void TearDown() override
     {
+        LOG(INFO) << "rm -rf "<< DirPath;
         rmrf(DirPath.c_str());
     }
 

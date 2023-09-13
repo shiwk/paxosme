@@ -19,8 +19,7 @@ SET(LEVELDB_BUILD_TESTS OFF CACHE BOOL "Build tests of leveldb.")
 add_subdirectory(${ROOT_DIR}/3rd_party/leveldb leveldb)
 target_link_libraries(test_storage gtest gtest_main)
 
-# libz for crc32
-target_link_libraries(test_storage storage leveldb util z)
+target_link_libraries(test_storage storage leveldb util glog::glog)
 # add_dependencies(test_storage GTest::gtest GTest::gtest_main)
 
 # target_include_directories(test_storage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

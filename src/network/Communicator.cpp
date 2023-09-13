@@ -3,7 +3,7 @@
 //
 
 #include "network.hpp"
-#include "messages_pax.hpp"
+#include "messages.hpp"
 
 namespace paxosme {
     template<>
