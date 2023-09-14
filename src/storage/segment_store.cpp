@@ -14,7 +14,13 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
 {
     if (!db_path_.empty())
     {
-        LOG(ERROR) << "db path = " << db_path_ << " not empty";
+        LOG(ERROR) << "db path = " << db_path_ << " already exists.";
+        return false;
+    }
+    
+    if(options.indexKeyLength == 0)
+    {
+        LOG(ERROR) << "indexKeyLength cannot be zero.";
         return false;
     }
 
@@ -220,6 +226,7 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     // NewSegment will set the new segement and offset pos if need
     if (cur_segment_offset_ + value_size > cur_segment_file_size_)
     {
+        LOG(INFO) << "cur_segment_file_size :" << cur_segment_file_size_;
         // truncate current segment as not enough space for new log
         if (ftruncate(cur_segment_fd_, cur_segment_offset_) != 0)
         {
@@ -243,18 +250,26 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     memcpy(buffer + sizeof(size_t), key.c_str(), index_key_length_);
     memcpy(buffer + sizeof(size_t) + index_key_length_, value.c_str(), value_size);
 
+    std::string metaStr(buffer, buffer_length);
+    LOG(INFO) << "metaStr:" << metaStr;
+    LOG(INFO) << "buffer_length:" << buffer_length << ", key_value_size:" << key_value_size << ", index_key_length_:" << index_key_length_ << ", value_size:" << value_size;
+    
     // todo II: read file with c++ style
     size_t write_length = write(cur_segment_fd_, buffer, buffer_length);
-    
+    LOG(INFO) << "write_length:" << write_length;
+
     if (write_length != buffer_length)
     {
         // write segment failed
         return false;
     }
     
-    cur_segment_offset_ += buffer_length;
     uint32_t checksum = crc32(0, (const uint8_t *)(buffer + sizeof(size_t)), key_value_size);
     ToSegmentIndex(cur_segment_id_, cur_segment_offset_, checksum, segment_index);
+
+    cur_segment_offset_ += buffer_length;
+
+    LOG(INFO) << "cur_segment_offset_:" << cur_segment_offset_;
 
     return true;
 }
@@ -506,7 +521,7 @@ int LogSegmentStore::PaddingIfNewSegment()
         return -1;
     }
 
-    
+    cur_segment_file_size_ = segment_max_size_;
     cur_segment_offset_ = 0;
     
     return 1;
@@ -647,10 +662,20 @@ bool LogSegmentStore::DeleteSegmentBefore(const SEGMENT_ID segment_id)
 
 void LogSegmentStore::ToSegmentIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentIndex &logIndex)
 {
-    logIndex = std::string(sizeof(int) + sizeof(int) + sizeof(uint32_t), 0);
-    memcpy((void *)logIndex.c_str(), (char *)&segment_id, sizeof(SEGMENT_ID));
-    memcpy((void *)(logIndex.c_str() + sizeof(SEGMENT_ID)), (char *)&offset, sizeof(off_t));
-    memcpy((void *)(logIndex.c_str() + sizeof(SEGMENT_ID) + sizeof(off_t)), (char *)&checksum, sizeof(CHECKSUM));
+    LOG(INFO) << "segment_id:" << segment_id << ", offset:" << offset << ", checksum:" << checksum;
+    size_t totalLen = sizeof(SEGMENT_ID) + sizeof(off_t) + sizeof(CHECKSUM);
+    char concat[totalLen];
+    memcpy(concat, &segment_id, sizeof(SEGMENT_ID));
+    LOG(INFO) << "&segment_id:" << (char*)&segment_id;
+    memcpy(concat + sizeof(SEGMENT_ID), &offset, sizeof(off_t));
+    LOG(INFO) << "&offset:" << (char*)&offset;
+    memcpy(concat + sizeof(SEGMENT_ID) + sizeof(off_t), &checksum, sizeof(CHECKSUM));
+    LOG(INFO) << "&checksum:" << (char*)&checksum;
+
+    logIndex = std::string(concat, totalLen);
+
+    LOG(INFO) << "logIndex:" << logIndex << ", len:" << logIndex.size();
+    
 }
 
 void LogSegmentStore::ParseSegmentIndex(const SegmentIndex &log_index, SEGMENT_ID &segment_id, off_t &offset, CHECKSUM &check_sum)

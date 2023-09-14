@@ -10,10 +10,10 @@
 
 TEST_F(TestSegmentStoreTests, SegmentStoreInit)
 {
-    auto semgmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024};
-    bool initResult = semgmentStore->Init(logStorageOptions);
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+    bool initResult = segmentStore->Init(logStorageOptions);
     EXPECT_TRUE(initResult);
 
     std::string dbPath = DirPath + "/" + SEGMENT_STORE_DIR;
@@ -34,56 +34,69 @@ TEST_F(TestSegmentStoreTests, SegmentStoreInit)
 
 TEST_F(TestSegmentStoreTests, SegmentStoreInitDirPathNotExists)
 {
-    auto semgmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
     const std::string &dirPath = "/tmp/segment_dir";
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {dirPath, 1024};
-    bool initResult = semgmentStore->Init(logStorageOptions);
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {dirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+    bool initResult = segmentStore->Init(logStorageOptions);
+    EXPECT_FALSE(initResult);
+}
+
+TEST_F(TestSegmentStoreTests, SegmentStoreInitWithZeroKeyLength)
+{
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, 0};
+    bool initResult = segmentStore->Init(logStorageOptions);
     EXPECT_FALSE(initResult);
 }
 
 TEST_F(TestSegmentStoreTests, SegmentStoreInitEmptyDirPath)
 {
-    // std::shared_ptr<LogSegmentStore> semgmentStore(LogSegmentStore::New());
-    auto semgmentStore = ShortLife::CreateInstance<LogSegmentStore>();
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {"", 1024};
-    bool initResult = semgmentStore->Init(logStorageOptions);
+    // std::shared_ptr<LogSegmentStore> segmentStore(LogSegmentStore::New());
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {"", 1024, SizeString::HexStringSize<instance_id_t>()};
+    bool initResult = segmentStore->Init(logStorageOptions);
     EXPECT_FALSE(initResult);
 }
 
-
 TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWrite)
 {
-    auto semgmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024};
-    
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+
+    bool initResult = segmentStore->Init(logStorageOptions);
+    EXPECT_TRUE(initResult);
+
+    for (instance_id_t i = 1; i < 3; i++)
     {
-        bool initResult = semgmentStore->Init(logStorageOptions);
-        EXPECT_TRUE(initResult);
+        const std::string &value = "test-value";
+
+        SegmentIndex log_index;
+        const std::string &key = SizeString::ToHexString(i);
+
+        LOG(INFO) << "key:" << key << ", len:" << key.size();
+        bool appendResult = segmentStore->Append(key, value, log_index);
+        LOG(INFO) << "log_index:" << log_index;
+        EXPECT_TRUE(appendResult);
+        EXPECT_FALSE(log_index.empty());
     }
 
-    {
-        bool initResult = semgmentStore->Init(logStorageOptions);
-        EXPECT_FALSE(initResult);
-    }
-
+    // todo I: more cases
 }
-
 
 TEST_F(TestSegmentStoreTests, InitWithSegmentExistSegment)
 {
-    auto semgmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024};
-    
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+
     {
-        bool initResult = semgmentStore->Init(logStorageOptions);
+        bool initResult = segmentStore->Init(logStorageOptions);
         EXPECT_TRUE(initResult);
     }
 
     {
-        bool initResult = semgmentStore->Init(logStorageOptions);
+        bool initResult = segmentStore->Init(logStorageOptions);
         EXPECT_FALSE(initResult);
     }
-
 }
