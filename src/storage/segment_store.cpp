@@ -155,7 +155,7 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
     // off_t segment_size = lseek(segment_fd, 0, SEEK_END);
     // LOG(INFO) << "segment_size:" << segment_size;
     
-    if (lseek(segment_fd, offset, SEEK_SET) != 0)
+    if (lseek(segment_fd, offset, SEEK_SET) != offset)
     {
         // on err, seek failed
         LOG(ERROR) << "Seek segment failed. offset: " << offset << " segment_id: " << segment_id;
@@ -274,11 +274,11 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     memcpy(buffer + sizeof(size_t) + index_key_length_, value.c_str(), value_size);
 
     std::string metaStr(buffer, buffer_length);
+    LOG(INFO) << "key_value_size:" << key_value_size;
     LOG(INFO) << "metaStr:" << metaStr;
     LOG(INFO) << "buffer_length:" << buffer_length << ", key_value_size:" << key_value_size << ", index_key_length_:" << index_key_length_ << ", value_size:" << value_size;
-    
     LOG(INFO) << "cur_segment_offset_: " << cur_segment_offset_; 
-    if (lseek(cur_segment_fd_, cur_segment_offset_, SEEK_SET) != 0)
+    if (lseek(cur_segment_fd_, cur_segment_offset_, SEEK_SET) != cur_segment_offset_)
     {
         // on err
         LOG(ERROR) << "Seek segment failed.";
@@ -551,9 +551,8 @@ int LogSegmentStore::PaddingIfNewSegment()
         // on err
         return -1;
     }
-
+    
     cur_segment_file_size_ = segment_max_size_;
-    cur_segment_offset_ = 0;
     
     return 1;
 }
@@ -593,6 +592,8 @@ bool LogSegmentStore::NewSegment(const size_t &sizeToWrite)
         // on err, padding failed
         return false;
     }
+
+    cur_segment_offset_ = 0;
 
     return true;
 }

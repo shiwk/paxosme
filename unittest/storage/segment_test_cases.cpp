@@ -67,7 +67,7 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWrite)
     bool initResult = segmentStore->Init(logStorageOptions);
     EXPECT_TRUE(initResult);
 
-    for (instance_id_t i = 1; i < 3; i++)
+    for (instance_id_t i = 1; i <= 2; ++i)
     {
         const std::string &value = "test-value" + std::to_string(i);
 
