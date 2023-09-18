@@ -69,18 +69,22 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWrite)
 
     for (instance_id_t i = 1; i < 3; i++)
     {
-        const std::string &value = "test-value";
+        const std::string &value = "test-value" + std::to_string(i);
 
-        SegmentIndex log_index;
-        const std::string &key = SizeString::ToHexString(i);
+        SegmentIndex segment_index;
+        std::string key = SizeString::ToHexString(i);
 
         LOG(INFO) << "key:" << key << ", len:" << key.size();
-        bool appendResult = segmentStore->Append(key, value, log_index);
-        LOG(INFO) << "log_index:" << log_index;
+        bool appendResult = segmentStore->Append(key, value, segment_index);
+        LOG(INFO) << "segment_index:" << segment_index;
         EXPECT_TRUE(appendResult);
-        EXPECT_FALSE(log_index.empty());
-    }
+        EXPECT_FALSE(segment_index.empty());
 
+        std::string readValue;
+        bool readResult = segmentStore->Read(segment_index, key, readValue);
+        EXPECT_TRUE(readResult) << "key: "<< key;
+        EXPECT_EQ(value, readValue);
+    }
     // todo I: more cases
 }
 
