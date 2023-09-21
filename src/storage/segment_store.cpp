@@ -492,7 +492,7 @@ int LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, const off_t &offset
     }
 
     index_key = std::string(index_key_buf, index_key_length_);
-    LOG(INFO) << "replay key: " << index_key;
+    // LOG(INFO) << "replay key: " << index_key;
 
     // read next [length - index_key_length_] bytes from fd
     char buffer[kvSize - index_key_length_];
