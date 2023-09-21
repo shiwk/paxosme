@@ -24,15 +24,15 @@ public:
     bool Read(const SegmentIndex & segment_index, std::string &key_in_segment, std::string &value_in_segment);
     bool Append(const std::string &, const std::string &, SegmentIndex &);
     bool Remove(const SegmentIndex &);
+    int ReplayLog(const SEGMENT_ID &, const off_t &, std::string &index_key, SegmentIndex &);
     SEGMENT_ID GetLastSegmentId();
-    bool ReplaySegment(const SEGMENT_ID &, off_t &);
+    off_t GetCurrentOffset();
+    
     static LogSegmentStore *New();
     static LogSegmentStore *SingleInstance();
-
-    // static void ParseSegmentIndex(const LogIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
     static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
-    bool ReplayLog(const SEGMENT_ID &, off_t &, SegmentIndex &, SegmentIndex &);
     static void ParseSegmentIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
+    ~LogSegmentStore();
 
 private:
     static bool CreateIfNotExists(const std::string &);
@@ -44,6 +44,7 @@ private:
     const std::string ToSegmentPath(const SEGMENT_ID&);
     bool DeleteSegment(const SEGMENT_ID);
     bool DeleteSegmentBefore(const SEGMENT_ID);
+    bool ReplaySegment(const SEGMENT_ID &, off_t &);
 
 private:
     std::string db_path_;

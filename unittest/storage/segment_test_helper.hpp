@@ -14,23 +14,27 @@ class TestSegmentStoreTests : public ::testing::Test
 public:
     static void SetUpTestCase()
     {
-        
     }
 
     static void TearDownTestCase()
     {
     }
 
+    // ~TestSegmentStoreTests()
+    // {
+    //     TearDown();
+    // }
+
 protected:
     virtual void SetUp() override
     {
-        LOG(INFO) << "mkdir "<< DirPath;
+        LOG(INFO) << "mkdir " << DirPath;
         DirExistsOrCreate(DirPath);
     }
 
     virtual void TearDown() override
     {
-        LOG(INFO) << "rm -rf "<< DirPath;
+        LOG(INFO) << "rm -rf " << DirPath;
         rmrf(DirPath.c_str());
     }
 
@@ -39,9 +43,9 @@ public:
     {
         std::ifstream testFile(path, std::ios::binary);
         const auto begin = testFile.tellg();
-        testFile.seekg (0, std::ios::end);
+        testFile.seekg(0, std::ios::end);
         const auto end = testFile.tellg();
-        const auto fsize = (end-begin);
+        const auto fsize = (end - begin);
         return fsize;
     }
 
@@ -51,7 +55,7 @@ public:
         const char *cpath = path.c_str();
         return stat(cpath, &path_info) == 0;
     }
-    
+
     static bool DirExistsOrCreate(const std::string &path)
     {
         struct stat path_info;
@@ -83,7 +87,8 @@ public:
         {
             return true;
         }
-        if (rmdir(path.c_str()) == -1) {  // Remove the directory
+        if (rmdir(path.c_str()) == -1)
+        { // Remove the directory
             // printf("Clean directory %s falied: %s", path.c_str(), strerror(errno));
             return false;
         }
@@ -106,7 +111,6 @@ public:
     {
         return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
     }
-
 };
 
 #endif

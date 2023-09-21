@@ -9,6 +9,17 @@
 #include <iostream>
 // #include <gflags/gflags.h>
 #include <glog/logging.h>
+#include <errno.h>
+
+extern int errno;
+
+LogSegmentStore::~LogSegmentStore()
+{
+    if (cur_segment_fd_ != -1)
+    {
+        close(cur_segment_fd_);
+    }
+}
 
 bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options)
 {
@@ -17,8 +28,8 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         LOG(ERROR) << "db path = " << db_path_ << " already exists.";
         return false;
     }
-    
-    if(options.indexKeyLength == 0)
+
+    if (options.indexKeyLength == 0)
     {
         LOG(ERROR) << "indexKeyLength cannot be zero.";
         return false;
@@ -100,6 +111,9 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
 
     cur_segment_fd_ = fd;
     
+    
+
+
 
     // padding
     segment_max_size_ = options.segmentMaxSize;
@@ -143,8 +157,6 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
     CHECKSUM parse_checksum;
     ParseSegmentIndex(segment_index, segment_id, offset, parse_checksum);
 
-    LOG(INFO) << "segment_id:" << segment_id << ", offset:" << offset << ", parse_checksum:" << parse_checksum;
-    
     FD segment_fd;
     bool st = OpenSegment(segment_id, segment_fd);
     if (!st)
@@ -156,57 +168,60 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
 
     // off_t segment_size = lseek(segment_fd, 0, SEEK_END);
     // LOG(INFO) << "segment_size:" << segment_size;
-    
+
     if (lseek(segment_fd, offset, SEEK_SET) != offset)
     {
         // on err, seek failed
         LOG(ERROR) << "Seek segment failed. offset: " << offset << " segment_id: " << segment_id;
-        return false; 
+        close(segment_fd);
+        return false;
     }
 
-    
     size_t kv_size;
     // todo II: read file with c++ style
     size_t read_len = read(segment_fd, &kv_size, sizeof(size_t));
-    LOG(INFO) << "kv_size: " << kv_size;
+    // LOG(INFO) << "kv_size: " << kv_size;
 
     if (read_len != sizeof(size_t))
     {
         // on err, read kv_size failed
         LOG(ERROR) << "Read segment failed.";
+        close(segment_fd);
         return false;
     }
 
     std::string keyValue(kv_size, '\0');
     read_len = read(segment_fd, (void *)keyValue.c_str(), index_key_length_);
-    LOG(INFO) << "keyValue: " << keyValue;
+    // LOG(INFO) << "keyValue: " << keyValue;
 
     if (read_len != index_key_length_)
     {
         // on err, read key_in_segment failed
         LOG(ERROR) << "read key length: " << read_len << " expected key length: " << index_key_length_;
+        close(segment_fd);
         return false;
     }
 
-
-    const std::string& key_in_segment = keyValue.substr(0, index_key_length_);
-    LOG(INFO) << "key_in_segment: " << key_in_segment;
+    const std::string &key_in_segment = keyValue.substr(0, index_key_length_);
+    // LOG(INFO) << "key_in_segment: " << key_in_segment;
 
     if (key_in_segment != index_key)
     {
         // on err, key_in_segment not match
         LOG(ERROR) << "key_in_segment not match. key_in_segment: " << key_in_segment << " index_key: " << index_key;
+        close(segment_fd);
         return false;
     }
 
     size_t value_len = kv_size - index_key_length_;
     read_len = read(segment_fd, (void *)(keyValue.c_str() + index_key_length_), value_len);
-    LOG(INFO) << "keyValue: " << keyValue;
-    
+    // LOG(INFO) << "keyValue: " << keyValue;
+
     if (read_len != value_len)
     {
         // on err, read value failed
         LOG(ERROR) << "read len not matched. read_len: " << read_len << " expected len: " << value_len;
+        close(segment_fd);
         return false;
     }
     CHECKSUM cal_checksum = crc32(0, (const uint8_t *)keyValue.c_str(), kv_size);
@@ -215,14 +230,15 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
     {
         // on err, calculated checksum not matched
         LOG(ERROR) << "calculated checksum not matched. cal_checksum: " << cal_checksum << " parse_checksum: " << parse_checksum;
+        close(segment_fd);
         return false;
     }
 
     value_in_segment = keyValue.substr(index_key_length_, value_len);
 
-    LOG(INFO) << "value in segment: " << value_in_segment;
+    // LOG(INFO) << "value in segment: " << value_in_segment;
 
-
+    close(segment_fd);
     return true;
 }
 
@@ -248,14 +264,14 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     // NewSegment will set the new segement and offset pos if need
     if (cur_segment_offset_ + value_size > cur_segment_file_size_)
     {
-        LOG(INFO) << "cur_segment_file_size :" << cur_segment_file_size_;
+        // LOG(INFO) << "cur_segment_file_size :" << cur_segment_file_size_;
         // truncate current segment as not enough space for new log
         if (ftruncate(cur_segment_fd_, cur_segment_offset_) != 0)
         {
             // on err, truncate segment failed
             return false;
         }
-        
+
         // close current segment
         close(cur_segment_fd_);
         bool ready = NewSegment(value_size);
@@ -265,48 +281,52 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
             // segment update failed.
             return false;
         }
-        else {
+        else
+        {
             cur_segment_offset_ = 0;
         }
     }
-    
+
     char buffer[buffer_length];
     memcpy(buffer, &key_value_size, sizeof(size_t));
     memcpy(buffer + sizeof(size_t), key.c_str(), index_key_length_);
     memcpy(buffer + sizeof(size_t) + index_key_length_, value.c_str(), value_size);
 
     std::string metaStr(buffer, buffer_length);
-    LOG(INFO) << "key_value_size:" << key_value_size;
-    LOG(INFO) << "metaStr:" << metaStr;
-    LOG(INFO) << "buffer_length:" << buffer_length << ", key_value_size:" << key_value_size << ", index_key_length_:" << index_key_length_ << ", value_size:" << value_size;
-    LOG(INFO) << "cur_segment_offset_: " << cur_segment_offset_; 
+    // LOG(INFO) << "key_value_size:" << key_value_size;
+    // LOG(INFO) << "metaStr:" << metaStr;
+    // LOG(INFO) << "buffer_length:" << buffer_length << ", key_value_size:" << key_value_size << ", index_key_length_:" << index_key_length_ << ", value_size:" << value_size;
+    // LOG(INFO) << "cur_segment_offset_: " << cur_segment_offset_;
     if (lseek(cur_segment_fd_, cur_segment_offset_, SEEK_SET) != cur_segment_offset_)
     {
         // on err
         LOG(ERROR) << "Seek segment failed.";
         return false;
     }
-    
+
     // todo II: read file with c++ style
     size_t write_length = write(cur_segment_fd_, buffer, buffer_length);
-    LOG(INFO) << "write_length:" << write_length;
+    // LOG(INFO) << "write_length:" << write_length;
 
     if (write_length != buffer_length)
     {
         // write segment failed
         return false;
     }
-    
+
     uint32_t checksum = crc32(0, (const uint8_t *)(buffer + sizeof(size_t)), key_value_size);
     ToSegmentIndex(cur_segment_id_, cur_segment_offset_, checksum, segment_index);
 
     cur_segment_offset_ += buffer_length;
 
-    LOG(INFO) << "cur_segment_offset_:" << cur_segment_offset_;
+    // LOG(INFO) << "cur_segment_offset_:" << cur_segment_offset_;
 
     return true;
 }
 
+/*
+    NOTE: assume that Remove as the sequence of append
+*/
 bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
 {
     SEGMENT_ID segment_id;
@@ -327,7 +347,7 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
     {
         // on err, seek failed
         close(segment_fd);
-        return false; 
+        return false;
     }
 
     size_t kv_size;
@@ -343,7 +363,7 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
     off_t next = offset + sizeof(size_t) + kv_size;
     off_t end = lseek(segment_fd, 0, SEEK_END);
     close(segment_fd);
-    
+
     if (next == end)
     {
         // delete this segment in which all logs have been removed
@@ -364,51 +384,56 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
 SEGMENT_ID LogSegmentStore::GetLastSegmentId()
 {
     // todo I: implement this
-    return SEGMENT_ID();
+    return cur_segment_id_;
+}
+
+off_t LogSegmentStore::GetCurrentOffset()
+{
+    return cur_segment_offset_;
 }
 
 bool LogSegmentStore::ReplaySegment(const SEGMENT_ID &segment_id, off_t &offset)
 {
     SegmentIndex next_index_key;
     SegmentIndex next_log_index;
-    bool replay_res = false;
-    off_t replay_offset = offset;
+    off_t replayOffset = offset;
 
-    do
+    while (true)
     {
-        replay_res = ReplayLog(segment_id, replay_offset, next_index_key, next_log_index);
-    } while (replay_res);
+        offset = ReplayLog(segment_id, replayOffset, next_index_key, next_log_index);
+        if (offset < 0)
+        {
+            return false;
+        }
 
-    if (replay_offset < 0)
-    {
-        // replay failed
-        return false;
+        if (offset == 0)
+        {
+            // reach the end of segment
+            offset = replayOffset;
+            return true;
+        }
+
+        replayOffset = offset;
     }
-
-    // reach the end of segment
-    offset = replay_offset;
-
-    return true;
 }
 
 LogSegmentStore *LogSegmentStore::SingleInstance()
-{   
+{
     static LogSegmentStore logSegmentStore;
     return &logSegmentStore;
 }
 
 LogSegmentStore *LogSegmentStore::New()
-{   
+{
     return new LogSegmentStore;
 }
 
-bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, SegmentIndex &index_key, SegmentIndex &log_index)
+int LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, const off_t &offset, std::string &index_key, SegmentIndex &segment_index)
 {
     if (!SegmentExists(segment_id))
     {
         // segment not exists
-        offset = -1;
-        return false;
+        return -1;
     }
 
     FD fd;
@@ -417,67 +442,68 @@ bool LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, off_t &offset, Seg
     if (fd < 0)
     {
         // open failed
-        offset = -1;
-        return false;
+        return -1;
     }
 
-    off_t file_size = lseek(fd, 0, SEEK_END);
-    if (file_size < 0)
-    {
-        // segment file corrupted
-        close(fd);
-        offset = -1;
-        return false;
-    }
+    // off_t fileSize = lseek(fd, 0, SEEK_END);
+    // if (fileSize < 0)
+    // {
+    //     // segment file corrupted
+    //     close(fd);
+    //     offset = -1;
+    //     return false;
+    // }
+
+
     off_t pos = lseek(fd, offset, SEEK_SET);
     if (pos == -1)
     {
         close(fd);
-        offset = -1;
-        return false;
+        return -1;
     }
 
-    size_t length = 0;
+    size_t kvSize = 0;
     // read first length
     // todo II: read file with c++ style
-    ssize_t read_len = read(fd, (char *)&length, sizeof(size_t));
-    if (read_len != sizeof(int))
+    ssize_t read_len = read(fd, (char *)&kvSize, sizeof(size_t));
+
+    if (read_len < sizeof(size_t))
     {
         // todo II: means read to the end if read_len == 0, otherwise needs truncate segment(discard the extra data after pos)
-        offset = pos;
         close(fd);
-        return false;
+        return 0;
     }
 
-    if (length == 0)
+    if (kvSize == 0)
     {
         // end of the segment, no need to read more
-        offset = pos;
         close(fd);
-        return false;
+        return 0;
     }
 
     char index_key_buf[index_key_length_];
     read_len = read(fd, index_key_buf, index_key_length_);
 
-    if (length != index_key_length_)
+    if (read_len != index_key_length_)
     {
         // todo II: means read to the end if read_len == 0, otherwise needs truncate segment(discard the extra data after pos)
-        return false;
+        close(fd);
+        return 0;
     }
 
-    index_key.append(index_key_buf, index_key_length_);
+    index_key = std::string(index_key_buf, index_key_length_);
+    LOG(INFO) << "replay key: " << index_key;
 
     // read next [length - index_key_length_] bytes from fd
-    char buffer[length - index_key_length_];
-    read_len = read(fd, buffer, length - index_key_length_);
+    char buffer[kvSize - index_key_length_];
+    read_len = read(fd, buffer, kvSize - index_key_length_);
 
-    uint32_t checksum = crc32(0, (const uint8_t *)buffer, length - index_key_length_);
+    uint32_t checksum = crc32(0, (const uint8_t *)buffer, kvSize - index_key_length_);
 
     close(fd);
-    ToSegmentIndex(segment_id, offset, checksum, log_index);
+    ToSegmentIndex(segment_id, offset, checksum, segment_index);
 
-    return true;
+    return offset + sizeof(size_t) + kvSize;
 }
 
 bool LogSegmentStore::CreateIfNotExists(const std::string &path)
@@ -553,9 +579,9 @@ int LogSegmentStore::PaddingIfNewSegment()
         // on err
         return -1;
     }
-    
+
     cur_segment_file_size_ = segment_max_size_;
-    
+
     return 1;
 }
 
@@ -570,7 +596,7 @@ bool LogSegmentStore::NewSegment(const size_t &sizeToWrite)
 
     cur_segment_id_++;
 
-    if(SegmentExists(cur_segment_id_))
+    if (SegmentExists(cur_segment_id_))
     {
         // on err, new segment already exists, somehing chaos
         return false;
@@ -603,14 +629,14 @@ bool LogSegmentStore::NewSegment(const size_t &sizeToWrite)
 bool LogSegmentStore::UpdateMetadata()
 {
     // update metadata
-    if(lseek(meta_fd_, 0, SEEK_SET) == -1)
+    if (lseek(meta_fd_, 0, SEEK_SET) == -1)
     {
         // on err, seek metadata failed
         return false;
     }
 
     // on err, write new seg id
-    SEGMENT_ID tmp_segid = cur_segment_id_ +1;
+    SEGMENT_ID tmp_segid = cur_segment_id_ + 1;
     size_t write_segid_len = write(meta_fd_, (char *)&tmp_segid, sizeof(SEGMENT_ID));
     if (write_segid_len != sizeof(SEGMENT_ID))
     {
@@ -637,16 +663,17 @@ bool LogSegmentStore::UpdateMetadata()
     return true;
 }
 
-bool LogSegmentStore::OpenSegment(const SEGMENT_ID& segment_id, FD &fd, bool need_create)
+bool LogSegmentStore::OpenSegment(const SEGMENT_ID &segment_id, FD &fd, bool need_create)
 {
     const std::string file_path = ToSegmentPath(segment_id);
 
     // create it if not exists and read&write permission for file owner
-    
+
     fd = open(file_path.c_str(), O_RDWR | (need_create ? O_CREAT : O_RDONLY), S_IWUSR | S_IREAD);
     if (fd == -1)
     {
         // on err, open segment file failed
+        LOG(ERROR) << "open file failed. errno: " << errno;
         return false;
     }
 
@@ -679,7 +706,7 @@ bool LogSegmentStore::DeleteSegmentBefore(const SEGMENT_ID segment_id)
         // on err, segment id not out of date
         return false;
     }
-    
+
     auto to_delete_segment = segment_id;
     while (SegmentExists(to_delete_segment))
     {
@@ -696,20 +723,19 @@ bool LogSegmentStore::DeleteSegmentBefore(const SEGMENT_ID segment_id)
 
 void LogSegmentStore::ToSegmentIndex(const SEGMENT_ID segment_id, const off_t offset, const CHECKSUM checksum, SegmentIndex &logIndex)
 {
-    LOG(INFO) << "segment_id:" << segment_id << ", offset:" << offset << ", checksum:" << checksum;
+    // LOG(INFO) << "segment_id:" << segment_id << ", offset:" << offset << ", checksum:" << checksum;
     size_t totalLen = sizeof(SEGMENT_ID) + sizeof(off_t) + sizeof(CHECKSUM);
     char concat[totalLen];
     memcpy(concat, &segment_id, sizeof(SEGMENT_ID));
-    LOG(INFO) << "segment_id:" << segment_id;
+    // LOG(INFO) << "segment_id:" << segment_id;
     memcpy(concat + sizeof(SEGMENT_ID), &offset, sizeof(off_t));
-    LOG(INFO) << "offset:" << offset;
+    // LOG(INFO) << "offset:" << offset;
     memcpy(concat + sizeof(SEGMENT_ID) + sizeof(off_t), &checksum, sizeof(CHECKSUM));
-    LOG(INFO) << "checksum:" << checksum;
+    // LOG(INFO) << "checksum:" << checksum;
 
     logIndex = std::string(concat, totalLen);
 
-    LOG(INFO) << "logIndex:" << logIndex << ", len:" << logIndex.size();
-    
+    // LOG(INFO) << "logIndex:" << logIndex << ", len:" << logIndex.size();
 }
 
 void LogSegmentStore::ParseSegmentIndex(const SegmentIndex &log_index, SEGMENT_ID &segment_id, off_t &offset, CHECKSUM &check_sum)

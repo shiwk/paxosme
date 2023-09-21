@@ -81,9 +81,9 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWriteInFirstSegment)
         SegmentIndex segment_index;
         std::string key = SizeString::ToHexString(i);
 
-        LOG(INFO) << "key:" << key << ", len:" << key.size();
+        // LOG(INFO) << "key:" << key << ", len:" << key.size();
         bool appendResult = segmentStore->Append(key, value, segment_index);
-        LOG(INFO) << "segment_index:" << segment_index;
+        // LOG(INFO) << "segment_index:" << segment_index;
         segmentIndexs.push_back(segment_index);
         ASSERT_TRUE(appendResult);
         ASSERT_FALSE(segment_index.empty());
@@ -213,14 +213,11 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
     SEGMENT_ID segmentId = 0;
 
     do {
-        // ASSERT_EQ(0, segmentId);
         const std::string &value = std::string(i, 'a');
         SegmentIndex segment_index;
         std::string key = SizeString::ToHexString(i);
 
-        // LOG(INFO) << "key:" << key << ", len:" << key.size();
         bool appendResult = segmentStore->Append(key, value, segment_index);
-        // LOG(INFO) << "segment_index:" << segment_index;
         segmentIndexs.push_back(segment_index);
         ASSERT_TRUE(appendResult);
         ASSERT_FALSE(segment_index.empty());
@@ -229,13 +226,9 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
         bool readResult = segmentStore->Read(segment_index, key, readValue);
         ASSERT_TRUE(readResult) << "key: "<< key << " i: " << i;
         ASSERT_EQ(value, readValue);
-        
-        CHECKSUM checkSum;
-        LogSegmentStore::ParseSegmentIndex(segment_index, segmentId, offset, checkSum);
-        ++i;
-    }while (sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + i <= segmentMaxSize);
+    }while (sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + ++i <= segmentMaxSize);
 
-    for (i = 1; i < segmentIndexs.size(); ++i)
+    for (i = 1; i <= segmentIndexs.size(); ++i)
     {
         std::string key = SizeString::ToHexString(i);
         std::string readValue;
@@ -244,4 +237,29 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
         const std::string &value = std::string(i, 'a');
         ASSERT_EQ(value, readValue);
     }
+}
+
+TEST_F(TestSegmentStoreTests, TestReplayLog)
+{
+    auto segmentStore1 = ShortLife::CreateInstance<LogSegmentStore>();
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+    bool initResult = segmentStore1->Init(logStorageOptions);
+
+    SegmentIndex segment_index;
+    instance_id_t i = 1;
+    std::string key = SizeString::ToHexString(i);
+    const std::string &value = "test-value" + std::to_string(i);
+    bool appendResult = segmentStore1->Append(key, value, segment_index);
+    std::string readValue;
+    bool readResult = segmentStore1->Read(segment_index, key, readValue);
+    
+    auto segmentStore2 = ShortLife::CreateInstance<LogSegmentStore>();
+    segmentStore2->Init(logStorageOptions);
+    SegmentIndex replayIndex;
+    std::string replayKey;
+    off_t offset = 0;
+    bool repalyRes = segmentStore2->ReplayLog(0, offset, replayKey, replayIndex);
+
+    ASSERT_TRUE(repalyRes);
+    ASSERT_EQ(key, replayKey);
 }

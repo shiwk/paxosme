@@ -97,28 +97,26 @@ bool DataBaseLogStorage::Delete(const LogEntryKey &log_entry_key)
     SegmentIndex segment_index;
     bool st = log_index_db_->GetIndex(idx_key, segment_index);
 
-    if(!st)
+    if (!st)
     {
-        //on err, index not exists
+        // on err, index not exists
         return false;
     }
 
     st = segment_store_->Remove(segment_index);
-    
-    if(!st)
+
+    if (!st)
     {
-        //on err, segment remove failed
+        // on err, segment remove failed
         return false;
     }
 
-    
     st = log_index_db_->DelIndex(idx_key);
-    if(!st)
+    if (!st)
     {
-        //on err, index delete failed
+        // on err, index delete failed
         return false;
     }
-    
 
     return true;
 }
@@ -154,33 +152,29 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
         return false;
     }
 
-    auto segment_id = db_segment_id;
+    SegmentIndex next_log_index;
+    std::string next_index_key;
+    SEGMENT_ID segment_id = db_segment_id;
+    
     while (true)
     {
-        // replay offset should always start from zero except the first time, as offset exists for the last log in index_db
-        SegmentIndex next_log_index;
-        std::string next_index_key;
-        while (segment_store_->ReplayLog(segment_id, segment_offset, next_index_key, next_log_index))
-        {
-            log_index_db_->PutIndex(next_index_key, next_log_index);
-        }
-
-        if (segment_offset > 0)
+        segment_offset = segment_store_->ReplayLog(segment_id, segment_offset, next_index_key, next_log_index);
+        if (segment_offset == 0)
         {
             // reach end of this segment
             segment_offset = 0;
             segment_id += 1;
             continue;
         }
-        else
+
+        if (segment_offset < 0)
         {
             // segment not exists
             break;
         }
 
-        next_index_key += 1;
+        log_index_db_->PutIndex(next_index_key, next_log_index);
     }
-
 
     return true;
 }
@@ -190,4 +184,3 @@ paxosme::LogStorage *paxosme::LogStorage::New()
     auto logStorage = new DataBaseLogStorage;
     return logStorage;
 }
-
