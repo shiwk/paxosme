@@ -323,7 +323,7 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>(), true};
 
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);

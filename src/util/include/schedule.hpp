@@ -49,7 +49,11 @@ public:
         return new Scheduler();
     };
 
+#ifdef FINITE_SCHEDULE_LOOP
     void *AutoDispatch(void *);
+#else
+    [[noreturn]] void *AutoDispatch(void *);
+#endif 
 
     private:
     MyUnorderedMap<EventType, EventId> eventTypeIdMap_;

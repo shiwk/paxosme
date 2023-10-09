@@ -143,12 +143,17 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         assert(replay_res);
     }
 
-    #ifdef FINITE_SCHEDULE_LOOP
-        LOG(INFO) << "FINITE_SCHEDULE_LOOP: "<< FINITE_SCHEDULE_LOOP;
-    #endif
-    auto mainLoop = [this](){ return scheduler_->AutoDispatch(nullptr); };
-    segment_clean_future_ = std::move(std::async(std::launch::async, mainLoop));
-    // std::future<void*> fut = std::async(std::launch::async, mainLoop);
+#ifdef FINITE_SCHEDULE_LOOP
+    LOG(INFO) << "FINITE_SCHEDULE_LOOP: " << FINITE_SCHEDULE_LOOP;
+#endif
+    if (options.removeAsync)
+    {
+
+        auto mainLoop = [this]()
+        { return scheduler_->AutoDispatch(nullptr); };
+        segment_clean_future_ = std::move(std::async(std::launch::async, mainLoop));
+        // std::future<void*> fut = std::async(std::launch::async, mainLoop);
+    }
     return true;
 }
 
@@ -365,9 +370,7 @@ bool LogSegmentStore::RemoveAsync(const SegmentIndex &segment_index)
     }
 
     off_t next = offset + sizeof(size_t) + kv_size;
-    LOG(INFO) << "next: " << next;
     off_t end = lseek(segment_fd, 0, SEEK_END);
-    LOG(INFO) << "end: " << end;
     close(segment_fd);
 
     if (next == end)
@@ -378,7 +381,8 @@ bool LogSegmentStore::RemoveAsync(const SegmentIndex &segment_index)
         const std::chrono::duration<int, std::milli> delay(delayInMilli);
         // t += delay;
 
-        auto callback = [this, segment_id] { DeleteSegment(segment_id); };
+        auto callback = [this, segment_id]
+        { DeleteSegment(segment_id); };
         scheduler_->AddEvent(callback, t, kEVENT_CLEAN_SEGMENT);
         LOG(INFO) << "AddEvent to clean segment " << segment_id;
         // todo I: loop for segment clean
@@ -459,7 +463,6 @@ int LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, const off_t &offset
     //     offset = -1;
     //     return false;
     // }
-
 
     off_t pos = lseek(fd, offset, SEEK_SET);
     if (pos == -1)
