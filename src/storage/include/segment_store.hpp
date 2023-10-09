@@ -7,9 +7,12 @@
 #include "common.hpp"
 // #include "logstorage.hpp"
 #include <mutex>
+#include <schedule.hpp>
+#include <future>
 
 #define SEGMENT_STORE_DIR "segment"
 #define METADATA_FILE ".metadata"
+#define SEGMENT_CLEAN_DELAY_IN_SECONDS 3
 
 using SEGMENT_ID = int32_t;
 using CHECKSUM = unsigned long;
@@ -23,7 +26,7 @@ public:
     bool Init(const paxosme::LogStorage::LogStorageOptions &);
     bool Read(const SegmentIndex & segment_index, std::string &key_in_segment, std::string &value_in_segment);
     bool Append(const std::string &, const std::string &, SegmentIndex &);
-    bool Remove(const SegmentIndex &);
+    bool RemoveAsync(const SegmentIndex &);
     int ReplayLog(const SEGMENT_ID &, const off_t &, std::string &index_key, SegmentIndex &);
     SEGMENT_ID GetLastSegmentId();
     off_t GetCurrentOffset();
@@ -56,6 +59,8 @@ private:
     size_t cur_segment_file_size_;
     size_t index_key_length_;
     size_t segment_max_size_;
+    std::shared_ptr<Scheduler> scheduler_ = ShortLife::CreateInstance<Scheduler>();
+    std::future<void *> segment_clean_future_;
 };
 
 #endif

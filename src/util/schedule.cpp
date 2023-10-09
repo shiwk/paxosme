@@ -4,6 +4,8 @@
 
 #include "event.hpp"
 #include "schedule.hpp"
+#include <unistd.h>
+#include <iostream>
 
 //    void Schedule::AddEvent(const EventHandler &cb, const time_t &when, EventType event_type) {
 //        EventId event_id = ++eventId_;
@@ -67,4 +69,24 @@ bool Scheduler::NextEventTime(EventTimeStamp &event_time_stamp)
 void Scheduler::Remove(EventType event_type)
 {
     eventTypeIdMap_.erase(event_type);
+}
+
+#ifdef FINITE_SCHEDULE_LOOP
+void *Scheduler::AutoDispatch(void *)
+#else
+[[noreturn]] void *Scheduler::AutoDispatch(void *)
+#endif
+{
+    while (true)
+    {
+        Event eventToHandle;
+        if (Dispatch(eventToHandle))
+        {
+            eventToHandle();
+#ifdef FINITE_SCHEDULE_LOOP
+            return nullptr;
+#endif
+        }
+        sleep(1);
+    }
 }

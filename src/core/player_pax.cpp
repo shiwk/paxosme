@@ -4,7 +4,6 @@
 
 #include <player_pax.hpp>
 #include <controller.hpp>
-#include <schedule.hpp>
 
 namespace paxosme {
     PaxPlayer::PaxPlayer(const PaxosOptions *config, const PaxCommunicator *communicator,
@@ -52,7 +51,7 @@ namespace paxosme {
         const std::chrono::duration<int> delay(delayInMilli);
         EventTimeStamp t = STEADY_TIME_NOW;
         t.operator+=(delay);
-        Scheduler::OneInstance()->AddEvent(callback, t, event_type);
+        Scheduler::SingleInstance()->AddEvent(callback, t, event_type);
     }
 
     ProposalTriplet PaxPlayer::GetAcceptedProposal() {
@@ -68,7 +67,7 @@ namespace paxosme {
     }
 
     void PaxPlayer::Withdraw(EventType event_type) {
-        Scheduler::OneInstance()->Remove(event_type);
+        Scheduler::SingleInstance()->Remove(event_type);
     }
 }
 

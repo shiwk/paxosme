@@ -159,13 +159,13 @@ namespace paxosme
         {
 
             Event eventToHandle;
-            while (Scheduler::OneInstance()->Dispatch(eventToHandle))
+            while (Scheduler::SingleInstance()->Dispatch(eventToHandle))
             {
                 eventToHandle();
             }
             EventTimeStamp nextEventTime;
             PaxMessage *paxMessage = nullptr;
-            if (Scheduler::OneInstance()->NextEventTime(nextEventTime))
+            if (Scheduler::SingleInstance()->NextEventTime(nextEventTime))
             {
                 if (msgProv_->Take(paxMessage, Time::DurationMS(STEADY_TIME_NOW, nextEventTime)))
                 {

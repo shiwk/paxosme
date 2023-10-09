@@ -25,7 +25,7 @@ class LongLife
 {
 public:
     template <class TClass>
-    static TClass *CreateInstance() { return TClass::SingleInstance(); }
+    static TClass *Instance() { return TClass::SingleInstance(); }
 };
 
 class ShortLife

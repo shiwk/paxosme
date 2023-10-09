@@ -103,7 +103,7 @@ bool DataBaseLogStorage::Delete(const LogEntryKey &log_entry_key)
         return false;
     }
 
-    st = segment_store_->Remove(segment_index);
+    st = segment_store_->RemoveAsync(segment_index);
 
     if (!st)
     {

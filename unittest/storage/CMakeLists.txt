@@ -1,5 +1,6 @@
 enable_testing()
 
+add_definitions(-DFINITE_SCHEDULE_LOOP)
 add_subdirectory(${ROOT_DIR}/src/util util)
 add_subdirectory(${ROOT_DIR}/src/storage storage)
 
@@ -15,6 +16,7 @@ add_executable(test_storage
 # otherwise specify option "-DLEVELDB_BUILD_TESTS=OFF".
 # you cannot just link libgtest(gtest_main) built from leveldb, as the linking error of undefined symbol "typeinfo for testing::Test"   
 SET(LEVELDB_BUILD_TESTS OFF CACHE BOOL "Build tests of leveldb.")
+
 
 add_subdirectory(${ROOT_DIR}/3rd_party/leveldb leveldb)
 target_link_libraries(test_storage gtest gtest_main)

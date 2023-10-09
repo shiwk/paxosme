@@ -110,10 +110,6 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     }
 
     cur_segment_fd_ = fd;
-    
-    
-
-
 
     // padding
     segment_max_size_ = options.segmentMaxSize;
@@ -146,6 +142,13 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         cur_segment_offset_ = offset;
         assert(replay_res);
     }
+
+    #ifdef FINITE_SCHEDULE_LOOP
+        LOG(INFO) << "FINITE_SCHEDULE_LOOP: "<< FINITE_SCHEDULE_LOOP;
+    #endif
+    auto mainLoop = [this](){ return scheduler_->AutoDispatch(nullptr); };
+    segment_clean_future_ = std::move(std::async(std::launch::async, mainLoop));
+    // std::future<void*> fut = std::async(std::launch::async, mainLoop);
     return true;
 }
 
@@ -158,11 +161,11 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
     ParseSegmentIndex(segment_index, segment_id, offset, parse_checksum);
 
     FD segment_fd;
-    bool st = OpenSegment(segment_id, segment_fd);
+    bool st = OpenSegment(segment_id, segment_fd, false);
     if (!st)
     {
         // on err, open segment failed
-        LOG(ERROR) << "Open segment failed.";
+        LOG(ERROR) << "Open segment " << segment_id << " failed.";
         return false;
     }
 
@@ -185,7 +188,7 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
     if (read_len != sizeof(size_t))
     {
         // on err, read kv_size failed
-        LOG(ERROR) << "Read segment failed.";
+        LOG(ERROR) << "Read segment " << segment_id << " failed.";
         close(segment_fd);
         return false;
     }
@@ -262,7 +265,7 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
     }
 
     // NewSegment will set the new segement and offset pos if need
-    if (cur_segment_offset_ + value_size > cur_segment_file_size_)
+    if (cur_segment_offset_ + buffer_length > cur_segment_file_size_)
     {
         // LOG(INFO) << "cur_segment_file_size :" << cur_segment_file_size_;
         // truncate current segment as not enough space for new log
@@ -327,7 +330,7 @@ bool LogSegmentStore::Append(const std::string &key, const std::string &value, S
 /*
     NOTE: assume that Remove as the sequence of append
 */
-bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
+bool LogSegmentStore::RemoveAsync(const SegmentIndex &segment_index)
 {
     SEGMENT_ID segment_id;
     off_t offset;
@@ -339,11 +342,11 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
     if (!st)
     {
         // on err, open segment failed
+        LOG(ERROR) << "Open segment failed.";
         return false;
     }
-    
 
-    if (!lseek(segment_fd, offset, SEEK_SET))
+    if (lseek(segment_fd, offset, SEEK_SET) == -1)
     {
         // on err, seek failed
         close(segment_fd);
@@ -353,6 +356,7 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
     size_t kv_size;
     // todo II: read file with c++ style
     size_t read_len = read(segment_fd, &kv_size, sizeof(size_t));
+
     if (read_len != sizeof(size_t))
     {
         // on err, read kv_size failed
@@ -361,20 +365,22 @@ bool LogSegmentStore::Remove(const SegmentIndex &segment_index)
     }
 
     off_t next = offset + sizeof(size_t) + kv_size;
+    LOG(INFO) << "next: " << next;
     off_t end = lseek(segment_fd, 0, SEEK_END);
+    LOG(INFO) << "end: " << end;
     close(segment_fd);
 
     if (next == end)
     {
         // delete this segment in which all logs have been removed
         EventTimeStamp t = STEADY_TIME_NOW;
-        const int delayInMilli = 100;
-        const std::chrono::duration<int> delay(delayInMilli);
-        t.operator+=(delay);
+        const int delayInMilli = 1000 * SEGMENT_CLEAN_DELAY_IN_SECONDS;
+        const std::chrono::duration<int, std::milli> delay(delayInMilli);
+        // t += delay;
 
-        // 10 is the safe distance, TBD
-        auto callback = [this, segment_id] { DeleteSegmentBefore(segment_id - 10); };
-        Scheduler::OneInstance()->AddEvent(callback, t, kEVENT_CLEAN_SEGMENT);
+        auto callback = [this, segment_id] { DeleteSegment(segment_id); };
+        scheduler_->AddEvent(callback, t, kEVENT_CLEAN_SEGMENT);
+        LOG(INFO) << "AddEvent to clean segment " << segment_id;
         // todo I: loop for segment clean
     }
 
@@ -688,6 +694,7 @@ const std::string LogSegmentStore::ToSegmentPath(const SEGMENT_ID &segment_id)
 
 bool LogSegmentStore::DeleteSegment(const SEGMENT_ID segment_id)
 {
+    LOG(INFO) << "Delete segment " << segment_id;
     const std::string path = ToSegmentPath(segment_id);
     bool st = remove(path.c_str());
     if (st != 0)
@@ -695,6 +702,7 @@ bool LogSegmentStore::DeleteSegment(const SEGMENT_ID segment_id)
         // on err, delete segment failed.
         return false;
     }
+    // LOG(INFO) << "Delete segment " << segment_id;
 
     return true;
 }

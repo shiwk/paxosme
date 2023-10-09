@@ -38,13 +38,20 @@ public:
 
     void Remove(EventType);
 
-    static Scheduler *OneInstance()
+    static Scheduler *SingleInstance()
     {
         static Scheduler scheduler;
         return &scheduler;
     }
 
-private:
+    static Scheduler *New()
+    {
+        return new Scheduler();
+    };
+
+    void *AutoDispatch(void *);
+
+    private:
     MyUnorderedMap<EventType, EventId> eventTypeIdMap_;
     EventQueue eventQueue_;
     EventId eventId_;
