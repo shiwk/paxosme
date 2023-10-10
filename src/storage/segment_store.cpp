@@ -152,7 +152,6 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         auto mainLoop = [this]()
         { return scheduler_->AutoDispatch(nullptr); };
         segment_clean_future_ = std::move(std::async(std::launch::async, mainLoop));
-        // std::future<void*> fut = std::async(std::launch::async, mainLoop);
     }
     return true;
 }
@@ -379,7 +378,7 @@ bool LogSegmentStore::RemoveAsync(const SegmentIndex &segment_index)
         EventTimeStamp t = STEADY_TIME_NOW;
         const int delayInMilli = 1000 * SEGMENT_CLEAN_DELAY_IN_SECONDS;
         const std::chrono::duration<int, std::milli> delay(delayInMilli);
-        // t += delay;
+        t += delay;
 
         auto callback = [this, segment_id]
         { DeleteSegment(segment_id); };

@@ -341,11 +341,9 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
         SegmentIndex segmentIndex;
         std::string key = SizeString::ToHexString(i++);
 
-
         bool appendResult = segmentStore->Append(key, value, segmentIndex);
         segment_bytes += sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + value.size();
 
-        
         ASSERT_TRUE(appendResult);
         ASSERT_FALSE(segmentIndex.empty());
         if (segment_bytes <= segmentMaxSize)
@@ -366,17 +364,17 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
         ASSERT_TRUE(readResult);
     }
 
-    sleep(SEGMENT_CLEAN_DELAY_IN_SECONDS + 1);
-    
-    // i = 1;
-    // for (auto segmentIndex : segmentIndexs)
-    // {
-    //     std::string key = SizeString::ToHexString(i++), readValue;
-    //     bool readResult = segmentStore->Read(segmentIndex, key, readValue);
-    //     ASSERT_TRUE(readResult);
-    // }
+    sleep(SEGMENT_CLEAN_DELAY_IN_SECONDS - 2);
 
-    // sleep(2);
+    i = 1;
+    for (auto segmentIndex : segmentIndexs)
+    {
+        std::string key = SizeString::ToHexString(i++), readValue;
+        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        ASSERT_TRUE(readResult) << "key: " << key;
+    }
+
+    sleep(3);
 
     i = 1;
     for (auto segmentIndex : segmentIndexs)
@@ -385,7 +383,50 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
         bool readResult = segmentStore->Read(segmentIndex, key, readValue);
         ASSERT_FALSE(readResult);
     }
+}
 
-    LOG(INFO) << "case over.";
-    
+TEST_F(TestSegmentStoreTests, TestGetLastSegmentIdAndGetCurrentOffset)
+{
+    auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+
+    size_t segmentMaxSize = 1024;
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+
+    bool initResult = segmentStore->Init(logStorageOptions);
+    ASSERT_TRUE(initResult);
+
+    std::vector<SegmentIndex> segmentIndexs;
+
+    off_t offset = 0;
+    instance_id_t i = 1;
+    SEGMENT_ID segmentId = 0;
+
+    while (true)
+    {
+        const std::string &value = std::string(i, 'a');
+
+        SegmentIndex segmentIndex;
+        std::string key = SizeString::ToHexString(i);
+
+        // LOG(INFO) << "key:" << key << ", len:" << key.size();
+        bool appendResult = segmentStore->Append(key, value, segmentIndex);
+        // LOG(INFO) << "segmentIndex:" << segmentIndex;
+        if (!appendResult)
+        {
+            break;
+        }
+
+        CHECKSUM checkSum;
+        SEGMENT_ID newSegmentId;
+        off_t newOffset;
+        LogSegmentStore::ParseSegmentIndex(segmentIndex, newSegmentId, newOffset, checkSum);
+        ++i;
+
+        SEGMENT_ID lastSegmentId = segmentStore->GetLastSegmentId();
+        ASSERT_EQ(newSegmentId, lastSegmentId);
+
+        ASSERT_EQ(newOffset, newSegmentId > segmentId ? 0 : offset) << ", i:" << i << ", newSegmentId: " << newSegmentId << ", segmentId: " << segmentId << ", newOffset: " << newOffset << ", offset: " << offset;
+        offset = segmentStore->GetCurrentOffset();
+        segmentId = newSegmentId;
+    }
 }

@@ -12,7 +12,7 @@
 
 #define SEGMENT_STORE_DIR "segment"
 #define METADATA_FILE ".metadata"
-#define SEGMENT_CLEAN_DELAY_IN_SECONDS 3
+#define SEGMENT_CLEAN_DELAY_IN_SECONDS 10
 
 using SEGMENT_ID = int32_t;
 using CHECKSUM = unsigned long;
@@ -33,7 +33,6 @@ public:
     
     static LogSegmentStore *New();
     static LogSegmentStore *SingleInstance();
-    static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
     static void ParseSegmentIndex(const SegmentIndex &, SEGMENT_ID &, off_t &, CHECKSUM &);
     ~LogSegmentStore();
 
@@ -48,6 +47,7 @@ private:
     bool DeleteSegment(const SEGMENT_ID);
     bool DeleteSegmentBefore(const SEGMENT_ID);
     bool ReplaySegment(const SEGMENT_ID &, off_t &);
+    static void ToSegmentIndex(const SEGMENT_ID, const off_t, const CHECKSUM, SegmentIndex &);
 
 private:
     std::string db_path_;
