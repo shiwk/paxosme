@@ -3,8 +3,8 @@
 
 bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_options)
 {
-    if (dbpath_.empty())
-        return true;
+    // if (dbpath_.empty())
+    //     return true;
 
     dbpath_ = log_storage_options.dbPath;
     leveldb::Options oOptions;
@@ -34,6 +34,11 @@ bool LogIndexDB::DelIndex(const std::string &idx_key)
 {
     leveldb::Status status = leveldb_->Delete(leveldb::WriteOptions(), idx_key);
     return status.ok();
+}
+
+LogIndexDB *LogIndexDB::New()
+{
+    return new LogIndexDB;
 }
 
 bool LogIndexDB::GetLastIndex(std::string &idx_val)
