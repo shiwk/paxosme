@@ -9,7 +9,9 @@ bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_
     dbpath_ = log_storage_options.dbPath;
     leveldb::Options oOptions;
     oOptions.create_if_missing = true;
-    auto status = leveldb::DB::Open(oOptions, dbpath_, &leveldb_);
+    leveldb::DB * db;
+    auto status = leveldb::DB::Open(oOptions, dbpath_, &db);
+    leveldb_.reset(db);
 
     if (!status.ok())
     {

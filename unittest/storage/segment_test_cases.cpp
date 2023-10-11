@@ -13,23 +13,23 @@ TEST_F(TestSegmentStoreTests, SegmentStoreInit)
 {
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, 1024, SizeString::HexStringSize<instance_id_t>()};
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);
 
-    std::string dbPath = DirPath + "/" + SEGMENT_STORE_DIR;
-    bool dirExists = TestSegmentStoreTests::DirExists(dbPath);
+    std::string dbPath = SegmentPath + "/" + SEGMENT_STORE_DIR;
+    bool dirExists = FSHelper::DirExists(dbPath);
     ASSERT_TRUE(dirExists);
 
     std::string metaPath = dbPath + "/" + METADATA_FILE;
-    dirExists = TestSegmentStoreTests::DirExists(metaPath);
+    dirExists = FSHelper::DirExists(metaPath);
     ASSERT_TRUE(dirExists);
 
     std::string segmentPath = dbPath + "/0";
-    dirExists = TestSegmentStoreTests::DirExists(segmentPath);
+    dirExists = FSHelper::DirExists(segmentPath);
     ASSERT_TRUE(dirExists);
 
-    size_t segmentSize = TestSegmentStoreTests::FileSize(segmentPath);
+    size_t segmentSize = FSHelper::FileSize(segmentPath);
     ASSERT_EQ(1024, segmentSize);
 }
 
@@ -45,7 +45,7 @@ TEST_F(TestSegmentStoreTests, SegmentStoreInitDirPathNotExists)
 TEST_F(TestSegmentStoreTests, SegmentStoreInitWithZeroKeyLength)
 {
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, 0};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, 1024, 0};
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_FALSE(initResult);
 }
@@ -64,7 +64,7 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWriteInFirstSegment)
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
 
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);
@@ -116,7 +116,7 @@ TEST_F(TestSegmentStoreTests, ReadWriteInMultiSegments)
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
 
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);
@@ -172,7 +172,7 @@ TEST_F(TestSegmentStoreTests, ReadWriteInMultiSegments)
 
 TEST_F(TestSegmentStoreTests, InitWithSegmentExistSegment)
 {
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, 1024, SizeString::HexStringSize<instance_id_t>()};
 
     auto segmentStore1 = ShortLife::CreateInstance<LogSegmentStore>();
     bool initResult = segmentStore1->Init(logStorageOptions);
@@ -204,7 +204,7 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
 
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);
@@ -246,7 +246,7 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
 TEST_F(TestSegmentStoreTests, TestReplayLog)
 {
     auto segmentStore1 = ShortLife::CreateInstance<LogSegmentStore>();
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, 1024, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, 1024, SizeString::HexStringSize<instance_id_t>()};
     bool initResult = segmentStore1->Init(logStorageOptions);
 
     SegmentIndex segmentIndex;
@@ -272,7 +272,7 @@ TEST_F(TestSegmentStoreTests, TestReplayMultiLogs)
 {
     auto segmentStore1 = ShortLife::CreateInstance<LogSegmentStore>();
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
     bool initResult = segmentStore1->Init(logStorageOptions);
 
     instance_id_t i = 1;
@@ -323,7 +323,7 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>(), true};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>(), true};
 
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);
@@ -390,7 +390,7 @@ TEST_F(TestSegmentStoreTests, TestGetLastSegmentIdAndGetCurrentOffset)
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
 
     size_t segmentMaxSize = 1024;
-    paxosme::LogStorage::LogStorageOptions logStorageOptions = {DirPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {SegmentPath, segmentMaxSize, SizeString::HexStringSize<instance_id_t>()};
 
     bool initResult = segmentStore->Init(logStorageOptions);
     ASSERT_TRUE(initResult);

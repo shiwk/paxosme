@@ -14,7 +14,7 @@ public:
     static LogIndexDB *New();
     bool GetLastIndex(std::string &);
 private:
-    leveldb::DB *leveldb_;
+    std::shared_ptr<leveldb::DB>leveldb_;
     std::string dbpath_;
 };
 
