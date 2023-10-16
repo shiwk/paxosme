@@ -12,7 +12,7 @@ public:
     bool PutIndex(const std::string &idx_key, const std::string &idx_val);
     bool DelIndex(const std::string &idx_key);
     static LogIndexDB *New();
-    bool GetLastIndex(std::string &);
+    bool GetLastIndex(std::string &idx_key, std::string &idx_val);
 private:
     std::shared_ptr<leveldb::DB>leveldb_;
     std::string dbpath_;

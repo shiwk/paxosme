@@ -1,5 +1,6 @@
 
 #include "index_db.hpp"
+#include <glog/logging.h>
 
 bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_options)
 {
@@ -43,10 +44,11 @@ LogIndexDB *LogIndexDB::New()
     return new LogIndexDB;
 }
 
-bool LogIndexDB::GetLastIndex(std::string &idx_val)
+bool LogIndexDB::GetLastIndex(std::string &idx_key, std::string &idx_val)
 {
-    auto iter = leveldb_->NewIterator(leveldb::ReadOptions());
-
+    leveldb::ReadOptions readOptions;
+    readOptions.fill_cache = false;
+    std::shared_ptr<leveldb::Iterator> iter= std::shared_ptr<leveldb::Iterator>(leveldb_->NewIterator(readOptions));
     // iter is invalid before seek
     iter->SeekToLast();
 
@@ -56,9 +58,10 @@ bool LogIndexDB::GetLastIndex(std::string &idx_val)
     {
         // no indexkey found
         idx_val = "";
-        delete iter;
-        return true;
+        return false;
     }
-    delete iter;
-    return GetIndex(iter->key().ToString(), idx_val);
+
+    auto st = iter->status();
+    idx_key = iter->key().ToString();
+    return GetIndex(idx_key, idx_val);
 }

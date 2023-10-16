@@ -131,7 +131,8 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
 {
     // reload index in history in case failover (ie. failover between append to logsegment and write index to index_db)
     SegmentIndex exist_log_index;
-    bool last_index_key_exists = log_index_db_->GetLastIndex(exist_log_index);
+    std::string idx_key;
+    bool last_index_key_exists = log_index_db_->GetLastIndex(idx_key, exist_log_index);
 
     if (!last_index_key_exists)
     {

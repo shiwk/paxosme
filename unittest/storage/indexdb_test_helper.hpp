@@ -5,7 +5,7 @@
 #include <glog/logging.h>
 #include "fs_helper.hpp"
 
-static const std::string &DBPath = "/tmp/indexdb_test";
+static const std::string &DBPath = "/tmp/indexdb_test/test";
 
 class IndexDbTests : public ::testing::Test
 {
