@@ -91,8 +91,10 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWriteInFirstSegment)
         ASSERT_FALSE(segmentIndex.empty());
 
         std::string readValue;
-        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
         ASSERT_TRUE(readResult) << "key: " << key;
+        ASSERT_EQ(key, readKey);
         ASSERT_EQ(value, readValue);
 
         CHECKSUM checkSum;
@@ -105,8 +107,10 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentAndReadWriteInFirstSegment)
         const std::string &value = "test-value" + std::to_string(i);
         std::string key = SizeString::ToHexString(i);
         std::string readValue;
-        bool readResult = segmentStore->Read(segmentIndexs[i - 1], key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndexs[i - 1], readKey, readValue);
         ASSERT_TRUE(readResult) << "key: " << key;
+        ASSERT_EQ(key, readKey);
         ASSERT_EQ(value, readValue);
     }
 }
@@ -143,8 +147,10 @@ TEST_F(TestSegmentStoreTests, ReadWriteInMultiSegments)
         ASSERT_FALSE(segmentIndex.empty());
 
         std::string readValue;
-        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
         // ASSERT_TRUE(readResult) << "key: "<< key;
+        ASSERT_EQ(key, readKey);
         ASSERT_EQ(value, readValue);
 
         CHECKSUM checkSum;
@@ -162,8 +168,11 @@ TEST_F(TestSegmentStoreTests, ReadWriteInMultiSegments)
     ASSERT_FALSE(segmentIndex.empty());
 
     std::string readValue;
-    bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+    std::string readKey;
+    bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
+    ASSERT_EQ(key, readKey);
     ASSERT_EQ(value, readValue);
+
 
     CHECKSUM checkSum;
     LogSegmentStore::ParseSegmentIndex(segmentIndex, segmentId, offset, checkSum);
@@ -186,16 +195,19 @@ TEST_F(TestSegmentStoreTests, InitWithSegmentExistSegment)
     ASSERT_TRUE(appendResult);
 
     std::string readValue;
-    bool readResult = segmentStore1->Read(segmentIndex, key, readValue);
+    std::string readKey;
+    bool readResult = segmentStore1->Read(segmentIndex, readKey, readValue);
     ASSERT_TRUE(readResult);
+    ASSERT_EQ(key, readKey);
     ASSERT_EQ(value, readValue);
 
     auto segmentStore2 = ShortLife::CreateInstance<LogSegmentStore>();
     initResult = segmentStore2->Init(logStorageOptions);
     ASSERT_TRUE(initResult);
 
-    readResult = segmentStore2->Read(segmentIndex, key, readValue);
+    readResult = segmentStore2->Read(segmentIndex, readKey, readValue);
     ASSERT_TRUE(readResult);
+    ASSERT_EQ(key, readKey);
     ASSERT_EQ(value, readValue);
 }
 
@@ -227,8 +239,10 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
         ASSERT_FALSE(segmentIndex.empty());
 
         std::string readValue;
-        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
         ASSERT_TRUE(readResult) << "key: " << key << " i: " << i;
+        ASSERT_EQ(key, readKey);
         ASSERT_EQ(value, readValue);
     } while (sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + ++i <= segmentMaxSize);
 
@@ -236,9 +250,11 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
     {
         std::string key = SizeString::ToHexString(i);
         std::string readValue;
+        std::string readKey;
         
-        bool readResult = segmentStore->Read(segmentIndexs[i - 1], key, readValue);
+        bool readResult = segmentStore->Read(segmentIndexs[i - 1], readKey, readValue);
         ASSERT_TRUE(readResult) << "key: " << key;
+        ASSERT_EQ(key, readKey);
         const std::string &value = std::string(i, 'a');
         ASSERT_EQ(value, readValue);
     }
@@ -256,7 +272,9 @@ TEST_F(TestSegmentStoreTests, TestReplayLog)
     const std::string &value = "test-value" + std::to_string(i);
     bool appendResult = segmentStore1->Append(key, value, segmentIndex);
     std::string readValue;
-    bool readResult = segmentStore1->Read(segmentIndex, key, readValue);
+    std::string readKey;
+    bool readResult = segmentStore1->Read(segmentIndex, readKey, readValue);
+    ASSERT_EQ(key, readKey);
 
     auto segmentStore2 = ShortLife::CreateInstance<LogSegmentStore>();
     segmentStore2->Init(logStorageOptions);
@@ -361,8 +379,10 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
     for (auto segmentIndex : segmentIndexs)
     {
         std::string key = SizeString::ToHexString(i++), readValue;
-        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
         ASSERT_TRUE(readResult);
+        ASSERT_EQ(key, readKey);
     }
 
     sleep(SEGMENT_CLEAN_DELAY_IN_SECONDS - 2);
@@ -371,8 +391,10 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
     for (auto segmentIndex : segmentIndexs)
     {
         std::string key = SizeString::ToHexString(i++), readValue;
-        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
         ASSERT_TRUE(readResult) << "key: " << key;
+        ASSERT_EQ(key, readKey);
     }
 
     sleep(3);
@@ -381,7 +403,8 @@ TEST_F(TestSegmentStoreTests, TestRemoveAsync)
     for (auto segmentIndex : segmentIndexs)
     {
         std::string key = SizeString::ToHexString(i++), readValue;
-        bool readResult = segmentStore->Read(segmentIndex, key, readValue);
+        std::string readKey;
+        bool readResult = segmentStore->Read(segmentIndex, readKey, readValue);
         ASSERT_FALSE(readResult);
     }
 }

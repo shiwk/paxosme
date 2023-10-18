@@ -137,8 +137,6 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
         // replay latest segment and get offset
         off_t offset = 0;
         bool replay_res = ReplaySegment(cur_segment_id_, offset);
-        LOG(INFO) << "replay_res " << replay_res;
-        LOG(INFO) << "segment offset " << offset;
         cur_segment_offset_ = offset;
         assert(replay_res);
     }
