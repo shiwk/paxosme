@@ -10,6 +10,7 @@
 class DataBaseLogStorage : public paxosme::LogStorage
 {
 public:
+    DataBaseLogStorage(std::shared_ptr<LogIndexDB>, std::shared_ptr<LogSegmentStore>);
     bool Init(const LogStorageOptions &) override;
 
     bool Put(const LogEntryKey &, const LogEntryValue &) override;
@@ -18,13 +19,15 @@ public:
 
     bool Delete(const LogEntryKey &) override;
 
+    static DataBaseLogStorage* New(std::shared_ptr<LogIndexDB>, std::shared_ptr<LogSegmentStore>);
+
 private:
     static SegmentIndex ToIndexKey(const LogEntryKey &);
 
 private:
     bool AlignIndexWithSegmentStore();
     std::string dbpath_;
-    LogIndexDB *log_index_db_;
-    LogSegmentStore *segment_store_;
+    std::shared_ptr<LogIndexDB> log_index_db_;
+    std::shared_ptr<LogSegmentStore> segment_store_;
 };
 #endif

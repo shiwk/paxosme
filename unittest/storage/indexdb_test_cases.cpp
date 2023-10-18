@@ -78,8 +78,6 @@ TEST_F(IndexDbTests, TestGetLastIndex)
 
     for (size_t i = 0; i <= end; i++)
     {
-        // todo I: use id binay as key
-        
         std::string key;
         key.append((char *)&i, sizeof(size_t));
         std::string value = "value" + std::to_string(i);

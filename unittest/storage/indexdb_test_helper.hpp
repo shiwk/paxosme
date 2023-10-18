@@ -6,6 +6,8 @@
 #include "fs_helper.hpp"
 
 static const std::string &DBPath = "/tmp/indexdb_test/test";
+static const std::string &SegmentPath = "/tmp/segment_test";
+
 
 class IndexDbTests : public ::testing::Test
 {
@@ -16,7 +18,6 @@ public:
     ~IndexDbTests();
 
 protected:
-    // virtual void SetUp() override;
     virtual void TearDown() override;
 };
 

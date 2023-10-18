@@ -6,6 +6,12 @@
  */
 
 #include "log_storage.hpp"
+#include <glog/logging.h>
+
+DataBaseLogStorage::DataBaseLogStorage(std::shared_ptr<LogIndexDB> logIndexDb, std::shared_ptr<LogSegmentStore> logSegmentsStore)
+    : log_index_db_(logIndexDb), segment_store_(logSegmentsStore)
+{
+}
 
 bool DataBaseLogStorage::Init(const LogStorageOptions &log_storage_options)
 {
@@ -74,17 +80,20 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     }
 
     // read segment with offset
+    LOG(INFO) << "segment index: " << segment_index << " key: " << (instance_id_t)(key.c_str()) << " value: " << value;
     std::string key_in_segment;
     bool read_res = segment_store_->Read(segment_index, key_in_segment, value);
 
     if (!read_res)
     {
+        LOG(ERROR) << "read segment failed";
         return false;
     }
 
-    if (key_in_segment != key)
+    if (key_in_segment != index_key)
     {
         // on err, key not matched
+        LOG(ERROR) << "key not matched";
         return false;
     }
 
@@ -119,6 +128,11 @@ bool DataBaseLogStorage::Delete(const LogEntryKey &log_entry_key)
     }
 
     return true;
+}
+
+DataBaseLogStorage *DataBaseLogStorage::New(std::shared_ptr<LogIndexDB> log_index_db, std::shared_ptr<LogSegmentStore>log_segment_store)
+{
+    return new DataBaseLogStorage(log_index_db, log_segment_store);
 }
 
 std::string DataBaseLogStorage ::ToIndexKey(const LogEntryKey &log_entry_key)
@@ -180,8 +194,4 @@ bool DataBaseLogStorage::AlignIndexWithSegmentStore()
     return true;
 }
 
-paxosme::LogStorage *paxosme::LogStorage::New()
-{
-    auto logStorage = new DataBaseLogStorage;
-    return logStorage;
-}
+

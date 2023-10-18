@@ -236,6 +236,7 @@ TEST_F(TestSegmentStoreTests, ReadWriteMultiSize)
     {
         std::string key = SizeString::ToHexString(i);
         std::string readValue;
+        
         bool readResult = segmentStore->Read(segmentIndexs[i - 1], key, readValue);
         ASSERT_TRUE(readResult) << "key: " << key;
         const std::string &value = std::string(i, 'a');

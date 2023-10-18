@@ -156,7 +156,7 @@ bool LogSegmentStore::Init(const paxosme::LogStorage::LogStorageOptions &options
     return true;
 }
 
-bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index_key, std::string &value_in_segment)
+bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &key_in_segment, std::string &value_in_segment)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     SEGMENT_ID segment_id;
@@ -209,16 +209,15 @@ bool LogSegmentStore::Read(const SegmentIndex &segment_index, std::string &index
         return false;
     }
 
-    const std::string &key_in_segment = keyValue.substr(0, index_key_length_);
+    key_in_segment = keyValue.substr(0, index_key_length_);
     // LOG(INFO) << "key_in_segment: " << key_in_segment;
 
-    if (key_in_segment != index_key)
-    {
-        // on err, key_in_segment not match
-        LOG(ERROR) << "key_in_segment not match. key_in_segment: " << key_in_segment << " index_key: " << index_key;
-        close(segment_fd);
-        return false;
-    }
+    // if (key_in_segment != index_key)
+    // {
+    //     // on err, key_in_segment not match
+    //     close(segment_fd);
+    //     return false;
+    // }
 
     size_t value_len = kv_size - index_key_length_;
     read_len = read(segment_fd, (void *)(keyValue.c_str() + index_key_length_), value_len);
