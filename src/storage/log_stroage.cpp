@@ -80,7 +80,7 @@ bool DataBaseLogStorage::Get(const LogEntryKey &key, LogEntryValue &value)
     }
 
     // read segment with offset
-    LOG(INFO) << "segment index: " << segment_index << " key: " << (instance_id_t)(key.c_str()) << " value: " << value;
+    LOG(INFO) << "segment index: " << segment_index << " key: " << *((instance_id_t*)key.c_str()) << " value: " << value;
     std::string key_in_segment;
     bool read_res = segment_store_->Read(segment_index, key_in_segment, value);
 

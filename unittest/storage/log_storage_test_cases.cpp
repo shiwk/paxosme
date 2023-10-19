@@ -79,7 +79,43 @@ TEST_F(LogStorageTests, TestLogStorageDelete)
     ASSERT_FALSE(delRes);
 }
 
-TEST_F(LogStorageTests, InitWithExistStorage)
+TEST_F(LogStorageTests, InitWithExistLogs)
 {
+    {
+        auto logIndexDb = ShortLife::CreateInstance<LogIndexDB>();
+        auto logSegmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+        auto logStorage = ShortLife::CreateInstance<DataBaseLogStorage>(logIndexDb, logSegmentStore);
+        paxosme::LogStorage::LogStorageOptions logStorageOptions = {LogStoragePath, 1024, sizeof(instance_id_t)};
+        logStorage->Init(logStorageOptions);
+
+        std::string key;
+        instance_id_t i = 1234;
+        key.append((char *)&i, sizeof(instance_id_t));
+
+        std::string putValue = "value1";
+        bool putRes = logStorage->Put(key, putValue);
+        ASSERT_TRUE(putRes);
+
+        std::string getValue;
+        bool getRes = logStorage->Get(key, getValue);
+        ASSERT_TRUE(getRes) << "key: " << key;
+        ASSERT_EQ("value1", getValue);
+    }
+
+    auto logIndexDb = ShortLife::CreateInstance<LogIndexDB>();
+    auto logSegmentStore = ShortLife::CreateInstance<LogSegmentStore>();
+    auto logStorage = ShortLife::CreateInstance<DataBaseLogStorage>(logIndexDb, logSegmentStore);
     
+    std::string key;
+    instance_id_t i = 1234;
+    key.append((char *)&i, sizeof(instance_id_t));
+    std::string getValue;
+
+    paxosme::LogStorage::LogStorageOptions logStorageOptions = {LogStoragePath, 1024, sizeof(instance_id_t)};
+    bool initRes = logStorage->Init(logStorageOptions);
+    ASSERT_TRUE(initRes);
+    
+    bool getRes = logStorage->Get(key, getValue);
+    ASSERT_TRUE(getRes) << "key: " << key;
+    ASSERT_EQ("value1", getValue);
 }

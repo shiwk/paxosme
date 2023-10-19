@@ -3,12 +3,6 @@
 #include <segment_store.hpp>
 #include "segment_test_helper.hpp"
 
-// TEST_F(TestAddIntExample, test_add_int)
-// {
-//     int res = 10 + 24;
-//     ASSERT_EQ(res, 34);
-// }
-
 TEST_F(TestSegmentStoreTests, SegmentStoreInit)
 {
     auto segmentStore = ShortLife::CreateInstance<LogSegmentStore>();
@@ -285,6 +279,7 @@ TEST_F(TestSegmentStoreTests, TestReplayLog)
     size_t pos = sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + value.size();
     ASSERT_EQ(pos, repalyRes);
     ASSERT_EQ(key, replayKey);
+    ASSERT_EQ(segmentIndex, replayIndex);
 }
 
 TEST_F(TestSegmentStoreTests, TestReplayMultiLogs)
@@ -296,6 +291,7 @@ TEST_F(TestSegmentStoreTests, TestReplayMultiLogs)
 
     instance_id_t i = 1;
     SEGMENT_ID segmentId = 0;
+    std::vector<SegmentIndex> appendSegmentIndex;
     do
     {
         const std::string &value = std::string(i, 'a');
@@ -305,6 +301,7 @@ TEST_F(TestSegmentStoreTests, TestReplayMultiLogs)
         bool appendResult = segmentStore1->Append(key, value, segmentIndex);
         ASSERT_TRUE(appendResult);
         ASSERT_FALSE(segmentIndex.empty());
+        appendSegmentIndex.push_back(segmentIndex);
     } while (sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + ++i <= segmentMaxSize);
     instance_id_t maxInstanceId = i - 1;
     LOG(INFO) << "maxInstanceId: " << maxInstanceId;
@@ -332,6 +329,7 @@ TEST_F(TestSegmentStoreTests, TestReplayMultiLogs)
         off_t tmpOffset = offset + sizeof(size_t) + SizeString::HexStringSize<instance_id_t>() + value.size();
         ASSERT_EQ(tmpOffset, repalyOffset) << "offset: " << offset << ", segmentId: " << segmentId << ", i: " << i << ", repalyKey: " << replayKey << ", key: " << key;
         ASSERT_EQ(key, replayKey);
+        ASSERT_EQ(appendSegmentIndex[i - 1], replayIndex);
         offset = repalyOffset;
         ++i;
     }

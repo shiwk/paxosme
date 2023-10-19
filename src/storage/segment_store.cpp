@@ -486,24 +486,19 @@ int LogSegmentStore::ReplayLog(const SEGMENT_ID &segment_id, const off_t &offset
         return 0;
     }
 
-    char index_key_buf[index_key_length_];
-    read_len = read(fd, index_key_buf, index_key_length_);
+    char buffer[kvSize];
+    read_len = read(fd, buffer, kvSize);
 
-    if (read_len != index_key_length_)
+    if (read_len != kvSize)
     {
         // todo II: means read to the end if read_len == 0, otherwise needs truncate segment(discard the extra data after pos)
         close(fd);
         return 0;
     }
 
-    index_key = std::string(index_key_buf, index_key_length_);
-    // LOG(INFO) << "replay key: " << index_key;
+    index_key = std::string(buffer, index_key_length_);
 
-    // read next [length - index_key_length_] bytes from fd
-    char buffer[kvSize - index_key_length_];
-    read_len = read(fd, buffer, kvSize - index_key_length_);
-
-    uint32_t checksum = crc32(0, (const uint8_t *)buffer, kvSize - index_key_length_);
+    uint32_t checksum = crc32(0, (const uint8_t *)buffer, kvSize);
 
     close(fd);
     ToSegmentIndex(segment_id, offset, checksum, segment_index);
