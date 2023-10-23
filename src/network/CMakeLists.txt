@@ -9,4 +9,11 @@ add_library(network
 add_subdirectory(grpc)
 add_subdirectory(asio)
 target_include_directories(network PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-target_link_libraries(network PRIVATE network_grpc)
+
+
+if(NETWORK_LIB_NAME STREQUAL "")
+    message(SEND_ERROR "NETWORK_LIB_NAME not set")
+#     set(NETWORK_LIB network_grpc)
+endif()
+
+target_link_libraries(network PRIVATE ${NETWORK_LIB_NAME})

@@ -11,3 +11,4 @@ include_directories(${ROOT_DIR}/include)
 add_subdirectory(${ROOT_DIR}/3rd_party/glog glog)
 
 add_subdirectory(storage)
+add_subdirectory(network)
