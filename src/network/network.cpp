@@ -6,6 +6,7 @@
 #include "network_client.hpp"
 #include "messages.hpp"
 #include "network.hpp"
+#include <glog/logging.h>
 
 #include <memory>
 #include <unordered_map>
@@ -19,7 +20,9 @@ namespace paxosme {
     class NetworkImpl : public Network {
         friend class Network;
 
-        ~NetworkImpl() override = default;
+        ~NetworkImpl() {
+            server_->Shutdown();
+        }
 
     private:
 //        std::deque<std::shared_ptr<Client>> clients;
@@ -47,8 +50,9 @@ namespace paxosme {
     }
 
     Network *Network::New() {
+        LOG(INFO) << "Network::New()";
         auto nwImpl = new NetworkImpl;
-        nwImpl->server_ = std::unique_ptr<NetworkServer>(NetworkServer::New());
+        nwImpl->server_ = std::move(std::unique_ptr<NetworkServer>(NetworkServer::New()));
 
         return nwImpl;
     }

@@ -9,7 +9,7 @@
 #include "network_server.hpp"
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server.h>
-
+#include <future>
 #include <utility>
 
 using paxos::Paxosme;
@@ -21,13 +21,15 @@ namespace paxosme {
 
     public:
         void Start(const Peer &, Network::MsgCallback) override;
+        void Shutdown() override;
         ~GrpcServer() override;
 
     private:
         std::unique_ptr<Server> server_;
         paxos::Paxosme::AsyncService asyncService_;
         std::unique_ptr<grpc::ServerCompletionQueue> cq_;
-
+        std::future<void> handleLoop_;
+        bool is_shutdown_ = false;
         void HandleRpcs();
     };
 

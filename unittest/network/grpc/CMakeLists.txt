@@ -4,6 +4,8 @@ set(NETWORK_LIB_NAME
         ""
         CACHE STRING "network lib name")
 
+# add_definitions(-DFINITE_SCHEDULE_LOOP)
+
 set(NETWORK_LIB_NAME "network_grpc") # network lib
 add_subdirectory(${ROOT_DIR}/src/network network)
 

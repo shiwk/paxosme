@@ -16,4 +16,4 @@ if(NETWORK_LIB_NAME STREQUAL "")
 #     set(NETWORK_LIB network_grpc)
 endif()
 
-target_link_libraries(network PRIVATE ${NETWORK_LIB_NAME})
+target_link_libraries(network PRIVATE ${NETWORK_LIB_NAME} glog::glog)

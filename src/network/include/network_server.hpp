@@ -14,6 +14,7 @@ namespace paxosme {
     public:
         static NetworkServer* New();
         virtual void Start(const Peer &, Network::MsgCallback) = 0;
+        virtual void Shutdown() = 0;
         virtual ~ NetworkServer () = default;;
 
     protected:

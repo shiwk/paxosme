@@ -1,1 +1,1 @@
-add_subdirectory(grpclib)
+add_subdirectory(grpc)

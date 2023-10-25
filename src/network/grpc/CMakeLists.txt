@@ -55,6 +55,7 @@ target_link_libraries(network_grpc
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
         ${Protobuf_LIBRARIES}
+        glog::glog
         )
 
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
