@@ -16,6 +16,7 @@ bool LogIndexDB::Init(const paxosme::LogStorage::LogStorageOptions &log_storage_
 
     if (!status.ok())
     {
+        LOG(ERROR) << status.ToString();
         return false;
     }
     return true;
