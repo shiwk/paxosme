@@ -11,6 +11,7 @@
 #include <grpcpp/server.h>
 #include <future>
 #include <utility>
+#include <mutex>
 
 using paxos::Paxosme;
 using grpc::ServerBuilder;
@@ -29,8 +30,9 @@ namespace paxosme {
         paxos::Paxosme::AsyncService asyncService_;
         std::unique_ptr<grpc::ServerCompletionQueue> cq_;
         std::future<void> handleLoop_;
-        bool is_shutdown_ = false;
+        bool is_running_ = false;
         void HandleRpcs();
+        std::mutex mtx_;
     };
 
     class BaseCallData {

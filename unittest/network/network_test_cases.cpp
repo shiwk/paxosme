@@ -4,7 +4,6 @@
 
 TEST_F(NetworkTests, TestInit)
 {
-    LOG(INFO) << "Network::New()";
     std::shared_ptr<paxosme::Network> network = ShortLife::CreateInstance<paxosme::Network>();
     std::vector<paxosme::Peer> peers;
     peers.emplace_back(paxosme::Network::NodeIdToPeer(1));
@@ -19,4 +18,9 @@ TEST_F(NetworkTests, TestInit)
         msgCallBack};
     
     network->Start(networkOption);
+}
+
+TEST_F(NetworkTests, TestQuit)
+{
+    //todo
 }

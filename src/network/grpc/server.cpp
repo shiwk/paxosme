@@ -14,6 +14,7 @@ namespace paxosme
 
     void GrpcServer::Start(const Peer &endpoint, Network::MsgCallback msg_callback)
     {
+        std::unique_lock<std::mutex> lock(mtx_);
         ServerBuilder builder;
         const std::string &serverAddress(endpoint.ToString());
 
@@ -32,14 +33,17 @@ namespace paxosme
         LOG(INFO) << "Start: handleFunc";
         handleLoop_ = std::move(std::async(std::launch::async, handleFunc));
         // HandleRpcs();
+        is_running_ = true;
     }
 
     void GrpcServer::Shutdown()
     {
-        if (is_shutdown_)
+        std::unique_lock<std::mutex> lock(mtx_);
+        if (!is_running_)
         {
             return;
         }
+        is_running_ = false;
         server_->Shutdown();
         cq_->Shutdown();
     }

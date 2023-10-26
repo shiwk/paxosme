@@ -1,12 +1,5 @@
 enable_testing()
 
-set(NETWORK_LIB_NAME
-        ""
-        CACHE STRING "network lib name")
-
-# add_definitions(-DFINITE_SCHEDULE_LOOP)
-
-set(NETWORK_LIB_NAME "network_grpc") # network lib
 add_subdirectory(${ROOT_DIR}/src/network network)
 
 file(GLOB TEST_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -17,5 +10,10 @@ add_executable(test_network_grpc
     ${TEST_ENV}
     )
 
-target_link_libraries(test_network_grpc gtest gtest_main glog::glog)
-target_link_libraries(test_network_grpc network)
+# message(STATUS "test_network_grpc: " ${CMAKE_CURRENT_BINARY_DIR})
+
+target_include_directories(test_network_grpc PRIVATE ${ROOT_DIR}/src/network/grpc/include)
+target_include_directories(test_network_grpc PRIVATE ${ROOT_DIR}/src/network/include)
+target_include_directories(test_network_grpc PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/network/grpc/protogen)
+
+target_link_libraries(test_network_grpc gtest gtest_main glog::glog network_grpc)

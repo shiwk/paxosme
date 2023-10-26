@@ -51,12 +51,12 @@ add_library(network_grpc
         ${SOURCES}
         ${HEADERS})
 
-target_link_libraries(network_grpc
-        ${_REFLECTION}
+target_link_libraries(network_grpc PRIVATE
         ${_GRPC_GRPCPP}
-        ${Protobuf_LIBRARIES}
         glog::glog
         )
+
+target_link_libraries(network_grpc PUBLIC ${_REFLECTION} ${Protobuf_LIBRARIES})
 
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
 target_include_directories(network_grpc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
