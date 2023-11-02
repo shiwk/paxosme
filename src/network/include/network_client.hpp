@@ -51,7 +51,7 @@ namespace paxosme {
 
     class NetworkClient {
     public:
-        static std::shared_ptr<NetworkClient> New(const Peer &);
+        static NetworkClient* New(const Peer &);
 
         virtual void Send(const PodMsg &) = 0;
     };

@@ -12,6 +12,8 @@
 #include <future>
 #include <utility>
 #include <mutex>
+#include <glog/logging.h>
+
 
 using paxos::Paxosme;
 using grpc::ServerBuilder;
@@ -23,6 +25,7 @@ namespace paxosme {
     public:
         void Start(const Peer &, Network::MsgCallback) override;
         void Shutdown() override;
+        bool Running() override;
         ~GrpcServer() override;
 
     private:
@@ -38,11 +41,16 @@ namespace paxosme {
     class BaseCallData {
     public:
         void Proceed() {
+            const std::string &typeName = typeid(*this).name();
+            LOG(INFO) << typeName << " Proceed: " << status_ ;
             if (status_ == CREATE) {
+                LOG(INFO) << "Proceed: CreateStatusFunc(";
                 CreateStatusFunc();
             } else if (status_ == PROCESS) {
+                LOG(INFO) << "Proceed: ProcessStatusFunc(";
                 ProcessStatusFunc();
             } else {
+                LOG(INFO) << "Proceed: FinishStatusFunc(";
                 FinishStatusFunc();
             }
         }

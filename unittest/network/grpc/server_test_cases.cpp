@@ -14,5 +14,30 @@ TEST_F(GrpcServerTest, TestStart)
         LOG(INFO) << "msgCallBack: " << message;
     };
 
+    bool isRunning = server->Running();
+    EXPECT_FALSE(isRunning);
+
     server->Start(paxosme::Peer{"127.0.0.1", 9999}, msgCallBack);
+    isRunning = server->Running();
+    EXPECT_TRUE(isRunning);
+};
+
+TEST_F(GrpcServerTest, TestShuwdown)
+{
+    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New());
+    std::vector<paxosme::Peer> peers;
+    peers.emplace_back(paxosme::Network::NodeIdToPeer(1));
+
+    paxosme::Network::MsgCallback msgCallBack = [](std::string message)
+    {
+        LOG(INFO) << "msgCallBack: " << message;
+    };
+
+    server->Start(paxosme::Peer{"127.0.0.1", 9999}, msgCallBack);
+    bool isRunning = server->Running();
+    EXPECT_TRUE(isRunning);
+
+    server->Shutdown();
+    isRunning = server->Running();
+    EXPECT_FALSE(isRunning);
 };
