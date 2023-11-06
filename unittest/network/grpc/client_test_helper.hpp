@@ -15,14 +15,27 @@ class GrpcClientTest : public ::testing::Test
     void TearDown() override;
 
     std::shared_ptr<paxosme::NetworkServer> server_;
+
+public:
+    template <class Func, class... Args>
+    static void func(Func f, Args... a);
+    int increment_id_ = 0;
 };
+
+template <class Func, class... Args>
+void GrpcClientTest::func(Func f, Args... a)
+{
+    f(a...);
+}
+
 
 void GrpcClientTest::SetUp()
 {
     server_ = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New());
-    paxosme::Network::MsgCallback msgCallBack = [](std::string message)
+    paxosme::Network::MsgCallback msgCallBack = [this](const std::string message)
     {
-        LOG(INFO) << "msgCallBack: " << message;
+        func([this]() { increment_id_++; });
+        // DLOG(INFO) << "msgCallBack: " << message;
     };
     server_->Start(server, msgCallBack);
 }

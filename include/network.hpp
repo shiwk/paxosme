@@ -77,7 +77,7 @@ namespace paxosme
     class Network
     {
     public:
-        using MsgCallback = std::function<void(std::string)>;
+        using MsgCallback = std::function<void(const std::string)>;
 
         struct NetworkOptions
         {

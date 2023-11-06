@@ -42,15 +42,15 @@ namespace paxosme {
     public:
         void Proceed() {
             const std::string &typeName = typeid(*this).name();
-            LOG(INFO) << typeName << " Proceed: " << status_ ;
+            DLOG(INFO) << typeName << " Proceed: " << status_ ;
             if (status_ == CREATE) {
-                LOG(INFO) << "Proceed: CreateStatusFunc(";
+                DLOG(INFO) << "Proceed: CreateStatusFunc(";
                 CreateStatusFunc();
             } else if (status_ == PROCESS) {
-                LOG(INFO) << "Proceed: ProcessStatusFunc(";
+                DLOG(INFO) << "Proceed: ProcessStatusFunc(";
                 ProcessStatusFunc();
             } else {
-                LOG(INFO) << "Proceed: FinishStatusFunc(";
+                DLOG(INFO) << "Proceed: FinishStatusFunc(";
                 FinishStatusFunc();
             }
         }
