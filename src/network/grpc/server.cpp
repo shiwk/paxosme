@@ -93,11 +93,11 @@ namespace paxosme
 
     void CallDataManager::Procceed(std::unique_ptr<BaseCallData>&& callDataPtr)
     {
-        if (callDataPtr->GetStatus() == BaseCallData::CallStatus::FINISH)
+        callDataPtr->Proceed();
+        if (callDataPtr->Finished())
         {
             return;
         }
-        callDataPtr->Proceed();
         callDataPtr.release();
     }
 
@@ -105,6 +105,4 @@ namespace paxosme
     void CallDataManager::New(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue>cq, Network::MsgCallback msg_callback){
         new CallData<TRequest, TReply>(service, cq, std::move(msg_callback)); 
     }
-
-    
 }
