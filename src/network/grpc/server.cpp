@@ -20,19 +20,22 @@ namespace paxosme
 
         LOG(INFO) << "Server listening on " << serverAddress;
         builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
+        
         builder.RegisterService(&asyncService_);
 
         cq_ = std::move(builder.AddCompletionQueue());
         server_ = std::move(builder.BuildAndStart());
 
-        msgCallback_ = msg_callback;
+        msgCallback_ = std::move(msg_callback);
 
         // Proceed to the server's main loop.
-        auto handleFunc = [this]()
-        { return this->HandleRpcs(); };
+        handleLoop_ = std::move(std::async(std::launch::async, [this]()
+        {
+            LOG(INFO) << "Start: handleFunc";
+            this->PrepareCallData();
+            return this->HandleRpcs();
+        }));
 
-        LOG(INFO) << "Start: handleFunc";
-        handleLoop_ = std::move(std::async(std::launch::async, handleFunc));
         // HandleRpcs();
         is_running_ = true;
     }
@@ -58,13 +61,7 @@ namespace paxosme
     // refer to https://github.com/grpc/grpc/blob/v1.52.0/examples/cpp/helloworld/greeter_async_server.cc
     void GrpcServer::HandleRpcs()
     {
-        // Spawn a new CallData instance to serve new clients.
-        new CallData<paxos::ProposeRequest, paxos::ProposeReply>(&asyncService_, cq_.get(), msgCallback_);
-        new CallData<paxos::ProposeAckRequest, paxos::ProposeAckReply>(&asyncService_, cq_.get(), msgCallback_);
-        new CallData<paxos::AcceptRequest, paxos::AcceptReply>(&asyncService_, cq_.get(), msgCallback_);
-        new CallData<paxos::AcceptAckRequest, paxos::AcceptAckReply>(&asyncService_, cq_.get(), msgCallback_);
-        new CallData<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>(&asyncService_, cq_.get(), msgCallback_);
-        // todo I: check more call data
+        
         void *tag; // uniquely identifies a request.
         bool ok;
         LOG(INFO) << "Server handling..";
@@ -72,13 +69,42 @@ namespace paxosme
         {
             if (ok)
             {
-                static_cast<BaseCallData *>(tag)->Proceed();
+                auto callDataPtr = std::unique_ptr<BaseCallData>(static_cast<BaseCallData *>(tag));
+                CallDataManager::Procceed(std::move(callDataPtr));
             }
         }
+    }
+
+    void GrpcServer::PrepareCallData()
+    {
+        // Spawn a new CallData instance to serve new clients.
+        CallDataManager::New<paxos::ProposeRequest, paxos::ProposeReply>(&asyncService_, cq_, msgCallback_);
+        CallDataManager::New<paxos::ProposeAckRequest, paxos::ProposeAckReply>(&asyncService_, cq_, msgCallback_);
+        CallDataManager::New<paxos::AcceptRequest, paxos::AcceptReply>(&asyncService_, cq_, msgCallback_);
+        CallDataManager::New<paxos::AcceptAckRequest, paxos::AcceptAckReply>(&asyncService_, cq_, msgCallback_);
+        CallDataManager::New<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>(&asyncService_, cq_, msgCallback_);
+        // todo I: check more call data
     }
 
     NetworkServer *NetworkServer::New()
     {
         return new GrpcServer;
     }
+
+    void CallDataManager::Procceed(std::unique_ptr<BaseCallData>&& callDataPtr)
+    {
+        if (callDataPtr->GetStatus() == BaseCallData::CallStatus::FINISH)
+        {
+            return;
+        }
+        callDataPtr->Proceed();
+        callDataPtr.release();
+    }
+
+    template<class TRequest, class TReply>
+    void CallDataManager::New(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue>cq, Network::MsgCallback msg_callback){
+        new CallData<TRequest, TReply>(service, cq, std::move(msg_callback)); 
+    }
+
+    
 }

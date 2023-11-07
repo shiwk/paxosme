@@ -9,7 +9,7 @@ namespace paxosme {
      */
     template<>
     void CallData<paxos::ProposeRequest, paxos::ProposeReply>::InitRequestState() {
-        service_->RequestPropose(&ctx_, &request_, &responder_, cq_, cq_, this);
+        service_->RequestPropose(&ctx_, &request_, &responder_, cq_.get(), cq_.get(), this);
     }
 
     template<>
@@ -31,7 +31,7 @@ namespace paxosme {
      */
     template<>
     void CallData<paxos::ProposeAckRequest, paxos::ProposeAckReply>::InitRequestState() {
-        service_->RequestProposeAck(&ctx_, &request_, &responder_, cq_, cq_, this);
+        service_->RequestProposeAck(&ctx_, &request_, &responder_, cq_.get(), cq_.get(), this);
     }
 
     template<>
@@ -55,7 +55,7 @@ namespace paxosme {
      */
     template<>
     void CallData<paxos::AcceptRequest, paxos::AcceptReply>::InitRequestState() {
-        service_->RequestAccept(&ctx_, &request_, &responder_, cq_, cq_, this);
+        service_->RequestAccept(&ctx_, &request_, &responder_, cq_.get(), cq_.get(), this);
     }
 
     template<>
@@ -76,7 +76,7 @@ namespace paxosme {
      */
     template<>
     void CallData<paxos::AcceptAckRequest, paxos::AcceptAckReply>::InitRequestState() {
-        service_->RequestAcceptAck(&ctx_, &request_, &responder_, cq_, cq_, this);
+        service_->RequestAcceptAck(&ctx_, &request_, &responder_, cq_.get(), cq_.get(), this);
     }
 
     template<>
@@ -96,7 +96,7 @@ namespace paxosme {
 
     template<>
     void CallData<paxos::NewValueChosenRequest, paxos::NewValueChosenReply>::InitRequestState() {
-        service_->RequestNewValueChosen(&ctx_, &request_, &responder_, cq_,cq_,this);
+        service_->RequestNewValueChosen(&ctx_, &request_, &responder_, cq_.get(),cq_.get(),this);
     }
 
     template<>

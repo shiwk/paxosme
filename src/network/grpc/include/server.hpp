@@ -14,13 +14,14 @@
 #include <mutex>
 #include <glog/logging.h>
 
-
-using paxos::Paxosme;
-using grpc::ServerBuilder;
 using grpc::Server;
+using grpc::ServerBuilder;
+using paxos::Paxosme;
 
-namespace paxosme {
-    class GrpcServer : public NetworkServer {
+namespace paxosme
+{
+    class GrpcServer : public NetworkServer
+    {
 
     public:
         void Start(const Peer &, Network::MsgCallback) override;
@@ -31,50 +32,64 @@ namespace paxosme {
     private:
         std::unique_ptr<Server> server_;
         paxos::Paxosme::AsyncService asyncService_;
-        std::unique_ptr<grpc::ServerCompletionQueue> cq_;
+        std::shared_ptr<grpc::ServerCompletionQueue> cq_;
         std::future<void> handleLoop_;
         bool is_running_ = false;
         void HandleRpcs();
+        void PrepareCallData();
         std::mutex mtx_;
     };
 
-    class BaseCallData {
+    class BaseCallData
+    {
     public:
-        void Proceed() {
+        // Let's implement a tiny state machine with the following states.
+        enum CallStatus
+        {
+            CREATE,
+            PROCESS,
+            FINISH
+        };
+
+        void Proceed()
+        {
             const std::string &typeName = typeid(*this).name();
-            DLOG(INFO) << typeName << " Proceed: " << status_ ;
-            if (status_ == CREATE) {
+            DLOG(INFO) << typeName << " Proceed: " << status_;
+            if (status_ == CREATE)
+            {
                 DLOG(INFO) << "Proceed: CreateStatusFunc(";
                 CreateStatusFunc();
-            } else if (status_ == PROCESS) {
+            }
+            else if (status_ == PROCESS)
+            {
                 DLOG(INFO) << "Proceed: ProcessStatusFunc(";
                 ProcessStatusFunc();
-            } else {
+            }
+            else
+            {
                 DLOG(INFO) << "Proceed: FinishStatusFunc(";
                 FinishStatusFunc();
             }
         }
 
-    protected:
-        BaseCallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq) : service_(service),
-                                                                                               cq_(cq),
-                                                                                               status_(CREATE) {}
+        virtual CallStatus GetStatus() const = 0;
+        virtual ~BaseCallData() = default;
 
+    protected:
+        BaseCallData(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue> cq) : service_(service),
+                                                                                                               cq_(cq),
+                                                                                                               status_(CREATE) {}
         // The means of communication with the gRPC runtime for an asynchronous
         // server.
         paxos::Paxosme::AsyncService *service_;
         // The producer-consumer queue where for asynchronous server notifications.
-        grpc::ServerCompletionQueue *cq_;
+        std::shared_ptr<grpc::ServerCompletionQueue> cq_;
         // Context for the rpc, allowing to tweak aspects of it such as the use
         // of compression, authentication, as well as to send metadata back to the
         // client.
         grpc::ServerContext ctx_;
 
-        // Let's implement a tiny state machine with the following states.
-        enum CallStatus {
-            CREATE, PROCESS, FINISH
-        };
-        CallStatus status_;  // The current serving state.
+        CallStatus status_; // The current serving state.
 
     private:
         virtual void CreateStatusFunc() = 0;
@@ -84,20 +99,32 @@ namespace paxosme {
         virtual void FinishStatusFunc() = 0;
     };
 
-    template<class TRequest, class TReply>
-    class CallData final : public BaseCallData {
+    template <class TRequest, class TReply>
+    class CallData final : public BaseCallData
+    {
     public:
-        CallData(paxos::Paxosme::AsyncService *service, grpc::ServerCompletionQueue *cq, Network::MsgCallback msg_callback)
-                : BaseCallData(service, cq), responder_(&ctx_), msgCallback_(std::move(msg_callback)) {
+        CallData(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue> cq, Network::MsgCallback msg_callback)
+            : BaseCallData(service, cq), responder_(&ctx_), msgCallback_(std::move(msg_callback))
+        {
             // Invoke the serving logic right away.
             Proceed();
         }
 
+        ~CallData()
+        {
+            DLOG(INFO) << "CallData: ~CallData()";
+        };
+
+        CallStatus GetStatus() const override
+        {
+            return status_;
+        }
 
     private:
         void InitRequestState();
 
-        void HandleRequest(TReply &reply){
+        void HandleRequest(TReply &reply)
+        {
             msgCallback_(request_.SerializeAsString());
             reply.set_ack(true);
         }
@@ -107,19 +134,20 @@ namespace paxosme {
 
         Network::MsgCallback msgCallback_;
 
-        void CreateStatusFunc() override {
+        void CreateStatusFunc() override
+        {
             // Make this instance progress to the PROCESS state.
             status_ = PROCESS;
 
             InitRequestState();
         }
 
-        void ProcessStatusFunc() override {
+        void ProcessStatusFunc() override
+        {
             // Spawn a new CallData instance to serve new clients while we process
             // the one for this CallData. The instance will deallocate itself as
             // part of its FINISH state.
             new CallData<TRequest, TReply>(service_, cq_, msgCallback_);
-
 
             TReply reply;
             HandleRequest(reply);
@@ -131,13 +159,21 @@ namespace paxosme {
             responder_.Finish(reply, grpc::Status::OK, this);
         }
 
-
-        void FinishStatusFunc() override {
+        void FinishStatusFunc() override
+        {
             GPR_ASSERT(status_ == FINISH);
             // Once in the FINISH state, deallocate ourselves (CallData).
-            delete this;
+            // delete this;
         }
+    };
 
+    class CallDataManager
+    {
+    public:
+        static void Procceed(std::unique_ptr<BaseCallData> &&callData);
+
+        template <class TRequest, class TReply>
+        static void New(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue> cq, Network::MsgCallback msg_callback);
     };
 }
-#endif //PAXOSME_SERVER_HPP
+#endif // PAXOSME_SERVER_HPP
