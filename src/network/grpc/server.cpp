@@ -12,15 +12,20 @@ namespace paxosme
         Shutdown();
     }
 
-    void GrpcServer::Start(const Peer &endpoint, Network::MsgCallback msg_callback)
+    GrpcServer::GrpcServer(const EndPoint &endpoint):
+        serverAddress_(endpoint.ToString())
+    {
+    }
+
+    void GrpcServer::Start(Network::MsgCallback msg_callback)
     {
         std::unique_lock<std::mutex> lock(mtx_);
         ServerBuilder builder;
-        const std::string &serverAddress(endpoint.ToString());
-
-        LOG(INFO) << "Server listening on " << serverAddress;
-        builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
         
+
+        LOG(INFO) << "Server listening on " << serverAddress_;
+        builder.AddListeningPort(serverAddress_, grpc::InsecureServerCredentials());
+
         builder.RegisterService(&asyncService_);
 
         cq_ = std::move(builder.AddCompletionQueue());
@@ -30,11 +35,10 @@ namespace paxosme
 
         // Proceed to the server's main loop.
         handleLoop_ = std::move(std::async(std::launch::async, [this]()
-        {
+                                           {
             LOG(INFO) << "Start: handleFunc";
             this->PrepareCallData();
-            return this->HandleRpcs();
-        }));
+            return this->HandleRpcs(); }));
 
         // HandleRpcs();
         is_running_ = true;
@@ -61,7 +65,7 @@ namespace paxosme
     // refer to https://github.com/grpc/grpc/blob/v1.52.0/examples/cpp/helloworld/greeter_async_server.cc
     void GrpcServer::HandleRpcs()
     {
-        
+
         void *tag; // uniquely identifies a request.
         bool ok;
         LOG(INFO) << "Server handling..";
@@ -86,12 +90,12 @@ namespace paxosme
         // todo I: check more call data
     }
 
-    NetworkServer *NetworkServer::New()
+    NetworkServer *NetworkServer::New(const EndPoint &endpoint)
     {
-        return new GrpcServer;
+        return new GrpcServer(endpoint);
     }
 
-    void CallDataManager::Procceed(std::unique_ptr<BaseCallData>&& callDataPtr)
+    void CallDataManager::Procceed(std::unique_ptr<BaseCallData> &&callDataPtr)
     {
         callDataPtr->Proceed();
         if (callDataPtr->Finished())
@@ -101,8 +105,9 @@ namespace paxosme
         callDataPtr.release();
     }
 
-    template<class TRequest, class TReply>
-    void CallDataManager::New(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue>cq, Network::MsgCallback msg_callback){
-        new CallData<TRequest, TReply>(service, cq, std::move(msg_callback)); 
+    template <class TRequest, class TReply>
+    void CallDataManager::New(paxos::Paxosme::AsyncService *service, std::shared_ptr<grpc::ServerCompletionQueue> cq, Network::MsgCallback msg_callback)
+    {
+        new CallData<TRequest, TReply>(service, cq, std::move(msg_callback));
     }
 }

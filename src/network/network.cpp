@@ -52,14 +52,14 @@ namespace paxosme
         // self server
         //        auto msgCallback = [impl](PaxMessage message) { impl->paxController_->AddMessage(message); };
         auto msgCallback = network_options.msgCallback;
-        impl->server_->Start(NodeIdToPeer(network_options.self), msgCallback);
+        impl->server_->Start(msgCallback);
     }
 
-    Network *Network::New()
+    Network *Network::New(const EndPoint &endpoint)
     {
         LOG(INFO) << "Network::New()";
         auto nwImpl = new NetworkImpl;
-        nwImpl->server_ = std::move(std::unique_ptr<NetworkServer>(NetworkServer::New()));
+        nwImpl->server_ = std::move(std::unique_ptr<NetworkServer>(NetworkServer::New(endpoint)));
 
         return nwImpl;
     }

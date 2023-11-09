@@ -15,9 +15,9 @@ add_library(network_asio
         ${SOURCES}
         ${HEADERS})
 
-#target_link_libraries(network_asio
-#        paxosmecore)
+target_link_libraries(network_asio
+       glog::glog)
 
-target_include_directories(network_asio PRIVATE ${BOOST_ROOT_DIR} )
+target_include_directories(network_asio PUBLIC ${BOOST_ROOT_DIR} )
 target_include_directories(network_asio PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/ )
 target_include_directories(network_asio PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ )

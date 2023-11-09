@@ -24,7 +24,8 @@ namespace paxosme
     {
 
     public:
-        void Start(const Peer &, Network::MsgCallback) override;
+        GrpcServer(const EndPoint &);
+        void Start(Network::MsgCallback) override;
         void Shutdown() override;
         bool Running() override;
         ~GrpcServer() override;
@@ -38,6 +39,7 @@ namespace paxosme
         void HandleRpcs();
         void PrepareCallData();
         std::mutex mtx_;
+        std::string serverAddress_;
     };
 
     class BaseCallData

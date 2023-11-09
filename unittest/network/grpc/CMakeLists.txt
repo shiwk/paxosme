@@ -1,7 +1,7 @@
 enable_testing()
 
 # add_compile_definitions(NDEBUG) #disalbe debug log 
-add_subdirectory(${ROOT_DIR}/src/network network)
+
 
 file(GLOB TEST_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB TEST_ENV ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)

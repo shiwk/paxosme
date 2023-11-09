@@ -4,7 +4,8 @@
 
 TEST_F(NetworkTests, TestInit)
 {
-    std::shared_ptr<paxosme::Network> network = ShortLife::CreateInstance<paxosme::Network>();
+    paxosme::EndPoint endpoint{"127.0.0.1", 9999};
+    std::shared_ptr<paxosme::Network> network = ShortLife::CreateInstance<paxosme::Network>(endpoint);
     std::vector<paxosme::Peer> peers;
     peers.emplace_back(paxosme::Network::NodeIdToPeer(1));
 

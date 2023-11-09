@@ -7,7 +7,7 @@
 
 const std::string host = "127.0.0.1";
 const int port = 9999;
-const paxosme::Peer server{host, port};
+const paxosme::EndPoint server{host, port};
 
 class GrpcClientTest : public ::testing::Test
 {
@@ -31,13 +31,13 @@ void GrpcClientTest::func(Func f, Args... a)
 
 void GrpcClientTest::SetUp()
 {
-    server_ = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New());
+    server_ = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(server));
     paxosme::Network::MsgCallback msgCallBack = [this](const std::string message)
     {
         func([this]() { increment_id_++; });
         // DLOG(INFO) << "msgCallBack: " << message;
     };
-    server_->Start(server, msgCallBack);
+    server_->Start(msgCallBack);
 }
 
 void GrpcClientTest::TearDown()

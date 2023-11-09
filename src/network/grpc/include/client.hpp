@@ -50,7 +50,7 @@ namespace paxosme {
 
         static GrpcClient *NewClient(const std::string &);
 
-        void Send(const PodMsg &) override;
+        bool Send(const PodMsg &) override;
     private:
 
 

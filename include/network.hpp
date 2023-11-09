@@ -14,6 +14,22 @@ using node_id_vector = std::vector<node_id_t>;
 
 namespace paxosme
 {
+    
+    struct EndPoint
+    {
+        std::string ip;
+        int port;
+
+        std::string ToString() const
+        {
+            return ip + ":" + std::to_string(port);
+        }
+
+        bool operator==(const EndPoint &endpoint) const
+        {
+            return this->port == endpoint.port && this->ip == endpoint.ip;
+        }
+    };
     struct Peer
     {
         std::string ip;
@@ -99,7 +115,7 @@ namespace paxosme
             return 0;
         }
 
-        static Network *New();
+        static Network *New(const EndPoint &endpoint);
         virtual ~Network() = default;
 
         //        void Start(const node_id_vector &, const node_id_t &self);

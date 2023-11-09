@@ -12,7 +12,8 @@ TEST_F(GrpcClientTest, TestSendOne)
 {
     auto client = std::shared_ptr<paxosme::GrpcClient>(paxosme::GrpcClient::NewClient(server.ToString()));
     paxosme::PodMsg msg{paxosme::kPOD_MSG_PROPOSE_ACK};
-    client->Send(msg);
+    bool sendRes = client->Send(msg);
+    ASSERT_TRUE(sendRes);
     ASSERT_EQ(1, increment_id_);
 }
 
@@ -23,7 +24,8 @@ TEST_F(GrpcClientTest, TestSendMulti)
     for (; i < 10000; ++i)
     {
         paxosme::PodMsg msg{paxosme::kPOD_MSG_PROPOSE_ACK};
-        client->Send(msg);
+        bool sendRes = client->Send(msg);
+        ASSERT_TRUE(sendRes);
         ASSERT_EQ(i, increment_id_);
     }
 }

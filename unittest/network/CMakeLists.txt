@@ -8,8 +8,10 @@ set(NETWORK_LIB_NAME
 
 set(NETWORK_LIB_NAME "network_grpc") # network lib
 
+add_subdirectory(${ROOT_DIR}/src/network network)
 
 add_subdirectory(grpc)
+add_subdirectory(asio)
 
 file(GLOB TEST_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB TEST_ENV ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)

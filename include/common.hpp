@@ -33,7 +33,6 @@ class ShortLife
 public:
     template <class TClass>
     static std::shared_ptr<TClass> CreateInstance() { return std::shared_ptr<TClass>(TClass::New()); }
-    
     template <class TClass, class ...Args>
     static std::shared_ptr<TClass> CreateInstance(Args const &...args) { return std::shared_ptr<TClass>(TClass::New(args...)); }
 };

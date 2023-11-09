@@ -14,8 +14,9 @@ using ResponseReader = std::unique_ptr<::grpc::ClientAsyncResponseReader<TRespon
 namespace paxosme
 {
 
-    void GrpcClient::Send(const PodMsg &pod_msg)
+    bool GrpcClient::Send(const PodMsg &pod_msg)
     {
+        bool result = false;
         switch (pod_msg.messageType)
         {
         case kPOD_MSG_PROPOSE_ACK:
@@ -28,7 +29,7 @@ namespace paxosme
             proposeAckRequest.set_promised_node_id(pod_msg.promisedNodeId);
             proposeAckRequest.set_accepted_log_value(pod_msg.acceptedValue);
 
-            Send<paxos::ProposeAckRequest, paxos::ProposeAckReply>(proposeAckRequest);
+            result = Send<paxos::ProposeAckRequest, paxos::ProposeAckReply>(proposeAckRequest);
             break;
         }
         case kPOD_MSG_ACCEPT_ACK:
@@ -42,7 +43,7 @@ namespace paxosme
             acceptAckRequest.set_accepted_value(pod_msg.acceptedValue);
             acceptAckRequest.set_rejected(pod_msg.rejected);
 
-            Send<paxos::AcceptAckRequest, paxos::AcceptAckReply>(acceptAckRequest);
+            result = Send<paxos::AcceptAckRequest, paxos::AcceptAckReply>(acceptAckRequest);
             break;
         }
 
@@ -55,7 +56,7 @@ namespace paxosme
             learnerValueSyncRequest.set_proposing_node_id(pod_msg.proposingNodeId);
             learnerValueSyncRequest.set_proposal_id(pod_msg.proposalId);
 
-            Send<paxos::LearnerValueSyncRequest, paxos::LearnerValueSyncReply>(
+            result = Send<paxos::LearnerValueSyncRequest, paxos::LearnerValueSyncReply>(
                 learnerValueSyncRequest);
             break;
         }
@@ -69,7 +70,7 @@ namespace paxosme
             learnerValueSendRequest.set_proposing_node_id(pod_msg.proposingNodeId);
             learnerValueSendRequest.set_proposal_id(pod_msg.proposalId);
 
-            Send<paxos::LearnerValueSendRequest, paxos::LearnerValueSendReply>(
+            result = Send<paxos::LearnerValueSendRequest, paxos::LearnerValueSendReply>(
                 learnerValueSendRequest);
             break;
         }
@@ -80,7 +81,7 @@ namespace paxosme
             ackSyncValueRequest.set_instance_id(pod_msg.instanceId);
             ackSyncValueRequest.set_sender_id(pod_msg.senderId);
 
-            Send<paxos::AckSyncValueRequest, paxos::AckSyncValueReply>(ackSyncValueRequest);
+            result = Send<paxos::AckSyncValueRequest, paxos::AckSyncValueReply>(ackSyncValueRequest);
             break;
         };
 
@@ -91,7 +92,7 @@ namespace paxosme
             tellInstanceIdRequest.set_leader_instance_id(pod_msg.leaderInstanceId);
             tellInstanceIdRequest.set_sender_id(pod_msg.senderId);
 
-            Send<paxos::TellInstanceIdRequest, paxos::TellInstanceIdReply>(
+            result = Send<paxos::TellInstanceIdRequest, paxos::TellInstanceIdReply>(
                 tellInstanceIdRequest);
             break;
         }
@@ -102,7 +103,7 @@ namespace paxosme
             confirmLearnRequest.set_instance_id(pod_msg.instanceId);
             confirmLearnRequest.set_sender_id(pod_msg.senderId);
 
-            Send<paxos::ConfirmLearnRequest, paxos::ConfirmLearnReply>(confirmLearnRequest);
+            result = Send<paxos::ConfirmLearnRequest, paxos::ConfirmLearnReply>(confirmLearnRequest);
             break;
         }
 
@@ -110,6 +111,8 @@ namespace paxosme
         default:
             break;
         }
+
+        return result;
     }
 
     template <>

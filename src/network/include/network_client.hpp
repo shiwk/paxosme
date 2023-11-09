@@ -53,7 +53,7 @@ namespace paxosme {
     public:
         static NetworkClient* New(const Peer &);
 
-        virtual void Send(const PodMsg &) = 0;
+        virtual bool Send(const PodMsg &) = 0;
     };
 }
 
