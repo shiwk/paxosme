@@ -12,16 +12,14 @@ namespace paxosme
         Shutdown();
     }
 
-    GrpcServer::GrpcServer(const EndPoint &endpoint):
-        serverAddress_(endpoint.ToString())
+    GrpcServer::GrpcServer(const EndPoint &endpoint) : serverAddress_(endpoint.ToString())
     {
     }
 
-    void GrpcServer::Start(Network::MsgCallback msg_callback)
+    void GrpcServer::Start(const Network::MsgCallback &msg_callback)
     {
         std::unique_lock<std::mutex> lock(mtx_);
         ServerBuilder builder;
-        
 
         LOG(INFO) << "Server listening on " << serverAddress_;
         builder.AddListeningPort(serverAddress_, grpc::InsecureServerCredentials());

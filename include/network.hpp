@@ -14,22 +14,6 @@ using node_id_vector = std::vector<node_id_t>;
 
 namespace paxosme
 {
-    
-    struct EndPoint
-    {
-        std::string ip;
-        int port;
-
-        std::string ToString() const
-        {
-            return ip + ":" + std::to_string(port);
-        }
-
-        bool operator==(const EndPoint &endpoint) const
-        {
-            return this->port == endpoint.port && this->ip == endpoint.ip;
-        }
-    };
     struct Peer
     {
         std::string ip;
@@ -43,6 +27,27 @@ namespace paxosme
         bool operator==(const Peer &endpoint) const
         {
             return this->port == endpoint.port && this->ip == endpoint.ip;
+        }
+    };
+
+    
+    struct EndPoint
+    {
+        std::string host;
+        int port;
+
+        // EndPoint(const Peer &peer) : host(peer.ip), port(peer.port)
+        // {
+        // }
+
+        std::string ToString() const
+        {
+            return host + ":" + std::to_string(port);
+        }
+
+        bool operator==(const EndPoint &endpoint) const
+        {
+            return this->port == endpoint.port && this->host == endpoint.host;
         }
     };
 

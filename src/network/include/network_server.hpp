@@ -13,7 +13,7 @@ namespace paxosme {
     class NetworkServer {
     public:
         static NetworkServer* New(const EndPoint &peer);
-        virtual void Start(Network::MsgCallback) = 0;
+        virtual void Start(const Network::MsgCallback &) = 0;
         virtual void Shutdown() = 0;
         virtual ~ NetworkServer () = default;;
         virtual bool Running() = 0;
