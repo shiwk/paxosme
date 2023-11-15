@@ -36,9 +36,13 @@ namespace paxosme
         std::string host;
         int port;
 
-        // EndPoint(const Peer &peer) : host(peer.ip), port(peer.port)
-        // {
-        // }
+        EndPoint(const std::string &host, int port) : host(host), port(port)
+        {
+        }
+        
+        EndPoint(const Peer &peer) : host(peer.ip), port(peer.port)
+        {
+        }
 
         std::string ToString() const
         {

@@ -42,21 +42,23 @@ bool paxosme::UdpClient::Send(const PodMsg &podMsg)
     {
         udp::resolver resolver(io_service_);
 
-        auto iter =
+        // Asynchronously perform forward resolution of a query to a list of entries.
+        std::future<boost::asio::ip::basic_resolver_results<boost::asio::ip::udp>> iter =
             resolver.async_resolve(
                 {endpoint_.host, std::to_string(endpoint_.port)},
                 boost::asio::use_future);
-        DLOG(INFO) << "before send... ";
-
+        
         // The async_resolve operation above returns the endpoint iterator as a
         // future value that is not retrieved ...
+        boost::asio::ip::basic_resolver_results<boost::asio::ip::udp> udpEndpointIter = iter.get(); // ... until here. This call may block.
+        
+        DLOG(INFO) << "before send... ";
 
-        udp::socket socket(io_service_, udp::v4());
-
-        // std::array<char, 1> send_buf = {{0}};
+        
+        // This function is used to asynchronously send a datagram to the specified remote endpoint
         std::future<std::size_t> send_length =
-            socket.async_send_to(boost::asio::buffer(podMsg.proposedLogValue), // TODO I: podmsg to buffer
-                                 *iter.get(), // ... until here. This call may block.
+            socket_.async_send_to(boost::asio::buffer(podMsg.proposedLogValue), // TODO I: podmsg to buffer
+                                 *udpEndpointIter, 
                                  boost::asio::use_future);
 
         DLOG(INFO) << "send... ";
@@ -69,17 +71,16 @@ bool paxosme::UdpClient::Send(const PodMsg &podMsg)
         std::array<char, 128> recv_buf;
         udp::endpoint sender_endpoint;
         std::future<std::size_t> recv_length =
-            socket.async_receive_from(
+            socket_.async_receive_from(
                 boost::asio::buffer(recv_buf),
                 sender_endpoint,
                 boost::asio::use_future);
 
         // Do other things here while the receive completes.
 
-        size_t recv_size = recv_length.get();
+        size_t recv_size = recv_length.get();  // ... until here. This call may block
         DLOG(INFO) << "recv_size = " << recv_size << std::endl;
         DLOG(INFO) << "recv_buf.data() = " << recv_buf.data() << std::endl;
-
 
         return true;
     }
@@ -97,5 +98,5 @@ paxosme::UdpClient *paxosme::UdpClient::NewClient(const paxosme::EndPoint &endpo
 
 paxosme::NetworkClient *paxosme::NetworkClient::New(const paxosme::Peer &peer)
 {
-    return new paxosme::UdpClient(paxosme::EndPoint{peer.ip, peer.port});
+    return new paxosme::UdpClient(peer);
 }

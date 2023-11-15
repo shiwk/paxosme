@@ -16,7 +16,7 @@ namespace paxosme
     {
     }
 
-    void GrpcServer::Start(const Network::MsgCallback &msg_callback)
+    void GrpcServer::Start(Network::MsgCallback msg_callback)
     {
         std::unique_lock<std::mutex> lock(mtx_);
         ServerBuilder builder;

@@ -5,7 +5,7 @@
 
 namespace paxosme
 {
-    class UdpClient : public NetworkClient
+    class UdpClient : public NetworkClient, public std::enable_shared_from_this<UdpClient>
     {
     public:
         UdpClient(const EndPoint &);

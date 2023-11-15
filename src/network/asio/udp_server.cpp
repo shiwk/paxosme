@@ -7,7 +7,7 @@ paxosme::UdpServer::UdpServer(const EndPoint &peer) : socket_(boost::asio::ip::u
 {
 }
 
-void paxosme::UdpServer::Start(const Network::MsgCallback &msgCallBack)
+void paxosme::UdpServer::Start(Network::MsgCallback msgCallBack)
 {
 
     msgCallback_ = std::move(msgCallBack);

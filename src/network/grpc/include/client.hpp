@@ -41,7 +41,7 @@ namespace paxosme {
     };
 
 
-    class GrpcClient : public NetworkClient {
+    class GrpcClient : public NetworkClient, public std::enable_shared_from_this<GrpcClient> {
     public:
         explicit GrpcClient(const std::shared_ptr<ChannelInterface> &channel)
                 : stub_(Paxosme::NewStub(channel)) {}
