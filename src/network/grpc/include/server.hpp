@@ -24,7 +24,7 @@ namespace paxosme
     {
 
     public:
-        GrpcServer(const EndPoint &);
+        GrpcServer(const Peer &);
         void Start(Network::MsgCallback) override;
         void Shutdown() override;
         bool Running() override;

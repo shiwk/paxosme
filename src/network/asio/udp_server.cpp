@@ -3,7 +3,7 @@
 
 using boost::asio::ip::udp;
 
-paxosme::UdpServer::UdpServer(const EndPoint &peer) : socket_(boost::asio::ip::udp::socket(io_service_, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), peer.port)))
+paxosme::UdpServer::UdpServer(const Peer &peer) : socket_(boost::asio::ip::udp::socket(io_service_, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), peer.port)))
 {
 }
 
@@ -72,7 +72,7 @@ void paxosme::UdpServer::DoSend(std::size_t length)
         });
 }
 
-paxosme::NetworkServer *paxosme::NetworkServer::New(const EndPoint &peer)
+paxosme::NetworkServer *paxosme::NetworkServer::New(const Peer &peer)
 {
     return new paxosme::UdpServer(peer);
 }

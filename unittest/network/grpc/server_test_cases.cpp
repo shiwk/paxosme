@@ -5,7 +5,7 @@
 
 TEST_F(GrpcServerTest, TestStart)
 {
-    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::EndPoint{"127.0.0.1", 9999}));
+    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::Peer{"127.0.0.1", 9999}));
 
     paxosme::Network::MsgCallback msgCallBack = [](std::string message)
     {
@@ -22,7 +22,7 @@ TEST_F(GrpcServerTest, TestStart)
 
 TEST_F(GrpcServerTest, TestShuwdown)
 {
-    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::EndPoint{"127.0.0.1", 9999}));
+    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::Peer{"127.0.0.1", 9999}));
 
     paxosme::Network::MsgCallback msgCallBack = [](std::string message)
     {

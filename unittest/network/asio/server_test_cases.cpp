@@ -5,7 +5,7 @@
 
 TEST_F(AsioServerTest, TestStart)
 {
-    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::EndPoint{"127.0.0.1", 9999}));
+    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::Peer{"127.0.0.1", 9999}));
 
     paxosme::Network::MsgCallback msgCallBack = [](std::string message)
     {
@@ -26,7 +26,7 @@ TEST_F(AsioServerTest, TestStart)
 
 TEST_F(AsioServerTest, TestShuwdown)
 {
-    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::EndPoint{"127.0.0.1", 9999}));
+    auto server = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::Peer{"127.0.0.1", 9999}));
     std::vector<paxosme::Peer> peers;
     peers.emplace_back(paxosme::Network::NodeIdToPeer(1));
 

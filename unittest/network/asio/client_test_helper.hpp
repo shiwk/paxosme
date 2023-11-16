@@ -6,7 +6,7 @@
 #include "udp_server.hpp"
 
 const std::string host = "127.0.0.1";
-const int port = 9999;
+const uint32_t port = 9999;
 
 class UdpClientTest : public ::testing::Test
 {
@@ -29,7 +29,7 @@ void UdpClientTest::func(Func f, Args... a)
 
 void UdpClientTest::SetUp()
 {
-    server_ = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::EndPoint{host, port}));
+    server_ = std::shared_ptr<paxosme::NetworkServer>(paxosme::NetworkServer::New(paxosme::Peer{host, port}));
 
     paxosme::Network::MsgCallback msgCallBack = [this](std::string message)
     {

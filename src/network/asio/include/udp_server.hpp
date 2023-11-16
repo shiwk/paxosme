@@ -7,7 +7,7 @@
 namespace paxosme {
     class UdpServer : public NetworkServer {
     public:
-        UdpServer(const EndPoint &peer);
+        UdpServer(const Peer &);
         void Start(Network::MsgCallback) override;
 
         void Shutdown() override;
@@ -17,7 +17,7 @@ namespace paxosme {
         ~UdpServer() override;
 
     private:
-        int socket_fd_;asd
+        int socket_fd_;
         bool is_running_ = false;
         boost::asio::ip::udp::endpoint sender_endpoint_;
         boost::asio::io_service io_service_;

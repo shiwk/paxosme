@@ -12,7 +12,7 @@ namespace paxosme
         Shutdown();
     }
 
-    GrpcServer::GrpcServer(const EndPoint &endpoint) : serverAddress_(endpoint.ToString())
+    GrpcServer::GrpcServer(const Peer &peer) : serverAddress_(peer.ToString())
     {
     }
 
@@ -88,9 +88,9 @@ namespace paxosme
         // todo I: check more call data
     }
 
-    NetworkServer *NetworkServer::New(const EndPoint &endpoint)
+    NetworkServer *NetworkServer::New(const Peer &peer)
     {
-        return new GrpcServer(endpoint);
+        return new GrpcServer(peer);
     }
 
     void CallDataManager::Procceed(std::unique_ptr<BaseCallData> &&callDataPtr)

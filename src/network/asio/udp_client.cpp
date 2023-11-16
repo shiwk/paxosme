@@ -20,7 +20,7 @@
 using boost::asio::ip::udp;
 
 
-paxosme::UdpClient::UdpClient(const paxosme::EndPoint &endpoint) : endpoint_(endpoint), socket_(std::move(boost::asio::ip::udp::socket(io_service_, udp::v4())))
+paxosme::UdpClient::UdpClient(const paxosme::Peer &peer) : endpoint_(peer), socket_(std::move(boost::asio::ip::udp::socket(io_service_, udp::v4())))
 {
     handleLoop_ = std::move(std::async(std::launch::async, [this]()
                                        {
@@ -45,7 +45,7 @@ bool paxosme::UdpClient::Send(const PodMsg &podMsg)
         // Asynchronously perform forward resolution of a query to a list of entries.
         std::future<boost::asio::ip::basic_resolver_results<boost::asio::ip::udp>> iter =
             resolver.async_resolve(
-                {endpoint_.host, std::to_string(endpoint_.port)},
+                {endpoint_.ip, std::to_string(endpoint_.port)},
                 boost::asio::use_future);
         
         // The async_resolve operation above returns the endpoint iterator as a
@@ -91,9 +91,9 @@ bool paxosme::UdpClient::Send(const PodMsg &podMsg)
     }
 }
 
-paxosme::UdpClient *paxosme::UdpClient::NewClient(const paxosme::EndPoint &endpoint)
+paxosme::UdpClient *paxosme::UdpClient::NewClient(const paxosme::Peer &peer)
 {
-    return new paxosme::UdpClient(endpoint);
+    return new paxosme::UdpClient(peer);
 }
 
 paxosme::NetworkClient *paxosme::NetworkClient::New(const paxosme::Peer &peer)

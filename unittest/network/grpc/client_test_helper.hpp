@@ -6,8 +6,8 @@
 #include <glog/logging.h>
 
 const std::string host = "127.0.0.1";
-const int port = 9999;
-const paxosme::EndPoint server{host, port};
+const uint32_t port = 9999;
+const paxosme::Peer server{host, port};
 
 class GrpcClientTest : public ::testing::Test
 {

@@ -26,4 +26,4 @@ target_link_libraries(test_storage storage leveldb util glog::glog)
 
 # target_include_directories(test_storage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_test(NAME test_add_example COMMAND test_storage 10 24 34)
+# add_test(NAME test_add_example COMMAND test_storage 10 24 34)

@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <vector>
 #include "common.hpp"
+#include <netinet/in.h> // in_addr
+#include <arpa/inet.h>  // inet_ntoa
 
 using node_id_vector = std::vector<node_id_t>;
 
@@ -17,51 +19,26 @@ namespace paxosme
     struct Peer
     {
         std::string ip;
-        int port;
+        uint32_t port;
 
         std::string ToString() const
         {
             return ip + ":" + std::to_string(port);
         }
 
-        bool operator==(const Peer &endpoint) const
+        bool operator==(const Peer &peer) const
         {
-            return this->port == endpoint.port && this->ip == endpoint.ip;
-        }
-    };
-
-    
-    struct EndPoint
-    {
-        std::string host;
-        int port;
-
-        EndPoint(const std::string &host, int port) : host(host), port(port)
-        {
-        }
-        
-        EndPoint(const Peer &peer) : host(peer.ip), port(peer.port)
-        {
-        }
-
-        std::string ToString() const
-        {
-            return host + ":" + std::to_string(port);
-        }
-
-        bool operator==(const EndPoint &endpoint) const
-        {
-            return this->port == endpoint.port && this->host == endpoint.host;
+            return this->port == peer.port && this->ip == peer.ip;
         }
     };
 
     struct PeerHash
     {
-        size_t operator()(const Peer &endpoint) const
+        size_t operator()(const Peer &peer) const
         {
             const int PRIME_CONST = 31;
             size_t hashCode = 0;
-            auto st = endpoint.ToString();
+            auto st = peer.ToString();
             for (int i = 0; i < st.length(); i++)
             {
                 hashCode += st[i] * pow(PRIME_CONST, i);
@@ -72,24 +49,26 @@ namespace paxosme
         static PeerHash peerHash;
     };
 
-    struct PeerList
+    using PeerList = std::vector<Peer>;
+
+    struct PeerSet
     {
-        PeerList(std::vector<Peer> nodeList) : peers(nodeList.begin(), nodeList.end())
+        PeerSet(std::vector<Peer> nodeList) : peers(nodeList.begin(), nodeList.end())
         {
         }
-        void Add(const Peer &endpoint)
+        void Add(const Peer &peer)
         {
-            peers.insert(endpoint);
-        }
-
-        bool Contains(const Peer &endpoint)
-        {
-            return peers.find(endpoint) != peers.end();
+            peers.insert(peer);
         }
 
-        bool Remove(const Peer &endpoint)
+        bool Contains(const Peer &peer)
         {
-            return peers.erase(endpoint);
+            return peers.find(peer) != peers.end();
+        }
+
+        bool Remove(const Peer &peer)
+        {
+            return peers.erase(peer);
         }
 
         auto begin() { return peers.begin(); }
@@ -106,7 +85,7 @@ namespace paxosme
 
         struct NetworkOptions
         {
-            PeerList peers;
+            PeerSet peers;
             node_id_t self;
             MsgCallback msgCallback;
         };
@@ -114,17 +93,18 @@ namespace paxosme
 
         static Peer NodeIdToPeer(node_id_t node_id)
         {
-            // todo I: convert node id to peer
-            return Peer{"127.0.0.1", 9999};
+            in_addr addr{(uint32_t)(node_id >> 32)};
+            return Peer{std::string(inet_ntoa(addr)), (uint32_t)(node_id & 0xffffffff)};
         }
 
-        static node_id_t PeerToNodeId(Peer)
+        static node_id_t PeerToNodeId(const Peer &peer)
         {
-            // todo I: convert peer to node id
-            return 0;
+            in_addr_t addr = inet_addr(peer.ip.c_str());
+            assert(addr != (uint32_t)-1);
+            return (((uint64_t)addr) << 32) | peer.port;
         }
 
-        static Network *New(const EndPoint &endpoint);
+        static Network *New(const PeerList &peers);
         virtual ~Network() = default;
 
         //        void Start(const node_id_vector &, const node_id_t &self);

@@ -5,9 +5,11 @@
 #include <string>
 #include "common.hpp"
 
-namespace paxosme {
+namespace paxosme
+{
 
-    enum MessageType {
+    enum MessageType
+    {
         kNone = 0,
 
         // for acceptor
@@ -32,11 +34,8 @@ namespace paxosme {
         kPLACEHOLDER_NEW_VALUE_COMMITTED = 0x1111 << 3
     };
 
-//    bool MessageForProposer(MessageType message_type) {
-//        return message_type >> 4 == 0x1;
-//    }
-
-    class PaxMessage {
+    class PaxMessage
+    {
 
     private:
         LogValue proposed_log_value_;
@@ -56,129 +55,160 @@ namespace paxosme {
         node_id_t senderId_{};
 
         bool rejected_{};
+
     public:
+        PaxMessage() = default;
 
         PaxMessage(node_id_t sender_id, MessageType message_type) : senderId_(sender_id),
                                                                     messageType_(message_type) {}
 
-        const LogValue &GetChosenValue() const {
+        const LogValue &GetChosenValue() const
+        {
             return chosen_value_;
         }
 
-        void SetChosenValue(const LogValue &chosen_value) {
+        void SetChosenValue(const LogValue &chosen_value)
+        {
             chosen_value_ = chosen_value;
         }
 
-        const LogValue &GetLearnedValue() const {
+        const LogValue &GetLearnedValue() const
+        {
             return learned_value_;
         }
 
-        void SetLearnedValue(const LogValue &learnedValue) {
+        void SetLearnedValue(const LogValue &learnedValue)
+        {
             learned_value_ = learnedValue;
         }
 
-        node_id_t GetSender() const {
+        node_id_t GetSender() const
+        {
             return senderId_;
         }
 
-        void SetSender(node_id_t sender_id) {
+        void SetSender(node_id_t sender_id)
+        {
             senderId_ = sender_id;
         }
 
-        instance_id_t GetLeaderInstanceId() const {
+        instance_id_t GetLeaderInstanceId() const
+        {
             return leaderInstanceId_;
         }
 
-        void SetLeaderInstanceId(instance_id_t leaderInstanceId) {
+        void SetLeaderInstanceId(instance_id_t leaderInstanceId)
+        {
             leaderInstanceId_ = leaderInstanceId;
         }
 
-        bool IsRejected() const {
+        bool IsRejected() const
+        {
             return rejected_;
         }
 
-        void SetRejected(bool rejected) {
+        void SetRejected(bool rejected)
+        {
             rejected_ = rejected;
         }
 
-        void SetProposingNodeId(node_id_t proposer) {
+        void SetProposingNodeId(node_id_t proposer)
+        {
             proposingNodeId_ = proposer;
         }
 
-        proposal_id_t GetAcceptedProposal() const {
+        proposal_id_t GetAcceptedProposal() const
+        {
             return acceptedProposalId_;
         }
 
-        void SetAcceptedProposal(proposal_id_t accepted_id) {
+        void SetAcceptedProposal(proposal_id_t accepted_id)
+        {
             acceptedProposalId_ = accepted_id;
         }
 
-        const LogValue &GetAcceptedValue() const {
+        const LogValue &GetAcceptedValue() const
+        {
             return accepted_value_;
         }
 
-        void SetAcceptedValue(const LogValue &accepted_value) {
+        void SetAcceptedValue(const LogValue &accepted_value)
+        {
             accepted_value_ = accepted_value;
         }
 
-        proposal_id_t GetPromisedProposalId() const {
+        proposal_id_t GetPromisedProposalId() const
+        {
             return promisedProposalId_;
         }
 
-        void SetPromisedProposalId(proposal_id_t promised_id) {
+        void SetPromisedProposalId(proposal_id_t promised_id)
+        {
             promisedProposalId_ = promised_id;
         }
 
-        node_id_t GetPromisedNodeId() const {
+        node_id_t GetPromisedNodeId() const
+        {
             return promisedNodeId_;
         }
 
-        void SetPromisedNodeId(node_id_t promised_node_id) {
+        void SetPromisedNodeId(node_id_t promised_node_id)
+        {
             promisedNodeId_ = promised_node_id;
         }
 
-        MessageType GetMessageType() const {
+        MessageType GetMessageType() const
+        {
             return messageType_;
         }
 
-        void SetMessageType(MessageType message_type) {
+        void SetMessageType(MessageType message_type)
+        {
             messageType_ = message_type;
         }
 
-        node_id_t GetFollowingNodeId() const {
+        node_id_t GetFollowingNodeId() const
+        {
             return followingNodeId_;
         }
 
-        void SetFollowingNodeId(node_id_t following_node_id) {
+        void SetFollowingNodeId(node_id_t following_node_id)
+        {
             followingNodeId_ = following_node_id;
         }
 
-        void SetInstanceId(instance_id_t instance_id) {
+        void SetInstanceId(instance_id_t instance_id)
+        {
             instanceId_ = instance_id;
         }
 
-
-        instance_id_t GetInstanceId() const {
+        instance_id_t GetInstanceId() const
+        {
             return instanceId_;
         }
 
-        void SetProposedLogValue(const LogValue &log_value) {
+        void SetProposedLogValue(const LogValue &log_value)
+        {
             proposed_log_value_ = log_value;
         }
 
-        const LogValue &GetProposedLogValue() const {
+        const LogValue &GetProposedLogValue() const
+        {
             return proposed_log_value_;
         }
 
-        proposal_id_t GetProposalId() const {
+        proposal_id_t GetProposalId() const
+        {
             return proposalId_;
         }
 
-        void SetProposalId(proposal_id_t proposal_id) {
+        void SetProposalId(proposal_id_t proposal_id)
+        {
             proposalId_ = proposal_id;
         }
 
-        node_id_t GetProposingNodeId() const {
+        node_id_t GetProposingNodeId() const
+        {
             return proposingNodeId_;
         }
     };

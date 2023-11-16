@@ -25,19 +25,31 @@ namespace paxosme
 
         ~NetworkImpl()
         {
-            server_->Shutdown();
+            for (auto &server : servers_)
+            {
+                server.second->Shutdown();
+                server.second.reset();
+            }
+
+            servers_.clear();
         }
 
     private:
         std::unordered_map<size_t, std::shared_ptr<NetworkClient>> clients_;
 
-        std::unique_ptr<NetworkServer> server_;
+        std::unordered_map<node_id_t, std::unique_ptr<NetworkServer>> servers_;
     };
 
     void Network::Quit(node_id_t node_id)
     {
         auto *impl = (NetworkImpl *)this;
-        impl->server_->Shutdown();
+
+        if (impl->servers_.find(node_id) == impl->servers_.end())
+        {
+            impl->servers_[node_id]->Shutdown();
+            impl->servers_[node_id].reset();
+            impl->servers_.erase(node_id);
+        }
     }
 
     void Network::Start(Network::NetworkOptions &network_options)
@@ -52,14 +64,21 @@ namespace paxosme
         // self server
         //        auto msgCallback = [impl](PaxMessage message) { impl->paxController_->AddMessage(message); };
         auto msgCallback = network_options.msgCallback;
-        impl->server_->Start(msgCallback);
+
+        for (auto &server : impl->servers_)
+        {
+            server.second->Start(msgCallback);
+        }
     }
 
-    Network *Network::New(const EndPoint &endpoint)
+    Network *Network::New(const PeerList &peers)
     {
         LOG(INFO) << "Network::New()";
         auto nwImpl = new NetworkImpl;
-        nwImpl->server_ = std::move(std::unique_ptr<NetworkServer>(NetworkServer::New(endpoint)));
+        for (auto peer : peers)
+        {
+            nwImpl->servers_.emplace(PeerToNodeId(peer), std::move(std::unique_ptr<NetworkServer>(NetworkServer::New(peer))));
+        }
 
         return nwImpl;
     }
@@ -93,5 +112,4 @@ namespace paxosme
     }
 
     PeerHash PeerHash::peerHash = PeerHash();
-
 }

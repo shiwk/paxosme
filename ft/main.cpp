@@ -9,7 +9,7 @@
 
 int main(){
     paxosme::NodeOptions nodeOptions;
-    nodeOptions.network = std::unique_ptr<paxosme::Network> (paxosme::Network::New(paxosme::EndPoint{"127.0.0.1", 9999}));
+    nodeOptions.network = std::unique_ptr<paxosme::Network> (paxosme::Network::New({paxosme::Peer{"127.0.0.1", 9999}}));
     nodeOptions.storage = std::shared_ptr<paxosme::LogStorage>();
 
     Statemachine::SmOptions smOptions;
